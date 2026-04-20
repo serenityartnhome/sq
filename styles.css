@@ -771,7 +771,8 @@ body{
   display:flex;gap:18px;align-items:stretch;
   margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
   margin-right:20px;
-  height:calc(100vh - 185px);
+  margin-top:14px;
+  height:calc(100vh - 199px);
 }
 .community-view{
   margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
