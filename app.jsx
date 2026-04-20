@@ -1,8 +1,4 @@
-const SB = supabase.createClient(
-  "https://hplmgpxnbgmdmqmsuisz.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbG1ncHhuYmdtZG1xbXN1aXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2ODM3OTAsImV4cCI6MjA5MjI1OTc5MH0.eKh6KMxsyOls_3V9KoCE0b7TECFKmpbYEDCDJ4QN67A"
-);
-window.SB = SB;
+// SB is loaded from supabase-client.js
 
 const STORAGE = "serenity-quest:v1";
 
