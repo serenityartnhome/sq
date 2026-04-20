@@ -261,7 +261,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
           let count = 0;
           const d = new Date();
-          // Start from today — only count if today is completed, then go backwards
+          d.setDate(d.getDate()-1); // start from yesterday — today is day 0
           while(true){
             const k = d.toISOString().slice(0,10);
             if(!hist[k]) break;
