@@ -94,6 +94,7 @@ function CommunityBoard({ userId }) {
         <div className="grat-wall-grid">
           {posts.map(post => {
             const animal = post.animal || hashAnimal(post.user_id || post.display_name);
+            const firstName = (post.display_name||"Adventurer").trim().split(" ")[0];
             const isLiked = liked.has(post.id);
             return (
               <div key={post.id} className="grat-card">
@@ -105,8 +106,8 @@ function CommunityBoard({ userId }) {
                       onError={e=>{e.target.style.opacity=0;}}/>
                   </div>
                   <div className="grat-card-meta">
-                    <div className="grat-card-name">{post.display_name || "Adventurer"}</div>
-                    {post.loc && <div className="grat-card-loc">{post.loc}</div>}
+                    <div className="grat-card-name">{firstName}</div>
+                    {post.loc && post.loc.trim() && <div className="grat-card-loc">{post.loc.trim()}</div>}
                     <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   </div>
                 </div>
