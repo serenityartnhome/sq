@@ -100,14 +100,17 @@ function CommunityBoard({ userId }) {
                 <div className="grat-card-heart-deco">♡</div>
                 <div className="grat-card-top">
                   <div className="grat-card-avatar">
-                    <ZodiacPet animal={animal} mood="happy" size={46}/>
+                    <img src={`assets/icon-account-${animal}.png?v=1`} alt={animal}
+                      style={{width:52,height:52,imageRendering:"pixelated",display:"block"}}
+                      onError={e=>{e.target.style.opacity=0;}}/>
                   </div>
                   <div className="grat-card-meta">
                     <div className="grat-card-name">{post.display_name || "Adventurer"}</div>
+                    {post.loc && <div className="grat-card-loc">{post.loc}</div>}
                     <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   </div>
                 </div>
-                <div className="grat-card-content">{post.content}</div>
+                <div className="grat-card-content">✦ {post.content}</div>
                 <div className="grat-card-footer">
                   {userId === post.user_id && (
                     <button onClick={()=>deletePost(post.id)} className="grat-card-delete">delete</button>

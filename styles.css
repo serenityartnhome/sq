@@ -815,7 +815,7 @@ body{
 }
 .grat-wall-grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   gap:14px;
   padding:0 2px;
 }
@@ -864,13 +864,22 @@ body{
   color:var(--plum-soft);
   margin-top:2px;
 }
+.grat-card-loc{
+  font-family:"Pixelify Sans",monospace;
+  font-size:11px;
+  color:var(--jade-deep);
+  margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .grat-card-content{
   font-family:"Pixelify Sans",monospace;
-  font-size:14px;
-  color:var(--ink);
-  line-height:1.55;
+  font-size:15px;
+  color:var(--plum);
+  line-height:1.6;
   flex:1;
   word-break:break-word;
+  padding:6px 4px 2px;
+  border-top:1px solid var(--gold-soft);
 }
 .grat-card-footer{
   display:flex;
@@ -956,9 +965,6 @@ body{
   transform:translate(-1px,-1px);
 }
 
-@media(max-width:980px){
-  .grat-wall-grid{ grid-template-columns:1fr; }
-}
 .cal-left{
   flex:0 0 65%;display:flex;flex-direction:column;gap:14px;min-height:0;
 }

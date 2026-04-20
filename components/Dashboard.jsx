@@ -255,7 +255,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(!userId || !window.SB || !content.trim()) return;
     setShareStatus("sharing");
     try {
-      const base = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim() };
+      const base = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"" };
       let { error } = await window.SB.from("gratitude_posts").insert({ ...base, animal });
       if(error) ({ error } = await window.SB.from("gratitude_posts").insert(base));
       setShareStatus(error ? "error" : "done");
