@@ -753,23 +753,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     )}
                   </div>
                   <div className="diary-col">
-                    {daysInFlow >= 7 ? (
-                      <>
-                        <button className="diary-btn" onClick={()=>setShowDiary(true)}>
-                          <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
-                               className="diary-icon" alt="diary"/>
-                        </button>
-                        <span className="diary-label">Write in<br/>my Journal</span>
-                      </>
-                    ) : (
-                      <>
-                        <div className="diary-btn diary-locked" title="Unlocks at Day 7">
-                          <img src="assets/icon-lock.png?v=1"
-                               style={{width:"60%",height:"auto",imageRendering:"pixelated",opacity:.7}} alt="locked"/>
-                        </div>
-                        <span className="diary-label" style={{opacity:.6}}>Journal<br/>Day 7 🔒</span>
-                      </>
-                    )}
+                    <div style={{position:"relative",display:"inline-block"}}>
+                      <button className="diary-btn" onClick={()=>daysInFlow>=7?setShowDiary(true):setShowComingSoon(true)}>
+                        <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
+                             className="diary-icon" alt="diary"
+                             style={daysInFlow<7?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
+                      </button>
+                      {daysInFlow < 7 && (
+                        <img src="assets/icon-lock.png?v=1" alt="locked"
+                          style={{position:"absolute",top:0,right:0,width:18,height:18,
+                                  imageRendering:"pixelated",pointerEvents:"none"}}/>
+                      )}
+                    </div>
+                    <span className="diary-label">{daysInFlow>=7?"Write in my Journal":"Unlocks Day 7"}</span>
                   </div>
                 </div>
               </div>
