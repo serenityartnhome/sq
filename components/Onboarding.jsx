@@ -66,9 +66,11 @@ function Onboarding({ onComplete, onLogin }){
     setCustomDraft(""); setCustomKind("sparkle"); setShowCustomInput(false);
   };
 
-  const [email, setEmail]       = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [authError, setAuthError] = React.useState("");
+  const [email, setEmail]           = React.useState("");
+  const [password, setPassword]     = React.useState("");
+  const [confirmPw, setConfirmPw]   = React.useState("");
+  const [showPw, setShowPw]         = React.useState(false);
+  const [authError, setAuthError]   = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
   const [showLoginDirect, setShowLoginDirect] = React.useState(false);
@@ -107,6 +109,7 @@ function Onboarding({ onComplete, onLogin }){
     setAuthError("");
     if(!email.trim()){ setAuthError("Please enter your email"); return; }
     if(password.length < 6){ setAuthError("Password must be at least 6 characters"); return; }
+    if(password !== confirmPw){ setAuthError("Passwords do not match"); return; }
     setSubmitting(true);
     const chosen = habits.filter(h=>selected.has(h.id));
     await onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen },
@@ -173,10 +176,11 @@ function Onboarding({ onComplete, onLogin }){
               <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
                 <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
               </button>
-              <div style={{textAlign:"center",marginTop:10}}>
+              <div style={{textAlign:"center",marginTop:12}}>
                 <button onClick={()=>{setShowLoginDirect(true);setLoginError("");}}
-                  style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
-                          fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                  style={{background:"none",border:"2px solid var(--plum)",borderRadius:4,
+                          color:"var(--plum)",cursor:"pointer",padding:"8px 16px",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em"}}>
                   Already have an account? Log in →
                 </button>
               </div>
@@ -369,8 +373,23 @@ function Onboarding({ onComplete, onLogin }){
           </div>
           <div className="field">
             <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 6 characters)</span></label>
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
-              placeholder="••••••••"/>
+            <div style={{position:"relative",display:"flex"}}>
+              <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
+                placeholder="••••••••" style={{flex:1,paddingRight:36}}/>
+              <button type="button" onClick={()=>setShowPw(v=>!v)}
+                style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",
+                        background:"none",border:"none",cursor:"pointer",
+                        color:"var(--plum-soft)",fontSize:14,padding:"2px 4px",lineHeight:1}}>
+                {showPw ? "🙈" : "👁"}
+              </button>
+            </div>
+          </div>
+          <div className="field">
+            <label>Confirm Password</label>
+            <div style={{position:"relative",display:"flex"}}>
+              <input type={showPw?"text":"password"} value={confirmPw} onChange={e=>setConfirmPw(e.target.value)}
+                placeholder="••••••••" style={{flex:1,paddingRight:36}}/>
+            </div>
           </div>
 
           {authError && (
