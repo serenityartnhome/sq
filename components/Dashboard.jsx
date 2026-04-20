@@ -59,7 +59,7 @@ function TopBarClock(){
   );
 }
 
-function Dashboard({ profile, habits, onReset }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
   const today = new Date().toISOString().slice(0,10);
 
   const [completed, setCompleted] = React.useState(()=>{
@@ -99,6 +99,7 @@ function Dashboard({ profile, habits, onReset }){
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [tab, setTab] = React.useState("home");
+  const [showSignOut, setShowSignOut] = React.useState(false);
   const [mood, setMood] = React.useState("calm");
   const [showDiary, setShowDiary] = React.useState(false);
   const [diaryEntry, setDiaryEntry] = React.useState("");
@@ -206,6 +207,13 @@ function Dashboard({ profile, habits, onReset }){
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto };
       localStorage.setItem("sq_history", JSON.stringify(hist));
     } catch{}
+    if(userId){
+      SB.from("daily_data").upsert({
+        user_id:userId, date:today, mood, energy,
+        completed:[...completed], powerups:[...powerups],
+        gratitude, diary:diaryEntry
+      }).then(()=>{});
+    }
     setCelebrate(true);
   };
 
@@ -259,7 +267,7 @@ function Dashboard({ profile, habits, onReset }){
         </div>
       </div>
 
-      {/* Nav rail inside sticky header */}
+      {/* Nav rail */}
       <div className="rail">
         <button className={"rail-btn "+(tab==="home"?"active":"")} onClick={()=>setTab("home")}>
           <Icon name="home" size={54}/>Home
@@ -267,18 +275,18 @@ function Dashboard({ profile, habits, onReset }){
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn rail-btn-locked" onClick={()=>setShowComingSoon(true)}>
-          <div style={{position:"relative",display:"inline-block"}}>
-            <Icon name="zodiac" size={54}/>
-            <span className="rail-lock-badge">🔒</span>
-          </div>
-          Zodiac
+        <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
+          <Icon name="heart" size={54}/>Community
         </button>
         <button className={"rail-btn "+(tab==="shop"?"active":"")} onClick={()=>setShowShopPrompt(true)}>
           <Icon name="shop" size={54}/>Shop
         </button>
+        <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
+          <span style={{fontSize:28,lineHeight:1,color:"var(--plum)"}}>◎</span>
+          {isGuest ? "Guest" : "Account"}
+        </button>
         <button className="rail-btn" onClick={onReset} title="Start over" style={{opacity:.75}}>
-          <span style={{fontSize:36,lineHeight:1,color:"var(--plum)"}}>↺</span>Reset
+          <span style={{fontSize:28,lineHeight:1,color:"var(--plum)"}}>↺</span>Reset
         </button>
       </div>
 
@@ -286,7 +294,27 @@ function Dashboard({ profile, habits, onReset }){
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
 
-      <div className="dash-grid-4" style={{display: tab==="calendar"?"none":"grid"}}>
+      {tab === "community" && <CommunityBoard userId={userId} displayName={profile.name}/>}
+
+      {showSignOut && (
+        <div className="coming-soon-overlay" onClick={()=>setShowSignOut(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
+            <h3 className="coming-soon-title">{isGuest ? "Guest Mode" : "Sign Out?"}</h3>
+            <p className="coming-soon-body">
+              {isGuest ? "You're browsing as a guest. Create an account to save your progress." : "Your progress is saved to your account."}
+            </p>
+            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="coming-soon-btn" onClick={onSignOut}>
+                {isGuest ? "Go to Login" : "Sign Out ✦"}
+              </button>
+              <button className="coming-soon-btn" style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowSignOut(false)}>Stay Here</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="dash-grid-4" style={{display: (tab==="calendar"||tab==="community")?"none":"grid"}}>
 
         {/* TOP LEFT: Zodiac + Intention — no frame */}
         <div className="dash-zodiac-panel">
