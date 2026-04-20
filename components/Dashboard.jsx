@@ -99,6 +99,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
+  const [showDiaryLocked, setShowDiaryLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [tab, setTab] = React.useState("home");
@@ -756,7 +757,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
-                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=7?setShowDiary(true):setShowComingSoon(true)}>
+                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=7?setShowDiary(true):setShowDiaryLocked(true)}>
                         <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
                              className="diary-icon" alt="diary"
                              style={daysInFlow<7?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
@@ -791,6 +792,24 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 Stay Here
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showDiaryLocked && (
+        <div className="coming-soon-overlay" onClick={()=>setShowDiaryLocked(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
+            <div className="coming-soon-lock">
+              <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt="locked"/>
+            </div>
+            <h3 className="coming-soon-title">Journal Locked</h3>
+            <p className="coming-soon-body">
+              Visit 7 days in a row to unlock your journal.<br/>
+              <span style={{fontSize:13,color:"var(--jade-deep)"}}>
+                You're on day {Math.max(daysInFlow,1)} — keep going! ✦
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
           </div>
         </div>
       )}
