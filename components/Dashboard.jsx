@@ -323,7 +323,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
 
-      {tab === "community" && <CommunityBoard userId={userId} displayName={profile.name}/>}
+      {tab === "community" && (
+        <div className="community-view">
+          <CommunityBoard userId={userId} displayName={profile.name}/>
+        </div>
+      )}
 
       {showSignOut && (
         <div className="coming-soon-overlay" onClick={()=>setShowSignOut(false)}>

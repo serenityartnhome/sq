@@ -479,8 +479,9 @@ body{
   display:grid;
   grid-template-columns:0.9fr 1.1fr;
   /* both rows fixed so the emotions panel never resizes when diary opens */
-  grid-template-rows:calc(60vh - 115px) calc(40vh - 60px);
+  grid-template-rows:calc(60vh - 129px) calc(40vh - 60px);
   gap:20px;
+  margin-top:14px;
   margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
   margin-right:20px;
 }
@@ -771,6 +772,13 @@ body{
   margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
   margin-right:20px;
   height:calc(100vh - 185px);
+}
+.community-view{
+  margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
+  margin-right:20px;
+  margin-top:14px;
+  height:calc(100vh - 185px);
+  overflow-y:auto;
 }
 .cal-left{
   flex:0 0 65%;display:flex;flex-direction:column;gap:14px;min-height:0;
@@ -1063,6 +1071,10 @@ body{
   .pu-icon-grid{ grid-template-columns:repeat(auto-fill,minmax(36px,1fr)); }
 
   /* Single column, auto-height rows so panels grow to fit content */
+  .onboard-safe-top{ height:0; } /* app-shell already handles safe area on mobile */
+  .hero-title{ font-size:22px; margin:4px 0 4px; }
+  .hero-sub{ font-size:10px; margin-bottom:10px; }
+  .features-row{ gap:6px; margin-bottom:10px; }
   .onboard-two,.dash-grid{ grid-template-columns:1fr;margin:0;padding:0; }
   /* Hide journey panel once form is open — saves scroll on mobile */
   .onboard-two.onboard-form-open > div:first-child{ display:none; }
@@ -1095,6 +1107,7 @@ body{
   /* Gratitude + diary: stack vertically on very small screens */
   .grat-half{ flex-direction:column; }
   .diary-col{ flex:0 0 auto;width:100%;flex-direction:row;justify-content:center;gap:12px; }
+  .community-view{ margin-left:0;margin-right:0;height:auto;overflow-y:visible; }
   .cal-view{
     flex-direction:column;height:auto;margin-left:0;margin-right:0;
     overflow-y:auto;
