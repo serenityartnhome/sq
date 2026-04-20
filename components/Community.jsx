@@ -153,7 +153,7 @@ function CommunityBoard({ userId }) {
                     {post.loc && post.loc.trim() && <div className="grat-card-loc">{post.loc.trim()}</div>}
                     <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   </div>
-                  {post.streak > 0 && (
+                  {post.streak > 1 && (
                     <div className="grat-card-streak">
                       <img src="assets/icon-flame.png?v=5" alt="streak"
                         style={{width:14,height:14,imageRendering:"pixelated",verticalAlign:"middle"}}/>
