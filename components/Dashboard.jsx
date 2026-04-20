@@ -228,9 +228,6 @@ function Dashboard({ profile, habits, onReset }){
 
   return (
     <React.Fragment>
-      <div className={"scene-img "+(tab==="calendar"?"scene-calendar":"scene-dashboard")}/>
-      <div className="scene-veil"/>
-
       {/* Sticky header: topbar + nav rail — outside scroll container */}
       <div className="nav-header">
       <div className="top-bar">
@@ -286,6 +283,8 @@ function Dashboard({ profile, habits, onReset }){
       </div>{/* end nav-header */}
 
       <div className="app-shell">
+      <div className={"scene-img "+(tab==="calendar"?"scene-calendar":"scene-dashboard")}/>
+      <div className="scene-veil"/>
 
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
