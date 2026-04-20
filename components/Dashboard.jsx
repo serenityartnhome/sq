@@ -96,6 +96,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showIntentPicker, setShowIntentPicker] = React.useState(false);
   const [bubbleIdx, setBubbleIdx] = React.useState(0);
   const [celebrate, setCelebrate] = React.useState(false);
+  const [isHatching, setIsHatching] = React.useState(false);
+  const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [tab, setTab] = React.useState("home");
@@ -174,6 +176,24 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const animal = React.useMemo(()=>zodiacForBirthday(profile.bday), [profile.bday]);
 
+  const daysInFlow = React.useMemo(()=>{
+    try {
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      let count = 0; const d = new Date();
+      while(hist[d.toISOString().slice(0,10)]){ count++; d.setDate(d.getDate()-1); }
+      return count;
+    } catch{ return 0; }
+  }, [dayCompleted]);
+
+  const isHatched = hatched || daysInFlow >= 3;
+  const eggSrc = (m) => `assets/icon-egg-${m==="calm"?"clam":m}.png?v=1`;
+
+  const EGG_SOUNDS = [
+    "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
+    "krrk","mlem","weh.","prrt","squeak?","bonk","glorp","hmph","nyeh",
+    "*shuffles*","...tap tap","bibble","zzzt","moop","crkk","hewwo??",
+  ];
+
   React.useEffect(()=>{
     const t = setInterval(()=>setBubbleIdx(i=>(i+1)%BUBBLES.length), 6500);
     return ()=>clearInterval(t);
@@ -237,6 +257,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     try {
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention };
       localStorage.setItem("sq_history", JSON.stringify(hist));
+      // Check if this completes day 3 — trigger hatch
+      if(!localStorage.getItem("sq_hatched")){
+        let days = 0; const dd = new Date();
+        while(hist[dd.toISOString().slice(0,10)]){ days++; dd.setDate(dd.getDate()-1); }
+        if(days >= 3){ setTimeout(()=>setIsHatching(true), 400); }
+      }
     } catch{}
     if(userId && window.SB){
       window.SB.from("daily_data").upsert({
@@ -333,7 +359,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <TopBarClock/>
           <div className="avatar" title={profile.name}>
-            <ZodiacPet animal={animal} mood={happyMood?"happy":mood} size={36}/>
+            {isHatched
+              ? <ZodiacPet animal={animal} mood={happyMood?"happy":mood} size={36}/>
+              : <img src={eggSrc(mood)} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
+            }
           </div>
         </div>
       </div>
@@ -353,8 +382,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <Icon name="shop" size={54}/>Shop
         </button>
         <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
-          <img src={`assets/icon-account-${animal}.png?v=1`} alt="account"
-            style={{width:54,height:54,imageRendering:"pixelated"}}/>
+          <img src={isHatched ? `assets/icon-account-${animal}.png?v=1` : {eggSrc(mood)}}
+            alt="account" style={{width:54,height:54,imageRendering:"pixelated"}}/>
           {isGuest ? "Guest" : "Account"}
         </button>
       </div>
@@ -424,12 +453,22 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               )}
             </div>
             <div style={{display:"flex",justifyContent:"center",marginBottom:4,marginTop:20}}>
-              <div className="bubble" key={bubbleIdx}>{BUBBLES[bubbleIdx]}</div>
+              <div className="bubble" key={bubbleIdx}>
+                {isHatched ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
+              </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>setShowProfileEdit(true)}
-              style={{cursor:"pointer"}} title="Edit your profile">
+            <div className="pet-cloud-stage" onClick={()=>isHatched&&setShowProfileEdit(true)}
+              style={{cursor:isHatched?"pointer":"default"}} title={isHatched?"Edit your profile":"Hatch on day 3!"}>
               <div className="pet-on-cloud">
-                <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={Math.round(Math.min(160, window.innerHeight*0.17))}/>
+                {isHatched && !isHatching ? (
+                  <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={Math.round(Math.min(160, window.innerHeight*0.17))}/>
+                ) : (
+                  <img src={eggSrc(mood)} alt="egg"
+                    className={isHatching ? "egg-hatching" : "egg-idle"}
+                    style={{width:Math.round(Math.min(160,window.innerHeight*0.17)),height:Math.round(Math.min(160,window.innerHeight*0.17)),imageRendering:"pixelated",display:"block"}}
+                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); } }}
+                  />
+                )}
               </div>
               <img src="assets/cloud.png" alt="" className="pet-cloud"
                    style={{width:"min(360px,100%)"}} aria-hidden="true"/>
@@ -843,7 +882,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="celebrate" onClick={()=>setCelebrate(false)}>
           <div className="card" onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"center"}}>
-              <ZodiacPet animal={animal} mood="excited" size={140}/>
+              {isHatched
+                ? <ZodiacPet animal={animal} mood="excited" size={140}/>
+                : <img src={eggSrc(mood)} className="egg-idle"
+                    style={{width:140,height:140,imageRendering:"pixelated"}} alt="egg"/>
+              }
             </div>
             <h3>Day Sealed ✦</h3>
             <p>

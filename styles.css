@@ -1363,6 +1363,45 @@ body{
 }
 
 /* ============================================================
+   EGG ANIMATIONS
+   ============================================================ */
+@keyframes eggWobble {
+  0%,100% { transform: rotate(-4deg); }
+  25%     { transform: rotate(0deg) translateY(-3px); }
+  50%     { transform: rotate(4deg); }
+  75%     { transform: rotate(0deg) translateY(-3px); }
+}
+.egg-idle {
+  animation: eggWobble 2.4s steps(4) infinite;
+  transform-origin: bottom center;
+  display: block;
+}
+
+@keyframes eggHatch {
+  0%   { transform: rotate(0deg) translateX(0); }
+  7%   { transform: rotate(-8deg) translateX(-3px); }
+  14%  { transform: rotate(9deg) translateX(4px); }
+  21%  { transform: rotate(-13deg) translateX(-6px); }
+  28%  { transform: rotate(14deg) translateX(6px); }
+  35%  { transform: rotate(-18deg) translateX(-8px) scale(1.04); }
+  42%  { transform: rotate(19deg) translateX(9px) scale(1.04); }
+  49%  { transform: rotate(-22deg) translateX(-10px) scale(1.08); }
+  56%  { transform: rotate(23deg) translateX(10px) scale(1.08); }
+  62%  { transform: rotate(-20deg) translateX(-9px) scale(1.12); }
+  68%  { transform: rotate(20deg) translateX(9px) scale(1.14); }
+  74%  { transform: rotate(-14deg) scale(1.18) translateY(-6px); }
+  80%  { transform: rotate(10deg) scale(1.26) translateY(-12px); }
+  87%  { transform: scale(1.38) translateY(-20px); opacity:.75; }
+  93%  { transform: scale(1.55) translateY(-28px); opacity:.35; }
+  100% { transform: scale(0.1) translateY(-38px); opacity:0; }
+}
+.egg-hatching {
+  animation: eggHatch 2.2s linear forwards;
+  transform-origin: bottom center;
+  display: block;
+}
+
+/* ============================================================
    ZODIAC + MOOD PICKER
    ============================================================ */
 .pixel.zodiac-pet{
