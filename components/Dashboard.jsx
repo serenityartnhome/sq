@@ -186,7 +186,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   }, [dayCompleted]);
 
   const isHatched = hatched || daysInFlow >= 3;
-  const eggSrc = (m) => `assets/icon-egg-${m==="calm"?"clam":m}.png?v=1`;
+  const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
 
   const EGG_SOUNDS = [
     "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
@@ -382,7 +382,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <Icon name="shop" size={54}/>Shop
         </button>
         <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
-          <img src={isHatched ? `assets/icon-account-${animal}.png?v=1` : {eggSrc(mood)}}
+          <img src={isHatched ? `assets/icon-account-${animal}.png?v=1` : eggSrc(mood)}
             alt="account" style={{width:54,height:54,imageRendering:"pixelated"}}/>
           {isGuest ? "Guest" : "Account"}
         </button>
