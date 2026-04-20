@@ -74,10 +74,18 @@ function CommunityBoard({ userId }) {
     setReported(prev => { const n = new Set(prev); n.add(postId); return n; });
     try {
       await window.SB.from("post_reports").insert({ user_id: userId, post_id: postId });
-      // Count total reports for this post
       const { data: reportData } = await window.SB.from("post_reports").select("post_id").eq("post_id", postId);
       if (reportData && reportData.length >= 3) {
-        // Auto-delete: remove from UI and clean up DB
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+          await window.SB.from("moderation_log").insert({
+            post_id: String(postId),
+            user_id: post.user_id,
+            display_name: post.display_name,
+            content: post.content,
+            reason: "auto-reported"
+          });
+        }
         setPosts(prev => prev.filter(p => p.id !== postId));
         await window.SB.from("post_likes").delete().eq("post_id", postId);
         await window.SB.from("post_reports").delete().eq("post_id", postId);
@@ -145,6 +153,13 @@ function CommunityBoard({ userId }) {
                     {post.loc && post.loc.trim() && <div className="grat-card-loc">{post.loc.trim()}</div>}
                     <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   </div>
+                  {post.streak > 0 && (
+                    <div className="grat-card-streak">
+                      <img src="assets/icon-flame.png?v=5" alt="streak"
+                        style={{width:14,height:14,imageRendering:"pixelated",verticalAlign:"middle"}}/>
+                      <span>{post.streak}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="grat-card-content">✦ {post.content}</div>
                 <div className="grat-card-footer">

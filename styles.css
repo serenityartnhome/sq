@@ -837,6 +837,17 @@ body{
   opacity:.5;
   pointer-events:none;
 }
+.grat-card-streak{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  margin-left:auto;
+  font-family:"Silkscreen",monospace;
+  font-size:11px;
+  color:var(--gold);
+  white-space:nowrap;
+  flex-shrink:0;
+}
 .grat-card-top{
   display:flex;
   align-items:center;

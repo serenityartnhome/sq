@@ -256,9 +256,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(!userId || !window.SB || !content.trim()) return;
     setShareStatus("sharing"); setShareError("");
     try {
+      const streak = (()=>{
+        try {
+          const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+          let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
+          while(true){ const k=d.toISOString().slice(0,10); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
+          return count;
+        } catch{ return 0; }
+      })();
       const attempts = [
-        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"", animal },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"", animal, streak },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal, streak },
         { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim() },
       ];
       let lastErr = null;
