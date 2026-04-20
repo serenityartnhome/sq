@@ -1,10 +1,15 @@
-function CommunityBoard({ userId, displayName }) {
-  const [posts, setPosts]   = React.useState([]);
-  const [liked, setLiked]   = React.useState(new Set());
-  const [newPost, setNewPost] = React.useState("");
+function CommunityBoard({ userId }) {
+  const [posts, setPosts]     = React.useState([]);
+  const [liked, setLiked]     = React.useState(new Set());
   const [loading, setLoading] = React.useState(true);
-  const [posting, setPosting] = React.useState(false);
-  const [err, setErr]       = React.useState(null);
+  const [err, setErr]         = React.useState(null);
+
+  const hashAnimal = (str) => {
+    const animals = ["rat","ox","tiger","rabbit","dragon","snake","horse","goat","monkey","rooster","dog","pig"];
+    let h = 0;
+    for(let i = 0; i < (str||"").length; i++) h = (Math.imul(31, h) + (str||"").charCodeAt(i)) | 0;
+    return animals[Math.abs(h) % animals.length];
+  };
 
   React.useEffect(() => {
     let cancelled = false;
@@ -13,7 +18,7 @@ function CommunityBoard({ userId, displayName }) {
       try {
         const { data: postsData, error: postsErr } = await window.SB
           .from("gratitude_posts").select("*")
-          .order("created_at", { ascending: false }).limit(50);
+          .order("created_at", { ascending: false }).limit(60);
         if (cancelled) return;
         if (postsErr || !postsData) { setErr("Could not load posts."); setLoading(false); return; }
 
@@ -26,7 +31,7 @@ function CommunityBoard({ userId, displayName }) {
 
         setPosts(postsData.map(p => ({ ...p, likeCount: countMap[p.id] || 0 })));
         if (userId) setLiked(new Set(likes.filter(l => l.user_id === userId).map(l => l.post_id)));
-      } catch(e) {
+      } catch {
         if (!cancelled) setErr("Could not load posts.");
       }
       if (!cancelled) setLoading(false);
@@ -34,22 +39,6 @@ function CommunityBoard({ userId, displayName }) {
     run();
     return () => { cancelled = true; };
   }, []);
-
-  const submitPost = async () => {
-    const text = newPost.trim();
-    if (!text || posting || !userId) return;
-    setPosting(true);
-    try {
-      const { data, error } = await window.SB.from("gratitude_posts").insert({
-        user_id: userId, display_name: displayName || "Adventurer", content: text
-      }).select().single();
-      if (!error && data) {
-        setPosts(prev => [{ ...data, likeCount: 0 }, ...prev]);
-        setNewPost("");
-      }
-    } catch{}
-    setPosting(false);
-  };
 
   const toggleLike = async (postId) => {
     if (!userId) return;
@@ -62,7 +51,7 @@ function CommunityBoard({ userId, displayName }) {
       } else {
         await window.SB.from("post_likes").insert({ user_id: userId, post_id: postId });
       }
-    } catch{}
+    } catch {}
   };
 
   const deletePost = async (postId) => {
@@ -70,7 +59,7 @@ function CommunityBoard({ userId, displayName }) {
     try {
       await window.SB.from("post_likes").delete().eq("post_id", postId);
       await window.SB.from("gratitude_posts").delete().eq("id", postId);
-    } catch{}
+    } catch {}
   };
 
   const timeAgo = (ts) => {
@@ -84,88 +73,53 @@ function CommunityBoard({ userId, displayName }) {
   };
 
   return (
-    <div style={{maxWidth:680,margin:"0 auto",padding:"16px 0 40px"}}>
-      <div className="div-sparkle" style={{marginBottom:16}}>✦ Community Gratitude ✦</div>
-      <div style={{textAlign:"center",fontSize:12,color:"var(--plum-soft)",
-                   fontFamily:"Pixelify Sans,monospace",marginBottom:20}}>
-        See what others are grateful for today
+    <div className="grat-wall">
+      <div className="grat-wall-header">
+        <h2 className="grat-wall-title">✦ Gratitude Wall ✦</h2>
+        <div className="grat-wall-sub">Share what you're grateful for from your Daily Quest</div>
       </div>
 
-      {userId ? (
-        <div className="panel" style={{marginBottom:16}}>
-          <div style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",marginBottom:8}}>
-            Share what you're grateful for ✦
-          </div>
-          <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
-            <textarea value={newPost} onChange={e=>setNewPost(e.target.value.slice(0,200))}
-              placeholder="Today I'm grateful for…"
-              style={{flex:1,minHeight:56,resize:"none"}}
-              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submitPost();}}}/>
-            <button className="btn-primary" onClick={submitPost}
-              disabled={posting||!newPost.trim()}
-              style={{flexShrink:0,padding:"8px 14px",height:56}}>
-              {posting ? "…" : "✦ Share"}
-            </button>
-          </div>
-          <div className="charcount">{newPost.length}/200</div>
-        </div>
-      ) : (
-        <div className="panel" style={{marginBottom:16,textAlign:"center",
-                                        color:"var(--plum-soft)",fontSize:12,
-                                        fontFamily:"Silkscreen,monospace"}}>
-          Log in to share your gratitude ✦
-        </div>
-      )}
-
       {loading ? (
-        <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",
-                     fontSize:12,color:"var(--plum-soft)"}}>
-          Loading…
-        </div>
+        <div className="grat-wall-empty">Loading…</div>
       ) : err ? (
-        <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",
-                     fontSize:12,color:"var(--plum-soft)"}}>
-          {err}
-        </div>
+        <div className="grat-wall-empty">{err}</div>
       ) : posts.length === 0 ? (
-        <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",
-                     fontSize:12,color:"var(--plum-soft)"}}>
-          Be the first to share ✦
+        <div className="grat-wall-empty">
+          No gratitudes shared yet ✦<br/>
+          <span style={{fontSize:11,fontFamily:"Pixelify Sans,monospace"}}>
+            Share yours from the Daily Quest gratitude section!
+          </span>
         </div>
       ) : (
-        posts.map(post => (
-          <div key={post.id} className="panel" style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,color:"var(--plum)",marginBottom:6,
-                             fontFamily:"Pixelify Sans,monospace",lineHeight:1.5}}>
-                  {post.content}
+        <div className="grat-wall-grid">
+          {posts.map(post => {
+            const animal = post.animal || hashAnimal(post.user_id || post.display_name);
+            const isLiked = liked.has(post.id);
+            return (
+              <div key={post.id} className="grat-card">
+                <div className="grat-card-heart-deco">♡</div>
+                <div className="grat-card-top">
+                  <div className="grat-card-avatar">
+                    <ZodiacPet animal={animal} mood="happy" size={46}/>
+                  </div>
+                  <div className="grat-card-meta">
+                    <div className="grat-card-name">{post.display_name || "Adventurer"}</div>
+                    <div className="grat-card-time">{timeAgo(post.created_at)}</div>
+                  </div>
                 </div>
-                <div style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
-                  ✦ {post.display_name || "Adventurer"} · {timeAgo(post.created_at)}
-                </div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-                <button onClick={()=>toggleLike(post.id)}
-                  style={{background:liked.has(post.id)?"var(--blush)":"var(--cream)",
-                           border:`2px solid ${liked.has(post.id)?"var(--rose)":"var(--gold-soft)"}`,
-                           borderRadius:6,cursor:userId?"pointer":"default",
-                           padding:"4px 10px",display:"flex",alignItems:"center",gap:4,
-                           color:"var(--plum)",fontFamily:"Silkscreen,monospace",fontSize:11}}>
-                  <Icon name="heart" size={14}/>
-                  {post.likeCount}
-                </button>
-                {userId === post.user_id && (
-                  <button onClick={()=>deletePost(post.id)}
-                    style={{background:"none",border:"none",cursor:"pointer",
-                             color:"var(--plum-soft)",fontSize:10,fontFamily:"Silkscreen,monospace"}}>
-                    delete
+                <div className="grat-card-content">{post.content}</div>
+                <div className="grat-card-footer">
+                  {userId === post.user_id && (
+                    <button onClick={()=>deletePost(post.id)} className="grat-card-delete">delete</button>
+                  )}
+                  <button onClick={()=>toggleLike(post.id)} className={"grat-card-like"+(isLiked?" liked":"")}>
+                    ♥ {post.likeCount}
                   </button>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
-        ))
+            );
+          })}
+        </div>
       )}
     </div>
   );

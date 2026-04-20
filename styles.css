@@ -780,6 +780,185 @@ body{
   height:calc(100vh - 185px);
   overflow-y:auto;
 }
+
+/* ============================================================
+   GRATITUDE WALL
+   ============================================================ */
+.grat-wall{
+  padding:4px 0 20px;
+}
+.grat-wall-header{
+  text-align:center;
+  margin-bottom:18px;
+}
+.grat-wall-title{
+  font-family:"Silkscreen",monospace;
+  color:var(--plum);
+  font-size:clamp(16px,2.2vw,22px);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin:0 0 4px;
+  text-shadow:2px 2px 0 rgba(0,0,0,.08);
+}
+.grat-wall-sub{
+  font-family:"Pixelify Sans",monospace;
+  font-size:13px;
+  color:var(--plum-soft);
+}
+.grat-wall-empty{
+  text-align:center;
+  font-family:"Pixelify Sans",monospace;
+  font-size:15px;
+  color:var(--plum-soft);
+  padding:40px 20px;
+  line-height:1.8;
+}
+.grat-wall-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  padding:0 2px;
+}
+.grat-card{
+  position:relative;
+  background:var(--parchment);
+  border:3px solid var(--plum);
+  box-shadow:4px 4px 0 rgba(0,0,0,.3), inset 0 0 0 2px var(--gold-soft);
+  padding:14px 14px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.grat-card-heart-deco{
+  position:absolute;
+  top:8px;right:10px;
+  font-size:16px;
+  color:var(--rose);
+  opacity:.5;
+  pointer-events:none;
+}
+.grat-card-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.grat-card-avatar{
+  flex-shrink:0;
+  width:46px;height:46px;
+  display:flex;align-items:center;justify-content:center;
+}
+.grat-card-meta{
+  min-width:0;flex:1;
+}
+.grat-card-name{
+  font-family:"Silkscreen",monospace;
+  font-size:11px;
+  color:var(--plum);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.grat-card-time{
+  font-family:"Pixelify Sans",monospace;
+  font-size:11px;
+  color:var(--plum-soft);
+  margin-top:2px;
+}
+.grat-card-content{
+  font-family:"Pixelify Sans",monospace;
+  font-size:14px;
+  color:var(--ink);
+  line-height:1.55;
+  flex:1;
+  word-break:break-word;
+}
+.grat-card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:2px;
+}
+.grat-card-like{
+  background:var(--cream);
+  border:2px solid var(--rose);
+  color:var(--plum);
+  font-family:"Silkscreen",monospace;
+  font-size:11px;
+  padding:4px 10px;
+  cursor:pointer;
+  transition:all .1s steps(2);
+  box-shadow:2px 2px 0 rgba(0,0,0,.2);
+}
+.grat-card-like:hover{ background:var(--blush-soft); }
+.grat-card-like.liked{
+  background:var(--rose);
+  color:#fff;
+  border-color:var(--plum);
+}
+.grat-card-delete{
+  background:transparent;
+  border:none;
+  color:var(--plum-soft);
+  font-family:"Silkscreen",monospace;
+  font-size:9px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  opacity:.7;
+  padding:4px 6px;
+}
+.grat-card-delete:hover{ opacity:1;color:var(--plum); }
+
+/* Share to wall button in gratitude section */
+.grat-share-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  width:100%;
+  margin-top:6px;
+  padding:8px 14px;
+  background:var(--plum);
+  color:#fff;
+  border:none;
+  font-family:"Silkscreen",monospace;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  cursor:pointer;
+  box-shadow:3px 3px 0 rgba(0,0,0,.3);
+  transition:all .1s steps(2);
+}
+.grat-share-btn:hover{ background:var(--plum-soft);transform:translate(-1px,-1px); }
+.grat-share-btn:disabled{ opacity:.45;cursor:default;transform:none; }
+
+/* Share picker modal entries */
+.grat-share-pick-list{
+  display:flex;flex-direction:column;gap:8px;margin:12px 0;
+}
+.grat-share-pick-item{
+  padding:10px 14px;
+  background:var(--cream);
+  border:2px solid var(--gold);
+  color:var(--ink);
+  font-family:"Pixelify Sans",monospace;
+  font-size:14px;
+  text-align:left;
+  cursor:pointer;
+  transition:all .1s steps(2);
+  box-shadow:2px 2px 0 rgba(0,0,0,.15);
+  line-height:1.5;
+}
+.grat-share-pick-item:hover{
+  background:var(--blush-soft);
+  border-color:var(--rose);
+  transform:translate(-1px,-1px);
+}
+
+@media(max-width:980px){
+  .grat-wall-grid{ grid-template-columns:1fr; }
+}
 .cal-left{
   flex:0 0 65%;display:flex;flex-direction:column;gap:14px;min-height:0;
 }

@@ -140,7 +140,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       localStorage.setItem("serenity-quest:v1", JSON.stringify(s));
     } catch{}
     if(userId && window.SB){
-      SB.from("profiles").upsert({
+      window.SB.from("profiles").upsert({
         id: userId, name: updates.name, bday: updates.bday, loc: updates.loc,
         why: profile.why||"", cursor: profile.cursor||null, habits: habits||[]
       }).then(()=>{});
@@ -238,14 +238,28 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention };
       localStorage.setItem("sq_history", JSON.stringify(hist));
     } catch{}
-    if(userId){
-      SB.from("daily_data").upsert({
+    if(userId && window.SB){
+      window.SB.from("daily_data").upsert({
         user_id:userId, date:today, mood, energy,
         completed:[...completed], powerups:[...powerups],
         gratitude, diary:diaryEntry
       }).then(()=>{});
     }
     setCelebrate(true);
+  };
+
+  const [showGratShare, setShowGratShare] = React.useState(false);
+  const [shareStatus, setShareStatus] = React.useState(null);
+
+  const shareToWall = async (content) => {
+    if(!userId || !window.SB || !content.trim()) return;
+    setShareStatus("sharing");
+    try {
+      const row = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal };
+      const { error } = await window.SB.from("gratitude_posts").insert(row);
+      setShareStatus(error ? "error" : "done");
+      if(!error) setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); }, 1400);
+    } catch { setShareStatus("error"); }
   };
 
   const gratitudeDone = gratitude.some(x=>x.trim().length>0);
@@ -667,6 +681,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                                  fontFamily:"Silkscreen, monospace",textTransform:"uppercase",flexShrink:1,overflow:"hidden",whiteSpace:"nowrap"}}>
                       {gratitudeDone ? "✓ Gratitude counted" : "Fill at least one"}
                     </div>
+                    {userId && gratitudeDone && (
+                      <button className="grat-share-btn" onClick={()=>setShowGratShare(true)}>
+                        ♥ Share to Wall
+                      </button>
+                    )}
                   </div>
                   <div className="diary-col">
                     <button className="diary-btn" onClick={()=>setShowDiary(true)}>
@@ -756,6 +775,37 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
                 onClick={()=>setShowProfileEdit(false)}>Cancel</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showGratShare && (
+        <div className="coming-soon-overlay" onClick={()=>{ setShowGratShare(false); setShareStatus(null); }}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
+            <h3 className="coming-soon-title">✦ Share to Gratitude Wall ✦</h3>
+            <p className="coming-soon-body" style={{marginBottom:4}}>Choose which gratitude to share:</p>
+            {shareStatus==="done" ? (
+              <div style={{textAlign:"center",padding:"20px 0",fontFamily:"Pixelify Sans,monospace",
+                           color:"var(--jade-deep)",fontSize:16}}>✓ Shared to the Wall!</div>
+            ) : shareStatus==="error" ? (
+              <div style={{textAlign:"center",padding:"20px 0",fontFamily:"Pixelify Sans,monospace",
+                           color:"var(--rose)",fontSize:14}}>Couldn't share. Try again.</div>
+            ) : (
+              <div className="grat-share-pick-list">
+                {gratitude.filter(g=>g.trim()).map((g,i)=>(
+                  <button key={i} className="grat-share-pick-item"
+                    disabled={shareStatus==="sharing"}
+                    onClick={()=>shareToWall(g)}>
+                    {g}
+                  </button>
+                ))}
+              </div>
+            )}
+            {shareStatus!=="done" && (
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)",marginTop:8}}
+                onClick={()=>{ setShowGratShare(false); setShareStatus(null); }}>Cancel</button>
+            )}
           </div>
         </div>
       )}
