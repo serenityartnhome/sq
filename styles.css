@@ -1006,24 +1006,24 @@ body{
     width:100%;
     margin-bottom:0;
     flex-wrap:nowrap;
-    gap:0;
+    gap:4px;
+    padding:4px;
     z-index:50;
     background:var(--parchment);
     border-top:3px solid var(--plum);
     border-bottom:3px solid var(--plum);
+    box-sizing:border-box;
   }
   .rail-btn{
     flex:1;
     width:auto;
-    height:70px;
+    height:72px;
     min-width:0;
     font-size:9px;
     gap:2px;
-    border:none;
-    border-right:2px solid var(--gold-soft);
-    box-shadow:none;
+    border:3px solid var(--plum) !important;
+    box-shadow:2px 2px 0 rgba(0,0,0,.25), inset 0 0 0 1px var(--gold) !important;
   }
-  .rail-btn:last-child{ border-right:none; }
   .rail-btn img{ width:36px;height:36px; }
 
   /* ── Onboarding ── */
