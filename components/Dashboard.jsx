@@ -59,7 +59,7 @@ function TopBarClock(){
   );
 }
 
-function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile }){
   const today = new Date().toISOString().slice(0,10);
 
   const [completed, setCompleted] = React.useState(()=>{
@@ -117,6 +117,37 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
   const [why, setWhy] = React.useState(profile.why||"");
   const [editingWhy, setEditingWhy] = React.useState(false);
   const [whyDraft, setWhyDraft] = React.useState(profile.why||"");
+
+  const parseBday = (bday) => {
+    if(!bday) return { d:"", m:"", y:"" };
+    const [y,m,d] = bday.split("-");
+    return { d: d ? String(parseInt(d)) : "", m: m ? String(parseInt(m)) : "", y: y||"" };
+  };
+  const [showProfileEdit, setShowProfileEdit] = React.useState(false);
+  const [editName, setEditName]     = React.useState(profile.name||"");
+  const [editLoc,  setEditLoc]      = React.useState(profile.loc||"");
+  const [editBdayDay,   setEditBdayDay]   = React.useState(()=>parseBday(profile.bday).d);
+  const [editBdayMonth, setEditBdayMonth] = React.useState(()=>parseBday(profile.bday).m);
+  const [editBdayYear,  setEditBdayYear]  = React.useState(()=>parseBday(profile.bday).y);
+
+  const saveProfileEdit = () => {
+    const newBday = editBdayYear && editBdayMonth && editBdayDay
+      ? `${editBdayYear}-${editBdayMonth.padStart(2,"0")}-${editBdayDay.padStart(2,"0")}` : profile.bday||"";
+    const updates = { name: editName.trim()||profile.name, bday: newBday, loc: editLoc.trim() };
+    try {
+      const s = JSON.parse(localStorage.getItem("serenity-quest:v1")||"{}");
+      s.profile = { ...s.profile, ...updates };
+      localStorage.setItem("serenity-quest:v1", JSON.stringify(s));
+    } catch{}
+    if(userId && window.SB){
+      SB.from("profiles").upsert({
+        id: userId, name: updates.name, bday: updates.bday, loc: updates.loc,
+        why: profile.why||"", cursor: profile.cursor||null, habits: habits||[]
+      }).then(()=>{});
+    }
+    if(onUpdateProfile) onUpdateProfile(updates);
+    setShowProfileEdit(false);
+  };
 
   const saveWhy = () => {
     const t = whyDraft.trim();
@@ -286,9 +317,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
           <span style={{fontSize:28,lineHeight:1,color:"var(--plum)"}}>◎</span>
           {isGuest ? "Guest" : "Account"}
         </button>
-        <button className="rail-btn" onClick={onReset} title="Start over" style={{opacity:.75}}>
-          <span style={{fontSize:28,lineHeight:1,color:"var(--plum)"}}>↺</span>Reset
-        </button>
       </div>
 
 
@@ -354,7 +382,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
             <div style={{display:"flex",justifyContent:"center",marginBottom:4,marginTop:20}}>
               <div className="bubble" key={bubbleIdx}>{BUBBLES[bubbleIdx]}</div>
             </div>
-            <div className="pet-cloud-stage">
+            <div className="pet-cloud-stage" onClick={()=>setShowProfileEdit(true)}
+              style={{cursor:"pointer"}} title="Edit your profile">
               <div className="pet-on-cloud">
                 <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={Math.round(Math.min(160, window.innerHeight*0.17))}/>
               </div>
@@ -365,6 +394,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
                          color:"#fff",fontSize:14,marginTop:5,textTransform:"uppercase",letterSpacing:".05em",
                          textShadow:"2px 2px 0 rgba(0,0,0,.6)"}}>
               Hello, {profile.name} ✦
+            </div>
+            <div style={{textAlign:"center",fontSize:10,color:"rgba(255,255,255,.7)",
+                         fontFamily:"Silkscreen,monospace",marginTop:2,letterSpacing:".04em"}}>
+              ✎ tap pet to edit profile
             </div>
             {/* Bottom spacer — equal to top spacer, keeps content centered */}
             <div style={{flex:1}}/>
@@ -671,6 +704,54 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
             <h3 className="coming-soon-title">Coming Soon</h3>
             <p className="coming-soon-body">Zodiac features are on their way.<br/>Stay tuned, adventurer!</p>
             <button className="coming-soon-btn" onClick={()=>setShowComingSoon(false)}>Got it ✦</button>
+          </div>
+        </div>
+      )}
+
+      {showProfileEdit && (
+        <div className="coming-soon-overlay" onClick={()=>setShowProfileEdit(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
+            style={{maxWidth:340,width:"90%"}}>
+            <h3 className="coming-soon-title">✦ Edit Profile ✦</h3>
+            <div className="field" style={{marginBottom:10}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Name</label>
+              <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32}
+                placeholder="Your name…"/>
+            </div>
+            <div className="field" style={{marginBottom:10}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday</label>
+              <div className="bday-row">
+                <select value={editBdayDay} onChange={e=>setEditBdayDay(e.target.value)} className="bday-select">
+                  <option value="">Day</option>
+                  {Array.from({length:31},(_,i)=>i+1).map(d=>(
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+                <select value={editBdayMonth} onChange={e=>setEditBdayMonth(e.target.value)} className="bday-select">
+                  <option value="">Month</option>
+                  {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m,i)=>(
+                    <option key={i} value={String(i+1)}>{m}</option>
+                  ))}
+                </select>
+                <select value={editBdayYear} onChange={e=>setEditBdayYear(e.target.value)} className="bday-select">
+                  <option value="">Year</option>
+                  {Array.from({length:100},(_,i)=>new Date().getFullYear()-i).map(y=>(
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="field" style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Location</label>
+              <input value={editLoc} onChange={e=>setEditLoc(e.target.value)}
+                placeholder="City, Country…"/>
+            </div>
+            <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+              <button className="coming-soon-btn" onClick={saveProfileEdit}>Save ✦</button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowProfileEdit(false)}>Cancel</button>
+            </div>
           </div>
         </div>
       )}

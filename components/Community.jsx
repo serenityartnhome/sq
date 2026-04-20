@@ -1,43 +1,53 @@
 function CommunityBoard({ userId, displayName }) {
-  const [posts, setPosts] = React.useState([]);
-  const [liked, setLiked] = React.useState(new Set());
+  const [posts, setPosts]   = React.useState([]);
+  const [liked, setLiked]   = React.useState(new Set());
   const [newPost, setNewPost] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [posting, setPosting] = React.useState(false);
+  const [err, setErr]       = React.useState(null);
 
-  const loadPosts = async () => {
-    setLoading(true);
-    const { data } = await SB
-      .from("gratitude_posts")
-      .select("*, post_likes(user_id)")
-      .order("created_at", { ascending: false })
-      .limit(60);
-    if (data) {
-      setPosts(data.map(p => ({ ...p, likeCount: p.post_likes?.length || 0 })));
-      if (userId) {
-        setLiked(new Set(
-          data.filter(p => p.post_likes?.some(l => l.user_id === userId)).map(p => p.id)
-        ));
+  React.useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true); setErr(null);
+      try {
+        const { data: postsData, error: postsErr } = await SB
+          .from("gratitude_posts").select("*")
+          .order("created_at", { ascending: false }).limit(50);
+        if (cancelled) return;
+        if (postsErr || !postsData) { setErr("Could not load posts."); setLoading(false); return; }
+
+        const { data: likesData } = await SB.from("post_likes").select("post_id, user_id");
+        if (cancelled) return;
+
+        const likes = likesData || [];
+        const countMap = {};
+        likes.forEach(l => { countMap[l.post_id] = (countMap[l.post_id] || 0) + 1; });
+
+        setPosts(postsData.map(p => ({ ...p, likeCount: countMap[p.id] || 0 })));
+        if (userId) setLiked(new Set(likes.filter(l => l.user_id === userId).map(l => l.post_id)));
+      } catch(e) {
+        if (!cancelled) setErr("Could not load posts.");
       }
-    }
-    setLoading(false);
-  };
-
-  React.useEffect(() => { loadPosts(); }, []);
+      if (!cancelled) setLoading(false);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, []);
 
   const submitPost = async () => {
     const text = newPost.trim();
     if (!text || posting || !userId) return;
     setPosting(true);
-    const { data, error } = await SB.from("gratitude_posts").insert({
-      user_id: userId,
-      display_name: displayName || "Adventurer",
-      content: text
-    }).select().single();
-    if (!error && data) {
-      setPosts(prev => [{ ...data, likeCount: 0 }, ...prev]);
-      setNewPost("");
-    }
+    try {
+      const { data, error } = await SB.from("gratitude_posts").insert({
+        user_id: userId, display_name: displayName || "Adventurer", content: text
+      }).select().single();
+      if (!error && data) {
+        setPosts(prev => [{ ...data, likeCount: 0 }, ...prev]);
+        setNewPost("");
+      }
+    } catch{}
     setPosting(false);
   };
 
@@ -45,19 +55,22 @@ function CommunityBoard({ userId, displayName }) {
     if (!userId) return;
     const isLiked = liked.has(postId);
     setLiked(prev => { const n = new Set(prev); isLiked ? n.delete(postId) : n.add(postId); return n; });
-    setPosts(prev => prev.map(p => p.id === postId
-      ? { ...p, likeCount: p.likeCount + (isLiked ? -1 : 1) } : p));
-    if (isLiked) {
-      await SB.from("post_likes").delete().match({ user_id: userId, post_id: postId });
-    } else {
-      await SB.from("post_likes").insert({ user_id: userId, post_id: postId });
-    }
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, likeCount: p.likeCount + (isLiked ? -1 : 1) } : p));
+    try {
+      if (isLiked) {
+        await SB.from("post_likes").delete().match({ user_id: userId, post_id: postId });
+      } else {
+        await SB.from("post_likes").insert({ user_id: userId, post_id: postId });
+      }
+    } catch{}
   };
 
   const deletePost = async (postId) => {
-    await SB.from("post_likes").delete().eq("post_id", postId);
-    await SB.from("gratitude_posts").delete().eq("id", postId);
     setPosts(prev => prev.filter(p => p.id !== postId));
+    try {
+      await SB.from("post_likes").delete().eq("post_id", postId);
+      await SB.from("gratitude_posts").delete().eq("id", postId);
+    } catch{}
   };
 
   const timeAgo = (ts) => {
@@ -107,7 +120,12 @@ function CommunityBoard({ userId, displayName }) {
       {loading ? (
         <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",
                      fontSize:12,color:"var(--plum-soft)"}}>
-          Loading community posts…
+          Loading…
+        </div>
+      ) : err ? (
+        <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",
+                     fontSize:12,color:"var(--plum-soft)"}}>
+          {err}
         </div>
       ) : posts.length === 0 ? (
         <div style={{textAlign:"center",padding:40,fontFamily:"Silkscreen,monospace",

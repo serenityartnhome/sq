@@ -112,6 +112,27 @@ function App(){
     }
   };
 
+  const handleLogin = async (user)=>{
+    setAuthUser(user);
+    if(window.SB){
+      try {
+        const { data } = await SB.from("profiles").select("*").eq("id", user.id).single();
+        if(data && data.name){
+          const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
+          save(p); setSaved(p);
+        }
+      } catch{}
+    }
+  };
+
+  const handleUpdateProfile = (updates)=>{
+    setSaved(prev=>{
+      const next = { ...prev, profile:{ ...prev.profile, ...updates } };
+      save(next);
+      return next;
+    });
+  };
+
   const signOut = async ()=>{
     if(window.SB) try{ await SB.auth.signOut(); }catch{}
     setAuthUser(null);
@@ -123,9 +144,10 @@ function App(){
   return (
     <>
       {!saved
-        ? <Onboarding onComplete={completeOnboarding}/>
+        ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
         : <Dashboard profile={saved.profile} habits={saved.habits}
-                     onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}/>
+                     onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
+                     onUpdateProfile={handleUpdateProfile}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
     </>

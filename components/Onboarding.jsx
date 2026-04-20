@@ -19,7 +19,7 @@ const DEFAULT_HABITS = [
   { id:"screen",   label:"Limit Screen Time",kind:"screen",   preset:true },
 ];
 
-function Onboarding({ onComplete }){
+function Onboarding({ onComplete, onLogin }){
   const [name, setName] = React.useState("");
   const [bdayDay, setBdayDay]     = React.useState("");
   const [bdayMonth, setBdayMonth] = React.useState("");
@@ -70,6 +70,26 @@ function Onboarding({ onComplete }){
   const [password, setPassword] = React.useState("");
   const [authError, setAuthError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+
+  const [showLogin, setShowLogin]       = React.useState(false);
+  const [loginEmail, setLoginEmail]     = React.useState("");
+  const [loginPassword, setLoginPassword] = React.useState("");
+  const [loginError, setLoginError]     = React.useState("");
+  const [loginLoading, setLoginLoading] = React.useState(false);
+
+  const handleLogin = async () => {
+    setLoginError("");
+    if(!loginEmail.trim() || !loginPassword){ setLoginError("Enter email and password"); return; }
+    setLoginLoading(true);
+    try {
+      const { data, error } = await SB.auth.signInWithPassword({ email:loginEmail.trim(), password:loginPassword });
+      if(error) throw error;
+      if(onLogin) await onLogin(data.user);
+    } catch(e){
+      setLoginError(e.message||"Login failed");
+    }
+    setLoginLoading(false);
+  };
 
   const selCount = selected.size;
   const canSubmit = name.trim().length > 0 && selCount >= 3 && selCount <= 8;
@@ -157,6 +177,8 @@ function Onboarding({ onComplete }){
         {showForm && (
         <div className="panel">
           <h2 style={{textAlign:"center",fontSize:16}}>✦ Create Your Profile ✦</h2>
+
+          <div>
           <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:14,
                        fontFamily:"Pixelify Sans, monospace"}}>
             Tell us about yourself to begin your journey
@@ -334,7 +356,36 @@ function Onboarding({ onComplete }){
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>
+
+            {/* Already have an account — below the submit buttons */}
+            <div style={{width:"100%",borderTop:"1px solid var(--gold-soft)",paddingTop:10,textAlign:"center"}}>
+              <button onClick={()=>{setShowLogin(v=>!v);setLoginError("");}}
+                style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                {showLogin ? "← Hide login" : "Already have an account? Log in"}
+              </button>
+            </div>
+
+            {showLogin && (
+              <div style={{width:"100%"}}>
+                <div className="field">
+                  <label>Email</label>
+                  <input type="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
+                    placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+                </div>
+                <div className="field">
+                  <label>Password</label>
+                  <input type="password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}
+                    placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+                </div>
+                {loginError && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,fontFamily:"Silkscreen,monospace"}}>{loginError}</div>}
+                <button className="btn-primary" onClick={handleLogin} disabled={loginLoading} style={{width:"100%"}}>
+                  <Icon name="sparkle" size={16}/> {loginLoading ? "Logging in…" : "Log In & Continue"} <Icon name="sparkle" size={16}/>
+                </button>
+              </div>
+            )}
           </div>
+        </div>
         </div>
         )}
       </div>
