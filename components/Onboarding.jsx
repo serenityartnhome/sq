@@ -107,7 +107,7 @@ function Onboarding({ onComplete }){
             <ul className="journey">
               <li>
                 <span className="mini"><Icon name="lotus-bud" size={28}/></span>
-                <div><strong>A Living Companion</strong><span>A pixel monkey that grows with you</span></div>
+                <div><strong>A Living Companion</strong><span>A zodiac pet that grows with you</span></div>
               </li>
               <li>
                 <span className="mini"><Icon name="energy-heart" size={28}/></span>

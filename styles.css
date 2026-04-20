@@ -992,7 +992,7 @@ body{
   }
   /* Smaller title text so it fits on one line */
   .top-bar .title{ font-size:13px;gap:4px; }
-  .topbar-clock{ flex-direction:column; align-items:flex-end; gap:1px; }
+  .topbar-clock{ flex-direction:row; align-items:center; gap:4px; }
   .topbar-time{ font-size:11px; }
   .topbar-date{ font-size:9px; }
   .streak{ font-size:11px; }
@@ -1004,13 +1004,10 @@ body{
     position:static;
     flex-direction:row;
     width:100%;
-    margin-bottom:0;
     flex-wrap:nowrap;
     gap:4px;
-    padding:4px;
-    z-index:50;
+    padding:4px 4px 6px;
     background:var(--parchment);
-    border-top:3px solid var(--plum);
     border-bottom:3px solid var(--plum);
     box-sizing:border-box;
   }
@@ -1022,8 +1019,10 @@ body{
     font-size:9px;
     gap:2px;
     border:3px solid var(--plum) !important;
-    box-shadow:2px 2px 0 rgba(0,0,0,.25), inset 0 0 0 1px var(--gold) !important;
+    box-shadow:3px 3px 0 rgba(0,0,0,.3), inset 0 0 0 2px var(--gold) !important;
+    background:var(--parchment);
   }
+  .rail-btn.active{ background:var(--blush) !important; border-color:var(--rose) !important; }
   .rail-btn img{ width:36px;height:36px; }
 
   /* ── Onboarding ── */

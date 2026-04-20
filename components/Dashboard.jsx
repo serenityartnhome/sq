@@ -227,11 +227,11 @@ function Dashboard({ profile, habits, onReset }){
   const selectIntention = (v) => { setIntention(v); setShowIntentPicker(false); setShowCustomI(false); };
 
   return (
-    <div className="app-shell">
+    <React.Fragment>
       <div className={"scene-img "+(tab==="calendar"?"scene-calendar":"scene-dashboard")}/>
       <div className="scene-veil"/>
 
-      {/* Sticky header: topbar + nav rail */}
+      {/* Sticky header: topbar + nav rail — outside scroll container */}
       <div className="nav-header">
       <div className="top-bar">
         <div className="streak"><Icon name="flame" size={22}/> {(()=>{
@@ -284,6 +284,8 @@ function Dashboard({ profile, habits, onReset }){
         </button>
       </div>
       </div>{/* end nav-header */}
+
+      <div className="app-shell">
 
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
@@ -663,7 +665,8 @@ function Dashboard({ profile, habits, onReset }){
           </div>
         </div>
       )}
-    </div>
+      </div>{/* end app-shell */}
+    </React.Fragment>
   );
 }
 
