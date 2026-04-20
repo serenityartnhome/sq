@@ -328,7 +328,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <Icon name="shop" size={54}/>Shop
         </button>
         <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
-          <span style={{fontSize:28,lineHeight:1,color:"var(--plum)"}}>◎</span>
+          <img src={`assets/icon-account-${animal}.png?v=1`} alt="account"
+            style={{width:54,height:54,imageRendering:"pixelated"}}/>
           {isGuest ? "Guest" : "Account"}
         </button>
       </div>

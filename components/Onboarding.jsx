@@ -383,7 +383,8 @@ function Onboarding({ onComplete, onLogin }){
                 style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",
                         background:"none",border:"none",cursor:"pointer",
                         color:"var(--plum-soft)",fontSize:14,padding:"2px 4px",lineHeight:1}}>
-                {showPw ? "🙈" : "👁"}
+                <img src={showPw?"assets/icon-eye-closed.png":"assets/icon-eye-open.png"}
+                  style={{width:20,height:20,imageRendering:"pixelated"}} alt={showPw?"hide":"show"}/>
               </button>
             </div>
           </div>
