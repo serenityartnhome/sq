@@ -150,6 +150,17 @@ function CalendarView({ habits, powerups, todayLive }){
                 ✦ Insights for {MONTH_NAMES[month]} {selectedDay}, {year} ✦
               </h3>
 
+              {/* Intention */}
+              {selData.intention && (
+                <div className="cal-section">
+                  <div className="div-sparkle" style={{fontSize:11,margin:"0 0 6px"}}>✦ Today's Intention ✦</div>
+                  <div style={{textAlign:"center",fontFamily:"Silkscreen,monospace",
+                               fontSize:13,color:"var(--rose)",padding:"4px 0"}}>
+                    {selData.intention}
+                  </div>
+                </div>
+              )}
+
               {/* Quests */}
               <div className="cal-section">
                 <div className="div-sparkle" style={{fontSize:11,margin:"0 0 6px"}}>

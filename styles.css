@@ -986,9 +986,9 @@ body{
   }
   /* Smaller title text so it fits on one line */
   .top-bar .title{ font-size:13px;gap:4px; }
-  .topbar-clock{ flex-direction:row; align-items:center; gap:4px; }
-  .topbar-time{ font-size:11px; }
-  .topbar-date{ font-size:9px; }
+  .topbar-clock{ flex-direction:column; align-items:flex-end; gap:1px; }
+  .topbar-time{ font-size:11px; white-space:nowrap; }
+  .topbar-date{ font-size:9px; white-space:nowrap; }
   .streak{ font-size:11px; }
   /* Hide the zodiac avatar on mobile — saves space */
   .avatar{ display:none; }

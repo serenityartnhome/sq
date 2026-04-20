@@ -204,7 +204,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
     localStorage.setItem("sq_streaks", JSON.stringify(newStreaks));
     localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...completed]}));
     try {
-      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto };
+      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention };
       localStorage.setItem("sq_history", JSON.stringify(hist));
     } catch{}
     if(userId){
@@ -245,6 +245,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut }){
             const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
             let count = 0;
             const d = new Date();
+            d.setDate(d.getDate()-1);
             while(true){
               const k = d.toISOString().slice(0,10);
               if(!hist[k]) break;
