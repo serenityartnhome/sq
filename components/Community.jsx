@@ -1,8 +1,9 @@
 function CommunityBoard({ userId }) {
-  const [posts, setPosts]     = React.useState([]);
-  const [liked, setLiked]     = React.useState(new Set());
-  const [loading, setLoading] = React.useState(true);
-  const [err, setErr]         = React.useState(null);
+  const [posts, setPosts]       = React.useState([]);
+  const [liked, setLiked]       = React.useState(new Set());
+  const [reported, setReported] = React.useState(new Set());
+  const [loading, setLoading]   = React.useState(true);
+  const [err, setErr]           = React.useState(null);
 
   const hashAnimal = (str) => {
     const animals = ["rat","ox","tiger","rabbit","dragon","snake","horse","goat","monkey","rooster","dog","pig"];
@@ -25,12 +26,26 @@ function CommunityBoard({ userId }) {
         const { data: likesData } = await window.SB.from("post_likes").select("post_id, user_id");
         if (cancelled) return;
 
+        const { data: reportsData } = await window.SB.from("post_reports").select("post_id, user_id");
+        if (cancelled) return;
+
         const likes = likesData || [];
+        const reports = reportsData || [];
+
         const countMap = {};
         likes.forEach(l => { countMap[l.post_id] = (countMap[l.post_id] || 0) + 1; });
 
-        setPosts(postsData.map(p => ({ ...p, likeCount: countMap[p.id] || 0 })));
-        if (userId) setLiked(new Set(likes.filter(l => l.user_id === userId).map(l => l.post_id)));
+        const reportCountMap = {};
+        reports.forEach(r => { reportCountMap[r.post_id] = (reportCountMap[r.post_id] || 0) + 1; });
+
+        // Filter out posts with 3+ reports
+        const visiblePosts = postsData.filter(p => (reportCountMap[p.id] || 0) < 3);
+
+        setPosts(visiblePosts.map(p => ({ ...p, likeCount: countMap[p.id] || 0 })));
+        if (userId) {
+          setLiked(new Set(likes.filter(l => l.user_id === userId).map(l => l.post_id)));
+          setReported(new Set(reports.filter(r => r.user_id === userId).map(r => r.post_id)));
+        }
       } catch {
         if (!cancelled) setErr("Could not load posts.");
       }
@@ -54,10 +69,28 @@ function CommunityBoard({ userId }) {
     } catch {}
   };
 
+  const reportPost = async (postId) => {
+    if (!userId || reported.has(postId)) return;
+    setReported(prev => { const n = new Set(prev); n.add(postId); return n; });
+    try {
+      await window.SB.from("post_reports").insert({ user_id: userId, post_id: postId });
+      // Count total reports for this post
+      const { data: reportData } = await window.SB.from("post_reports").select("post_id").eq("post_id", postId);
+      if (reportData && reportData.length >= 3) {
+        // Auto-delete: remove from UI and clean up DB
+        setPosts(prev => prev.filter(p => p.id !== postId));
+        await window.SB.from("post_likes").delete().eq("post_id", postId);
+        await window.SB.from("post_reports").delete().eq("post_id", postId);
+        await window.SB.from("gratitude_posts").delete().eq("id", postId);
+      }
+    } catch {}
+  };
+
   const deletePost = async (postId) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
     try {
       await window.SB.from("post_likes").delete().eq("post_id", postId);
+      await window.SB.from("post_reports").delete().eq("post_id", postId);
       await window.SB.from("gratitude_posts").delete().eq("id", postId);
     } catch {}
   };
@@ -96,6 +129,8 @@ function CommunityBoard({ userId }) {
             const animal = post.animal || hashAnimal(post.user_id || post.display_name);
             const firstName = (post.display_name||"Adventurer").trim().split(" ")[0];
             const isLiked = liked.has(post.id);
+            const isReported = reported.has(post.id);
+            const isOwn = userId === post.user_id;
             return (
               <div key={post.id} className="grat-card">
                 <div className="grat-card-heart-deco">♡</div>
@@ -113,8 +148,14 @@ function CommunityBoard({ userId }) {
                 </div>
                 <div className="grat-card-content">✦ {post.content}</div>
                 <div className="grat-card-footer">
-                  {userId === post.user_id && (
+                  {isOwn ? (
                     <button onClick={()=>deletePost(post.id)} className="grat-card-delete">delete</button>
+                  ) : userId && (
+                    <button onClick={()=>reportPost(post.id)}
+                      className={"grat-card-report"+(isReported?" reported":"")}
+                      disabled={isReported} title="Report this post">
+                      {isReported ? "⚑ reported" : "⚑"}
+                    </button>
                   )}
                   <button onClick={()=>toggleLike(post.id)} className={"grat-card-like"+(isLiked?" liked":"")}>
                     ♥ {post.likeCount}

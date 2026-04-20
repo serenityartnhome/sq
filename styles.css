@@ -918,6 +918,21 @@ body{
   padding:4px 6px;
 }
 .grat-card-delete:hover{ opacity:1;color:var(--plum); }
+.grat-card-report{
+  background:transparent;
+  border:none;
+  color:var(--plum-soft);
+  font-family:"Silkscreen",monospace;
+  font-size:9px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  opacity:.5;
+  padding:4px 6px;
+  transition:all .1s steps(2);
+}
+.grat-card-report:hover{ opacity:1;color:var(--rose); }
+.grat-card-report.reported{ opacity:1;color:var(--rose);cursor:default; }
 
 /* Share to wall button in gratitude section */
 .grat-share-btn{
