@@ -98,6 +98,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [celebrate, setCelebrate] = React.useState(false);
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
+  const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [tab, setTab] = React.useState("home");
@@ -258,10 +259,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention };
       localStorage.setItem("sq_history", JSON.stringify(hist));
       // Check if this completes day 3 — trigger hatch
-      if(!localStorage.getItem("sq_hatched")){
-        let days = 0; const dd = new Date();
-        while(hist[dd.toISOString().slice(0,10)]){ days++; dd.setDate(dd.getDate()-1); }
-        if(days >= 3){ setTimeout(()=>setIsHatching(true), 400); }
+      let days = 0; const dd = new Date();
+      while(hist[dd.toISOString().slice(0,10)]){ days++; dd.setDate(dd.getDate()-1); }
+      if(days >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
+      if(days >= 7 && !localStorage.getItem("sq_diary_unlocked")){
+        localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true);
       }
     } catch{}
     if(userId && window.SB){
@@ -754,7 +756,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
-                      <button className="diary-btn" onClick={()=>daysInFlow>=7?setShowDiary(true):setShowComingSoon(true)}>
+                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=7?setShowDiary(true):setShowComingSoon(true)}>
                         <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
                              className="diary-icon" alt="diary"
                              style={daysInFlow<7?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
@@ -765,7 +767,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                                   imageRendering:"pixelated",pointerEvents:"none"}}/>
                       )}
                     </div>
-                    <span className="diary-label">{daysInFlow>=7?"Write in my Journal":"Unlocks Day 7"}</span>
+                    <span className="diary-label">{diaryUnlocked||daysInFlow>=7?"Write in my Journal":"Unlocks Day 7"}</span>
                   </div>
                 </div>
               </div>
