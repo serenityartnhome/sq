@@ -255,8 +255,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(!userId || !window.SB || !content.trim()) return;
     setShareStatus("sharing");
     try {
-      const row = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal };
-      const { error } = await window.SB.from("gratitude_posts").insert(row);
+      const base = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim() };
+      let { error } = await window.SB.from("gratitude_posts").insert({ ...base, animal });
+      if(error) ({ error } = await window.SB.from("gratitude_posts").insert(base));
       setShareStatus(error ? "error" : "done");
       if(!error) setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); }, 1400);
     } catch { setShareStatus("error"); }
