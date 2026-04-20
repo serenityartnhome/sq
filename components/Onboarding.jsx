@@ -177,14 +177,16 @@ function Onboarding({ onComplete, onLogin }){
               <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
                 <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
               </button>
-              <div style={{textAlign:"center",marginTop:12}}>
-                <button onClick={()=>{setShowLoginDirect(true);setLoginError("");}}
-                  style={{background:"none",border:"2px solid var(--plum)",borderRadius:4,
-                          color:"var(--plum)",cursor:"pointer",padding:"8px 16px",
-                          fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em"}}>
-                  Already have an account? Log in →
-                </button>
-              </div>
+              <button onClick={()=>{setShowLoginDirect(true);setLoginError("");}}
+                style={{width:"100%",marginTop:10,
+                        background:"var(--cream)",color:"var(--plum)",
+                        border:"3px solid var(--plum)",borderRadius:4,
+                        boxShadow:"3px 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px var(--gold)",
+                        cursor:"pointer",padding:"12px 20px",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em",
+                        display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+                Already have an account? Log in →
+              </button>
             </div>
           )}
         </div>
