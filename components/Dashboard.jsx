@@ -251,16 +251,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showGratShare, setShowGratShare] = React.useState(false);
   const [shareStatus, setShareStatus] = React.useState(null);
 
+  const [shareError, setShareError] = React.useState("");
   const shareToWall = async (content) => {
     if(!userId || !window.SB || !content.trim()) return;
-    setShareStatus("sharing");
+    setShareStatus("sharing"); setShareError("");
     try {
-      const base = { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"" };
-      let { error } = await window.SB.from("gratitude_posts").insert({ ...base, animal });
-      if(error) ({ error } = await window.SB.from("gratitude_posts").insert(base));
-      setShareStatus(error ? "error" : "done");
-      if(!error) setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); }, 1400);
-    } catch { setShareStatus("error"); }
+      const attempts = [
+        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"", animal },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim() },
+      ];
+      let lastErr = null;
+      for(const row of attempts){
+        const { error } = await window.SB.from("gratitude_posts").insert(row);
+        if(!error){ setShareStatus("done"); setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); setShareError(""); }, 1400); return; }
+        lastErr = error;
+      }
+      setShareError(lastErr?.message||"Unknown error");
+      setShareStatus("error");
+    } catch(e) { setShareError(e?.message||"Unknown error"); setShareStatus("error"); }
   };
 
   const gratitudeDone = gratitude.some(x=>x.trim().length>0);
@@ -790,8 +799,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div style={{textAlign:"center",padding:"20px 0",fontFamily:"Pixelify Sans,monospace",
                            color:"var(--jade-deep)",fontSize:16}}>✓ Shared to the Wall!</div>
             ) : shareStatus==="error" ? (
-              <div style={{textAlign:"center",padding:"20px 0",fontFamily:"Pixelify Sans,monospace",
-                           color:"var(--rose)",fontSize:14}}>Couldn't share. Try again.</div>
+              <div style={{textAlign:"center",padding:"12px 0",fontFamily:"Pixelify Sans,monospace",
+                           color:"var(--rose)",fontSize:13,lineHeight:1.5}}>
+                Couldn't share.<br/>
+                <span style={{fontSize:11,opacity:.8}}>{shareError}</span>
+              </div>
             ) : (
               <div className="grat-share-pick-list">
                 {gratitude.filter(g=>g.trim()).map((g,i)=>(
