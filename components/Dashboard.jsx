@@ -753,11 +753,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     )}
                   </div>
                   <div className="diary-col">
-                    <button className="diary-btn" onClick={()=>setShowDiary(true)}>
-                      <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
-                           className="diary-icon" alt="diary"/>
-                    </button>
-                    <span className="diary-label">Write in<br/>my Journal</span>
+                    {daysInFlow >= 7 ? (
+                      <>
+                        <button className="diary-btn" onClick={()=>setShowDiary(true)}>
+                          <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
+                               className="diary-icon" alt="diary"/>
+                        </button>
+                        <span className="diary-label">Write in<br/>my Journal</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="diary-btn diary-locked" title="Unlocks at Day 7">
+                          <img src="assets/icon-lock.png?v=1"
+                               style={{width:"60%",height:"auto",imageRendering:"pixelated",opacity:.7}} alt="locked"/>
+                        </div>
+                        <span className="diary-label" style={{opacity:.6}}>Journal<br/>Day 7 🔒</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
