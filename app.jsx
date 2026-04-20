@@ -64,11 +64,10 @@ function App(){
   React.useEffect(()=>{
     if(!window.SB) return;
     try {
-      SB.auth.getSession().then(({ data:{ session } })=>{
+      window.SB.auth.getSession().then(({ data:{ session } })=>{
         if(!session) return;
         setAuthUser(session.user);
-        // Sync profile from cloud in background
-        SB.from("profiles").select("*").eq("id", session.user.id).single()
+        window.SB.from("profiles").select("*").eq("id", session.user.id).single()
           .then(({ data })=>{
             if(data && data.name){
               const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
@@ -83,19 +82,26 @@ function App(){
   const completeOnboarding = async (data, credentials)=>{
     save(data);
     setSaved(data);
-    if(credentials && window.SB){
-      try {
-        const { data:auth, error } = await SB.auth.signUp({ email:credentials.email, password:credentials.password });
-        if(!error && auth?.user){
-          setAuthUser(auth.user);
-          await SB.from("profiles").upsert({
-            id:auth.user.id, name:data.profile.name, bday:data.profile.bday||"",
-            loc:data.profile.loc||"", why:data.profile.why||"",
-            cursor:data.profile.cursor||null, habits:data.habits||[]
-          });
-        }
-      } catch{}
-    }
+    if(!credentials || !window.SB) return;
+    try {
+      let authUser = null;
+      const { data:signUpData, error:signUpErr } = await window.SB.auth.signUp({ email:credentials.email, password:credentials.password });
+      if(!signUpErr && signUpData?.user){
+        authUser = signUpData.user;
+      } else {
+        // Email already registered — try signing in instead
+        const { data:signInData, error:signInErr } = await window.SB.auth.signInWithPassword({ email:credentials.email, password:credentials.password });
+        if(!signInErr && signInData?.user) authUser = signInData.user;
+      }
+      if(authUser){
+        setAuthUser(authUser);
+        await window.SB.from("profiles").upsert({
+          id:authUser.id, name:data.profile.name, bday:data.profile.bday||"",
+          loc:data.profile.loc||"", why:data.profile.why||"",
+          cursor:data.profile.cursor||null, habits:data.habits||[]
+        });
+      }
+    } catch{}
   };
 
   const reset = async ()=>{
@@ -104,8 +110,8 @@ function App(){
         .forEach(k=>localStorage.removeItem(k));
       if(authUser && window.SB){
         try {
-          await SB.from("profiles").delete().eq("id",authUser.id);
-          await SB.from("daily_data").delete().eq("user_id",authUser.id);
+          await window.SB.from("profiles").delete().eq("id",authUser.id);
+          await window.SB.from("daily_data").delete().eq("user_id",authUser.id);
         } catch{}
       }
       setSaved(null); setAuthUser(null);
@@ -116,12 +122,20 @@ function App(){
     setAuthUser(user);
     if(window.SB){
       try {
-        const { data } = await SB.from("profiles").select("*").eq("id", user.id).single();
+        const { data } = await window.SB.from("profiles").select("*").eq("id", user.id).single();
         if(data && data.name){
           const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
           save(p); setSaved(p);
+          return;
         }
       } catch{}
+    }
+    // Profile not in DB — use localStorage data if available, else create minimal profile
+    const local = load();
+    if(local){ setSaved(local); }
+    else {
+      const p = { profile:{ name:user.email?.split("@")[0]||"Adventurer", bday:"", loc:"", why:"", cursor:null }, habits:[] };
+      save(p); setSaved(p);
     }
   };
 
@@ -134,7 +148,7 @@ function App(){
   };
 
   const signOut = async ()=>{
-    if(window.SB) try{ await SB.auth.signOut(); }catch{}
+    if(window.SB) try{ await window.SB.auth.signOut(); }catch{}
     setAuthUser(null);
     setSaved(null);
   };
