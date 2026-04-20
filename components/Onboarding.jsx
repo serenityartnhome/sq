@@ -71,6 +71,7 @@ function Onboarding({ onComplete, onLogin }){
   const [authError, setAuthError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
+  const [showLoginDirect, setShowLoginDirect] = React.useState(false);
   const [showLogin, setShowLogin]       = React.useState(false);
   const [loginEmail, setLoginEmail]     = React.useState("");
   const [loginPassword, setLoginPassword] = React.useState("");
@@ -167,11 +168,53 @@ function Onboarding({ onComplete, onLogin }){
           </div>
 
           {!showForm && (
-            <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
-              <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
-            </button>
+            <div>
+              <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
+                <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
+              </button>
+              <div style={{textAlign:"center",marginTop:10}}>
+                <button onClick={()=>{setShowLoginDirect(true);setLoginError("");}}
+                  style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
+                          fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                  Already have an account? Log in →
+                </button>
+              </div>
+            </div>
           )}
         </div>
+
+        {/* RIGHT: Direct login panel — shown when user clicks "Already have an account?" */}
+        {!showForm && showLoginDirect && (
+          <div className="panel">
+            <h2 style={{textAlign:"center",fontSize:16}}>✦ Welcome Back ✦</h2>
+            <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:18,
+                         fontFamily:"Pixelify Sans,monospace"}}>
+              Log in to continue your quest
+            </div>
+            <div className="field">
+              <label>Email</label>
+              <input type="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
+                placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+            </div>
+            <div className="field" style={{marginBottom:14}}>
+              <label>Password</label>
+              <input type="password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}
+                placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
+            </div>
+            {loginError && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,
+                                        fontFamily:"Silkscreen,monospace"}}>{loginError}</div>}
+            <button className="btn-primary" onClick={handleLogin} disabled={loginLoading} style={{width:"100%",marginBottom:10}}>
+              <Icon name="sparkle" size={16}/> {loginLoading ? "Logging in…" : "Log In & Continue"} <Icon name="sparkle" size={16}/>
+            </button>
+            <div style={{textAlign:"center"}}>
+              <button onClick={()=>setShowLoginDirect(false)}
+                style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                ← Back
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* RIGHT: Profile + Habits form — only shown after button click */}
         {showForm && (
