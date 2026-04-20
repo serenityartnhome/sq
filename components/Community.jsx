@@ -11,13 +11,13 @@ function CommunityBoard({ userId, displayName }) {
     const run = async () => {
       setLoading(true); setErr(null);
       try {
-        const { data: postsData, error: postsErr } = await SB
+        const { data: postsData, error: postsErr } = await window.SB
           .from("gratitude_posts").select("*")
           .order("created_at", { ascending: false }).limit(50);
         if (cancelled) return;
         if (postsErr || !postsData) { setErr("Could not load posts."); setLoading(false); return; }
 
-        const { data: likesData } = await SB.from("post_likes").select("post_id, user_id");
+        const { data: likesData } = await window.SB.from("post_likes").select("post_id, user_id");
         if (cancelled) return;
 
         const likes = likesData || [];
@@ -40,7 +40,7 @@ function CommunityBoard({ userId, displayName }) {
     if (!text || posting || !userId) return;
     setPosting(true);
     try {
-      const { data, error } = await SB.from("gratitude_posts").insert({
+      const { data, error } = await window.SB.from("gratitude_posts").insert({
         user_id: userId, display_name: displayName || "Adventurer", content: text
       }).select().single();
       if (!error && data) {
@@ -58,9 +58,9 @@ function CommunityBoard({ userId, displayName }) {
     setPosts(prev => prev.map(p => p.id === postId ? { ...p, likeCount: p.likeCount + (isLiked ? -1 : 1) } : p));
     try {
       if (isLiked) {
-        await SB.from("post_likes").delete().match({ user_id: userId, post_id: postId });
+        await window.SB.from("post_likes").delete().match({ user_id: userId, post_id: postId });
       } else {
-        await SB.from("post_likes").insert({ user_id: userId, post_id: postId });
+        await window.SB.from("post_likes").insert({ user_id: userId, post_id: postId });
       }
     } catch{}
   };
@@ -68,8 +68,8 @@ function CommunityBoard({ userId, displayName }) {
   const deletePost = async (postId) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
     try {
-      await SB.from("post_likes").delete().eq("post_id", postId);
-      await SB.from("gratitude_posts").delete().eq("id", postId);
+      await window.SB.from("post_likes").delete().eq("post_id", postId);
+      await window.SB.from("gratitude_posts").delete().eq("id", postId);
     } catch{}
   };
 

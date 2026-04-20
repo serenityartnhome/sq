@@ -81,9 +81,10 @@ function Onboarding({ onComplete, onLogin }){
   const handleLogin = async () => {
     setLoginError("");
     if(!loginEmail.trim() || !loginPassword){ setLoginError("Enter email and password"); return; }
+    if(!window.SB){ setLoginError("Service unavailable, please refresh"); return; }
     setLoginLoading(true);
     try {
-      const { data, error } = await SB.auth.signInWithPassword({ email:loginEmail.trim(), password:loginPassword });
+      const { data, error } = await window.SB.auth.signInWithPassword({ email:loginEmail.trim(), password:loginPassword });
       if(error) throw error;
       if(onLogin) await onLogin(data.user);
     } catch(e){
