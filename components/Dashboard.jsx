@@ -260,29 +260,6 @@ function Dashboard({ profile, habits, onReset }){
         </div>
       </div>
 
-      {/* Left rail */}
-      <div className="rail">
-        <button className={"rail-btn "+(tab==="home"?"active":"")} onClick={()=>setTab("home")}>
-          <Icon name="home" size={54}/>Home
-        </button>
-        <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
-          <Icon name="calendar" size={54}/>Calendar
-        </button>
-        <button className="rail-btn rail-btn-locked" onClick={()=>setShowComingSoon(true)}>
-          <div style={{position:"relative",display:"inline-block"}}>
-            <Icon name="zodiac" size={54}/>
-            <span className="rail-lock-badge">🔒</span>
-          </div>
-          Zodiac
-        </button>
-        <button className={"rail-btn "+(tab==="shop"?"active":"")} onClick={()=>setShowShopPrompt(true)}>
-          <Icon name="shop" size={54}/>Shop
-        </button>
-        <button className="rail-btn" onClick={onReset} title="Start over" style={{opacity:.75}}>
-          <span style={{fontSize:36,lineHeight:1,color:"var(--plum)"}}>↺</span>Reset
-        </button>
-      </div>
-
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
 
@@ -645,6 +622,29 @@ function Dashboard({ profile, habits, onReset }){
           </div>
         </div>
       )}
+
+      {/* Rail — placed last so sticky bottom works on mobile */}
+      <div className="rail">
+        <button className={"rail-btn "+(tab==="home"?"active":"")} onClick={()=>setTab("home")}>
+          <Icon name="home" size={54}/>Home
+        </button>
+        <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
+          <Icon name="calendar" size={54}/>Calendar
+        </button>
+        <button className="rail-btn rail-btn-locked" onClick={()=>setShowComingSoon(true)}>
+          <div style={{position:"relative",display:"inline-block"}}>
+            <Icon name="zodiac" size={54}/>
+            <span className="rail-lock-badge">🔒</span>
+          </div>
+          Zodiac
+        </button>
+        <button className={"rail-btn "+(tab==="shop"?"active":"")} onClick={()=>setShowShopPrompt(true)}>
+          <Icon name="shop" size={54}/>Shop
+        </button>
+        <button className="rail-btn" onClick={onReset} title="Start over" style={{opacity:.75}}>
+          <span style={{fontSize:36,lineHeight:1,color:"var(--plum)"}}>↺</span>Reset
+        </button>
+      </div>
 
       {celebrate && (
         <div className="celebrate" onClick={()=>setCelebrate(false)}>

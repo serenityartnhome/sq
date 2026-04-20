@@ -9,7 +9,7 @@ body { overscroll-behavior-y: none; background-color: #2a0e1a; }
 /* PWA standalone mode only — fixes rubber-band black flash on iOS home screen app */
 @media all and (display-mode: standalone) {
   body { position:fixed; overflow:hidden; width:100%; height:100%; }
-  .app-shell { overflow-y:scroll; -webkit-overflow-scrolling:touch; height:100%; }
+  .app-shell { overflow-y:scroll !important; -webkit-overflow-scrolling:touch; height:100% !important; box-sizing:border-box; }
 }
 :root{
   --parchment:#fbf1e3;
