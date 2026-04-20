@@ -979,9 +979,7 @@ body{
   .app-shell img{ max-width:100%; }
 
   .top-bar{
-    position:sticky;
-    top:env(safe-area-inset-top);
-    z-index:50;
+    position:static;
     margin-bottom:0;
     padding:8px 12px;
     gap:8px;
