@@ -27,11 +27,9 @@ function load(){ try{ const s=localStorage.getItem(STORAGE); return s?JSON.parse
 function save(s){ try{ localStorage.setItem(STORAGE,JSON.stringify(s)); }catch{} }
 
 function App(){
-  // undefined = still checking, null = guest/logged out, object = logged in user
-  const [authUser, setAuthUser] = React.useState(undefined);
-  const [saved, setSaved] = React.useState(null);
-  const [profileLoading, setProfileLoading] = React.useState(false);
-  const [tweaks, setTweaks] = React.useState(()=>({
+  const [saved, setSaved]         = React.useState(()=>load());
+  const [authUser, setAuthUser]   = React.useState(null);
+  const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
     petMood: window.__SQ_DEFAULTS.petMood,
     showLanterns: window.__SQ_DEFAULTS.showLanterns,
@@ -62,74 +60,41 @@ function App(){
     return ()=>window.removeEventListener("message",onMsg);
   },[]);
 
-  const loadProfile = React.useCallback(async (user)=>{
-    setProfileLoading(true);
-    const { data } = await SB.from("profiles").select("*").eq("id",user.id).single();
-    if(data){
-      const profileData = {
-        profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null },
-        habits: data.habits||[]
-      };
-      setSaved(profileData);
-      save(profileData);
-    } else {
-      // Try migrating existing localStorage data
-      const local = load();
-      if(local?.profile?.name){
-        await SB.from("profiles").upsert({
-          id:user.id, name:local.profile.name, bday:local.profile.bday||"",
-          loc:local.profile.loc||"", why:local.profile.why||"",
-          cursor:local.profile.cursor||null, habits:local.habits||[]
-        });
-        setSaved(local);
-      }
-      // else: no profile → show onboarding
-    }
-    setProfileLoading(false);
+  // Restore Supabase session in background — doesn't block rendering
+  React.useEffect(()=>{
+    if(!window.SB) return;
+    try {
+      SB.auth.getSession().then(({ data:{ session } })=>{
+        if(!session) return;
+        setAuthUser(session.user);
+        // Sync profile from cloud in background
+        SB.from("profiles").select("*").eq("id", session.user.id).single()
+          .then(({ data })=>{
+            if(data && data.name){
+              const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
+              setSaved(p); save(p);
+            }
+          }).catch(()=>{});
+      }).catch(()=>{});
+    } catch{}
   },[]);
 
-  // Auth state
-  React.useEffect(()=>{
-    SB.auth.getSession().then(({ data:{ session } })=>{
-      if(session?.user){
-        setAuthUser(session.user);
-        loadProfile(session.user);
-      } else {
-        setAuthUser(null);
-      }
-    });
-    const { data:{ subscription } } = SB.auth.onAuthStateChange((event,session)=>{
-      if(session?.user){
-        setAuthUser(session.user);
-        if(event==="SIGNED_IN") loadProfile(session.user);
-      } else {
-        setAuthUser(null);
-        setSaved(null);
-      }
-    });
-    return ()=>subscription.unsubscribe();
-  },[loadProfile]);
-
-  const handleAuth = (user)=>{
-    if(user===null){
-      // Guest mode — use localStorage only
-      setAuthUser("guest");
-      const local = load();
-      if(local?.profile?.name) setSaved(local);
-    } else {
-      setAuthUser(user);
-    }
-  };
-
-  const completeOnboarding = async (data)=>{
+  // Called from Onboarding with optional email/password for account creation
+  const completeOnboarding = async (data, credentials)=>{
     save(data);
     setSaved(data);
-    if(authUser && authUser!=="guest"){
-      await SB.from("profiles").upsert({
-        id:authUser.id, name:data.profile.name, bday:data.profile.bday||"",
-        loc:data.profile.loc||"", why:data.profile.why||"",
-        cursor:data.profile.cursor||null, habits:data.habits||[]
-      });
+    if(credentials && window.SB){
+      try {
+        const { data:auth, error } = await SB.auth.signUp({ email:credentials.email, password:credentials.password });
+        if(!error && auth?.user){
+          setAuthUser(auth.user);
+          await SB.from("profiles").upsert({
+            id:auth.user.id, name:data.profile.name, bday:data.profile.bday||"",
+            loc:data.profile.loc||"", why:data.profile.why||"",
+            cursor:data.profile.cursor||null, habits:data.habits||[]
+          });
+        }
+      } catch{}
     }
   };
 
@@ -137,47 +102,30 @@ function App(){
     if(confirm("Start over? Your progress will be cleared.")){
       [STORAGE,"sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits","sq_notes","sq_week_mon"]
         .forEach(k=>localStorage.removeItem(k));
-      if(authUser && authUser!=="guest"){
-        await SB.from("profiles").delete().eq("id",authUser.id);
-        await SB.from("daily_data").delete().eq("user_id",authUser.id);
+      if(authUser && window.SB){
+        try {
+          await SB.from("profiles").delete().eq("id",authUser.id);
+          await SB.from("daily_data").delete().eq("user_id",authUser.id);
+        } catch{}
       }
-      setSaved(null);
+      setSaved(null); setAuthUser(null);
     }
   };
 
   const signOut = async ()=>{
-    if(authUser==="guest"){
-      setAuthUser(null);
-      setSaved(null);
-    } else {
-      await SB.auth.signOut();
-    }
+    if(window.SB) try{ await SB.auth.signOut(); }catch{}
+    setAuthUser(null);
+    setSaved(null);
   };
 
-  // Loading state
-  if(authUser===undefined || profileLoading){
-    return (
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",
-                   height:"100vh",background:"#2a0e1a",flexDirection:"column",gap:16}}>
-        <Icon name="sparkle" size={40}/>
-        <div style={{fontFamily:"Silkscreen,monospace",color:"var(--gold)",fontSize:13,letterSpacing:".06em"}}>
-          Loading your quest…
-        </div>
-      </div>
-    );
-  }
-
-  const userId = (authUser && authUser!=="guest") ? authUser.id : null;
-  const isGuest = authUser==="guest";
+  const userId = authUser?.id || null;
 
   return (
     <>
-      {!authUser
-        ? <Auth onAuth={handleAuth}/>
-        : !saved
-          ? <Onboarding onComplete={completeOnboarding}/>
-          : <Dashboard profile={saved.profile} habits={saved.habits}
-                       onReset={reset} userId={userId} isGuest={isGuest} onSignOut={signOut}/>
+      {!saved
+        ? <Onboarding onComplete={completeOnboarding}/>
+        : <Dashboard profile={saved.profile} habits={saved.habits}
+                     onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
     </>

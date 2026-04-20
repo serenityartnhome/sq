@@ -66,13 +66,30 @@ function Onboarding({ onComplete }){
     setCustomDraft(""); setCustomKind("sparkle"); setShowCustomInput(false);
   };
 
+  const [email, setEmail]       = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [authError, setAuthError] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+
   const selCount = selected.size;
   const canSubmit = name.trim().length > 0 && selCount >= 3 && selCount <= 8;
 
-  const submit = () => {
+  const submitGuest = () => {
     if(!canSubmit) return;
     const chosen = habits.filter(h=>selected.has(h.id));
-    onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen });
+    onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen }, null);
+  };
+
+  const submitWithAccount = async () => {
+    if(!canSubmit) return;
+    setAuthError("");
+    if(!email.trim()){ setAuthError("Please enter your email"); return; }
+    if(password.length < 6){ setAuthError("Password must be at least 6 characters"); return; }
+    setSubmitting(true);
+    const chosen = habits.filter(h=>selected.has(h.id));
+    await onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen },
+                     { email:email.trim(), password });
+    setSubmitting(false);
   };
 
   return (
@@ -277,16 +294,45 @@ function Onboarding({ onComplete }){
           </div>
           </div>{/* end cursor-section */}
 
-          <div style={{marginTop:14,display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
-            <button className="btn-primary" disabled={!canSubmit} onClick={submit} style={{width:"100%"}}>
-              <Icon name="sparkle" size={18}/> Begin My Quest <Icon name="sparkle" size={18}/>
+          <div className="div-sparkle" style={{marginTop:18}}>✦ Save Your Progress ✦</div>
+
+          <div className="field" style={{marginTop:10}}>
+            <label>Email <span style={{fontSize:10,color:"var(--plum-soft)"}}>(to save your progress)</span></label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+              placeholder="your@email.com"/>
+          </div>
+          <div className="field">
+            <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 6 characters)</span></label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+              placeholder="••••••••"/>
+          </div>
+
+          {authError && (
+            <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,
+                         fontFamily:"Silkscreen,monospace"}}>
+              {authError}
+            </div>
+          )}
+
+          <div style={{marginTop:10,display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
+            <button className="btn-primary" disabled={!canSubmit||submitting} onClick={submitWithAccount} style={{width:"100%"}}>
+              <Icon name="sparkle" size={18}/>
+              {submitting ? "Creating account…" : "Begin My Quest & Save Progress"}
+              <Icon name="sparkle" size={18}/>
+            </button>
+            <button onClick={submitGuest} disabled={!canSubmit}
+              style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",
+                      color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",fontSize:11,
+                      padding:"8px",cursor:canSubmit?"pointer":"not-allowed",borderRadius:4,
+                      letterSpacing:".04em"}}>
+              Continue as Guest (no cloud save)
             </button>
             <div style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen, monospace",
                          textTransform:"uppercase",letterSpacing:".04em"}}>
               {selCount < 3 ? `Pick ${3-selCount} more habit${3-selCount===1?"":"s"} to begin` :
                selCount > 8 ? "Pick at most 8 habits" :
                name.trim().length===0 ? "Enter your name to continue" :
-               "Your data is private & secure"}
+               "✦ You're ready to begin ✦"}
             </div>
           </div>
         </div>
