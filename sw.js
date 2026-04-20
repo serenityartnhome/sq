@@ -1,14 +1,17 @@
-const CACHE = "serenity-quest-v1";
+const CACHE = "serenity-quest-v3";
 const ASSETS = [
   "/",
   "/index.html",
   "/styles.css",
   "/app.jsx",
   "/manifest.json",
+  "/supabase-client.js",
   "/components/Primitives.jsx",
   "/components/Zodiac.jsx",
+  "/components/Auth.jsx",
   "/components/Onboarding.jsx",
   "/components/Calendar.jsx",
+  "/components/Community.jsx",
   "/components/Dashboard.jsx",
   "/components/Tweaks.jsx",
 ];
