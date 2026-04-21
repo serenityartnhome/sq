@@ -471,6 +471,7 @@ body{
 .cursor-pick-btn:hover{background:var(--blush-soft);}
 .btn-pink{background:#f5c9cc !important;border-color:#e39aa0 !important;color:#5c2a35 !important;}
 .btn-pink:hover:not(:disabled){background:#fbe0e2 !important;border-color:#e39aa0 !important;}
+.btn-white-cancel{background:#fff !important;}
 .btn-google-pixel{
   width:100%;background:#fff;color:#3c4043;
   border:3px solid #3c4043;
@@ -1235,18 +1236,19 @@ body{
   .rail-btn{
     flex:1;
     width:auto;
-    height:52px;
+    aspect-ratio:1/1;
     min-width:0;
-    font-size:9px;
-    flex-direction:row;
+    font-size:8px;
+    flex-direction:column !important;
     align-items:center;
-    gap:5px;
+    justify-content:center;
+    gap:3px;
     border:3px solid var(--plum) !important;
     box-shadow:3px 3px 0 rgba(0,0,0,.3), inset 0 0 0 2px var(--gold) !important;
     background:var(--parchment);
   }
   .rail-btn.active{ background:var(--blush) !important; border-color:var(--rose) !important; }
-  .rail-btn img{ width:28px;height:28px; }
+  .rail-btn img{ width:26px;height:26px; }
 
   /* ── Onboarding ── */
   .hero-title{ font-size:clamp(18px,6vw,28px);gap:8px;margin:10px 0 4px; }

@@ -1231,25 +1231,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {label:"Reset Password", onClick:async()=>{ setResetPwStatus(null); const sess=JSON.parse(localStorage.getItem("sq_sb_session")||"null"); const email=sess?.user?.email||null; if(!email){setResetPwStatus("error");return;} const{error}=await window.SB.auth.resetPasswordForEmail(email); setResetPwStatus(error?"error":"sent"); }},
                 {label:"Log Out", onClick:()=>{ setShowPetMenu(false); onSignOut(); }},
               ].map(({label,onClick})=>(
-                <button key={label} onClick={onClick}
-                  style={{width:"100%",background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
-                          fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
-                          textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",
-                          borderRadius:0}}>
+                <button key={label} onClick={onClick} className="btn-primary"
+                  style={{width:"100%",fontSize:12}}>
                   {label}
                 </button>
               ))}
               <button onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}
                 style={{width:"100%",background:"#8b1a1a",color:"#fff",border:"2px solid #6b0e0e",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
-                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(0,0,0,.4)",
-                        borderRadius:2}}>
+                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(0,0,0,.4)"}}>
                 Reset Everything
               </button>
-              <button onClick={()=>setShowPetMenu(false)}
-                style={{width:"100%",background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
-                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
-                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",borderRadius:0}}>
+              <button onClick={()=>setShowPetMenu(false)} className="btn-primary btn-white-cancel"
+                style={{width:"100%",fontSize:12}}>
                 Cancel
               </button>
             </div>
