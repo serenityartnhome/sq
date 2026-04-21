@@ -72,9 +72,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [streaks, setStreaks] = React.useState(()=>{
     try { return JSON.parse(localStorage.getItem("sq_streaks")||"{}"); } catch{ return {}; }
   });
-  const [dayCompleted, setDayCompleted] = React.useState(()=>{
-    try { return !!JSON.parse(localStorage.getItem("sq_history")||"{}")[today]; } catch{ return false; }
-  });
   const [customHabits, setCustomHabits] = React.useState(()=>{
     try { return JSON.parse(localStorage.getItem("sq_custom_habits")||"[]"); } catch{ return []; }
   });
@@ -103,9 +100,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [powerupsUnlocked, setPowerupsUnlocked] = React.useState(()=>!!localStorage.getItem("sq_powerups_unlocked"));
   const [showDiaryLocked, setShowDiaryLocked] = React.useState(false);
   const [showPhotoLocked, setShowPhotoLocked] = React.useState(false);
-  const [showPowerupsLocked, setShowPowerupsLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
+  const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [feedbackMsg, setFeedbackMsg] = React.useState("");
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
@@ -189,10 +186,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     try {
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
       let count = 0; const d = new Date();
-      while(hist[d.toISOString().slice(0,10)]){ count++; d.setDate(d.getDate()-1); }
+      while(true){
+        const k = d.toISOString().slice(0,10);
+        if(!hist[k] || !hist[k].done) break;
+        count++; d.setDate(d.getDate()-1);
+      }
       return count;
     } catch{ return 0; }
-  }, [dayCompleted]);
+  }, [completed, powerups, gratitude, diaryEntry]);
 
   const isHatched = hatched || daysInFlow >= 3;
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
@@ -245,44 +246,80 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     setActiveHabitIds(ids=>{ const n=ids.filter(x=>x!==id); localStorage.setItem("sq_active_habits",JSON.stringify(n)); return n; });
   };
 
-  const completeDay = () => {
-    const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-    const yd = new Date(); yd.setDate(yd.getDate()-1);
-    const yesterdayKey = yd.toISOString().slice(0,10);
-    const yesterdayCompleted = new Set(hist[yesterdayKey]?.completed||[]);
+  const supabasePushTimer = React.useRef(null);
 
-    const newStreaks = {};
-    activeHabits.forEach(h=>{
-      if(completed.has(h.id)){
-        newStreaks[h.id] = yesterdayCompleted.has(h.id) ? (streaks[h.id]||0)+1 : 1;
-      } else {
-        newStreaks[h.id] = 0;
-      }
-    });
-    setStreaks(newStreaks);
-    setDayCompleted(true);
-    localStorage.setItem("sq_streaks", JSON.stringify(newStreaks));
-    localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...completed]}));
+  // Auto-save to localStorage history on any activity change
+  React.useEffect(()=>{
     try {
-      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention };
+      const habitsDone = activeHabits.filter(h=>completed.has(h.id)).length;
+      const wDone = gratitude.some(x=>x.trim()) || diaryEntry.trim().length > 0 ? 1 : 0;
+      const pDone = powerups.size > 0 ? 1 : 0;
+      const dc = habitsDone + wDone + pDone;
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention, done: dc >= 3 };
       localStorage.setItem("sq_history", JSON.stringify(hist));
-      // Check if this completes day 3 — trigger hatch
-      let days = 0; const dd = new Date();
-      while(hist[dd.toISOString().slice(0,10)]){ days++; dd.setDate(dd.getDate()-1); }
-      if(days >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
-      if(days >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
-      if(days >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); }
-      if(days >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
+      localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...completed]}));
     } catch{}
-    if(userId && window.SB){
+  }, [completed, mood, gratitude, powerups, diaryEntry, intention, diaryPhoto]);
+
+  // Debounced Supabase push
+  React.useEffect(()=>{
+    if(!userId || !window.SB) return;
+    if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current);
+    supabasePushTimer.current = setTimeout(()=>{
       window.SB.from("daily_data").upsert({
         user_id:userId, date:today, mood, energy,
         completed:[...completed], powerups:[...powerups],
         gratitude, diary:diaryEntry
       }).then(()=>{});
+    }, 3000);
+    return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
+  }, [completed, mood, gratitude, powerups, diaryEntry]);
+
+  // Recalculate habit streaks once per day on app open
+  React.useEffect(()=>{
+    try {
+      if(localStorage.getItem("sq_streaks_date") === today) return;
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      const yd = new Date(); yd.setDate(yd.getDate()-1);
+      const yesterdayKey = yd.toISOString().slice(0,10);
+      const yesterdayData = hist[yesterdayKey];
+      const newStreaks = {};
+      [...PRESET_HABITS, ...customHabits].forEach(h=>{
+        if((yesterdayData?.completed||[]).includes(h.id)){
+          let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
+          while(true){
+            const k = d.toISOString().slice(0,10);
+            if(!(hist[k]?.completed||[]).includes(h.id)) break;
+            count++; d.setDate(d.getDate()-1);
+          }
+          newStreaks[h.id] = count;
+        } else {
+          newStreaks[h.id] = 0;
+        }
+      });
+      setStreaks(newStreaks);
+      localStorage.setItem("sq_streaks", JSON.stringify(newStreaks));
+      localStorage.setItem("sq_streaks_date", today);
+    } catch{}
+  }, []);
+
+  // Unlock checks when daysInFlow changes
+  React.useEffect(()=>{
+    if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
+    if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
+    if(daysInFlow >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); }
+    if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
+  }, [daysInFlow]);
+
+  // Celebration fires once when doneCount first hits 3 today
+  React.useEffect(()=>{
+    if(localStorage.getItem("sq_celebrated") === today) return;
+    if(doneCount >= 3){
+      localStorage.setItem("sq_celebrated", today);
+      setTimeout(()=>setCelebrate(true), 800);
     }
-    setCelebrate(true);
-  };
+  }, [doneCount]);
 
   const [showGratShare, setShowGratShare] = React.useState(false);
   const [shareStatus, setShareStatus] = React.useState(null);
@@ -411,7 +448,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
           <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>Community
         </button>
-        <button className="rail-btn" onClick={()=>{ setFeedbackMsg(""); setFeedbackStatus(null); setShowFeedback(true); }}>
+        <button className="rail-btn" onClick={()=>setShowShopPrompt(true)}>
           <Icon name="shop" size={54}/>Shop
         </button>
       </div>
@@ -638,84 +675,99 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                      display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             <Icon name="sparkle" size={18}/>Power-Ups<Icon name="sparkle" size={18}/>
           </h2>
-          <p style={{textAlign:"center",fontSize:11,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
-                     marginBottom:8,marginTop:0,lineHeight:1.5}}>
-            Small rituals that raise your energy and earn bonus XP.{(!powerupsUnlocked&&daysInFlow<2)&&<span style={{color:"var(--rose)"}}> Unlocks Day 2.</span>}
-          </p>
 
-          {showPowerupPicker && (
-            <div className="pu-picker-panel">
-              <div className="pu-picker-title">Choose your power-ups</div>
+          {(!powerupsUnlocked && daysInFlow < 2) ? (
+            <div className="pu-picker-panel" style={{marginBottom:0}}>
+              <p style={{textAlign:"center",fontSize:12,color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",
+                         lineHeight:1.6,marginBottom:10,marginTop:0}}>
+                Power-ups are the little things that give <em>you</em> energy — a walk, a cosy ritual, a moment of joy. They're personal to you. Pick your favourites below and they'll activate tomorrow when you return. ✦ You can change them any time.
+              </p>
               <div className="pu-picker-grid">
                 {[...POWERUPS, ...customPowerups].map(p=>{
                   const on = activePowerupIds.includes(p.id);
                   return (
-                    <button key={p.id}
-                      className={"pu-pick-btn "+(on?"on":"")}
-                      onClick={()=>setActivePowerupIds(ids=>
-                        on ? ids.filter(x=>x!==p.id) : [...ids, p.id]
-                      )}>
+                    <button key={p.id} className={"pu-pick-btn "+(on?"on":"")}
+                      onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
                       <HabitIcon kind={p.kind||"sparkle"} size={20}/>
                       <span>{p.name}</span>
-                      {p.custom && <span className="pu-remove" onClick={e=>{e.stopPropagation();setCustomPowerups(cs=>cs.filter(c=>c.id!==p.id));setActivePowerupIds(ids=>ids.filter(x=>x!==p.id));}}>✕</span>}
                     </button>
                   );
                 })}
               </div>
-              <div className="pu-custom-form">
-                <div className="pu-custom-title">✦ Create Custom</div>
-                <div className="pu-custom-row">
-                  <input value={newPuName} onChange={e=>setNewPuName(e.target.value)}
-                    placeholder="Name…" maxLength={20} className="pu-add-input" style={{flex:1}}/>
-                  <label className="pu-xp-label">XP
-                    <input type="number" min={1} max={99} value={newPuXp}
-                      onChange={e=>setNewPuXp(Math.max(1,Math.min(99,Number(e.target.value)||1)))}
-                      className="pu-xp-input"/>
-                  </label>
-                </div>
-                <div className="pu-icon-grid">
-                  {ALL_ICONS.map(ic=>(
-                    <button key={ic} className={"pu-icon-btn"+(newPuKind===ic?" on":"")}
-                      onClick={()=>setNewPuKind(ic)} title={ic}>
-                      <img src={`assets/icon-${ic}.png?v=5`} alt={ic}
-                           style={{width:20,height:20,imageRendering:"pixelated"}}/>
-                    </button>
-                  ))}
-                </div>
-                <button className="pu-add-btn" disabled={!newPuName.trim()}
-                  onClick={()=>{
-                    const id="custom-"+Date.now();
-                    const p={id,name:newPuName.trim(),kind:newPuKind,xp:newPuXp,custom:true};
-                    setCustomPowerups(cs=>[...cs,p]);
-                    setActivePowerupIds(ids=>[...ids,id]);
-                    setNewPuName(""); setNewPuXp(10); setNewPuKind("sparkle");
-                  }}>+ Add Power-Up</button>
-              </div>
+              <p style={{textAlign:"center",fontSize:10,color:"var(--rose)",fontFamily:"Silkscreen,monospace",
+                         marginTop:8,marginBottom:0,textTransform:"uppercase",letterSpacing:".04em"}}>
+                ✦ Activates Day 2 ✦
+              </p>
             </div>
+          ) : (
+            <>
+              <p style={{textAlign:"center",fontSize:11,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
+                         marginBottom:8,marginTop:0,lineHeight:1.5}}>
+                Little rituals that raise your energy and earn bonus XP — personal to you.
+              </p>
+              {showPowerupPicker && (
+                <div className="pu-picker-panel">
+                  <div className="pu-picker-title">Choose your power-ups</div>
+                  <div className="pu-picker-grid">
+                    {[...POWERUPS, ...customPowerups].map(p=>{
+                      const on = activePowerupIds.includes(p.id);
+                      return (
+                        <button key={p.id} className={"pu-pick-btn "+(on?"on":"")}
+                          onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
+                          <HabitIcon kind={p.kind||"sparkle"} size={20}/>
+                          <span>{p.name}</span>
+                          {p.custom && <span className="pu-remove" onClick={e=>{e.stopPropagation();setCustomPowerups(cs=>cs.filter(c=>c.id!==p.id));setActivePowerupIds(ids=>ids.filter(x=>x!==p.id));}}>✕</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="pu-custom-form">
+                    <div className="pu-custom-title">✦ Create Custom</div>
+                    <div className="pu-custom-row">
+                      <input value={newPuName} onChange={e=>setNewPuName(e.target.value)}
+                        placeholder="Name…" maxLength={20} className="pu-add-input" style={{flex:1}}/>
+                      <label className="pu-xp-label">XP
+                        <input type="number" min={1} max={99} value={newPuXp}
+                          onChange={e=>setNewPuXp(Math.max(1,Math.min(99,Number(e.target.value)||1)))}
+                          className="pu-xp-input"/>
+                      </label>
+                    </div>
+                    <div className="pu-icon-grid">
+                      {ALL_ICONS.map(ic=>(
+                        <button key={ic} className={"pu-icon-btn"+(newPuKind===ic?" on":"")}
+                          onClick={()=>setNewPuKind(ic)} title={ic}>
+                          <img src={`assets/icon-${ic}.png?v=5`} alt={ic} style={{width:20,height:20,imageRendering:"pixelated"}}/>
+                        </button>
+                      ))}
+                    </div>
+                    <button className="pu-add-btn" disabled={!newPuName.trim()}
+                      onClick={()=>{
+                        const id="custom-"+Date.now();
+                        const p={id,name:newPuName.trim(),kind:newPuKind,xp:newPuXp,custom:true};
+                        setCustomPowerups(cs=>[...cs,p]);
+                        setActivePowerupIds(ids=>[...ids,id]);
+                        setNewPuName(""); setNewPuXp(10); setNewPuKind("sparkle");
+                      }}>+ Add Power-Up</button>
+                  </div>
+                </div>
+              )}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                {[...POWERUPS,...customPowerups].filter(p=>activePowerupIds.includes(p.id)).map(p=>(
+                  <button key={p.id} className={"power "+(powerups.has(p.id)?"active":"")}
+                          onClick={()=>togglePower(p.id)}>
+                    <HabitIcon kind={p.kind||"sparkle"} size={32}/>
+                    <span className="name">{p.name}</span>
+                    <span className="xp">+{p.xp} XP</span>
+                  </button>
+                ))}
+                <button className="power pu-edit-tile" onClick={()=>setShowPowerupPicker(v=>!v)}>
+                  <span style={{fontSize:22,lineHeight:1}}>✎</span>
+                  <span className="name">Edit</span>
+                </button>
+              </div>
+            </>
           )}
 
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,
-                       ...(!powerupsUnlocked&&daysInFlow<2?{opacity:.45,pointerEvents:"none",filter:"grayscale(30%)"}:{})}}>
-            {[...POWERUPS,...customPowerups].filter(p=>activePowerupIds.includes(p.id)).map(p=>(
-              <button key={p.id} className={"power "+(powerups.has(p.id)?"active":"")}
-                      onClick={()=>togglePower(p.id)}>
-                <HabitIcon kind={p.kind||"sparkle"} size={32}/>
-                <span className="name">{p.name}</span>
-                <span className="xp">+{p.xp} XP</span>
-              </button>
-            ))}
-            <button className="power pu-edit-tile" onClick={()=>setShowPowerupPicker(v=>!v)}>
-              <span style={{fontSize:22,lineHeight:1}}>✎</span>
-              <span className="name">Edit</span>
-            </button>
-          </div>
-
-          <div style={{marginTop:"auto",paddingTop:10,flexShrink:0}}>
-            <button className="btn-primary" disabled={!canComplete}
-                    onClick={completeDay} style={{width:"100%"}}>
-              Complete Today <Icon name="sparkle" size={16}/>
-            </button>
-          </div>
         </div>
 
         {/* BOTTOM LEFT: Emotions + Gratitude / Diary */}
@@ -818,6 +870,29 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           )}
         </div>
       </div>
+
+      {showShopPrompt && (
+        <div className="coming-soon-overlay" onClick={()=>setShowShopPrompt(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
+            <div className="coming-soon-lock"><Icon name="shop" size={40}/></div>
+            <h3 className="coming-soon-title">Visit Our Shop</h3>
+            <p className="coming-soon-body">Discover feng shui treasures to elevate your space and energy.</p>
+            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="coming-soon-btn" onClick={()=>{ window.open("https://www.serenityartnhome.com/","_blank"); setShowShopPrompt(false); }}>
+                Visit Shop ✦
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--rose)"}}
+                onClick={()=>{ setShowShopPrompt(false); setFeedbackMsg(""); setFeedbackStatus(null); setShowFeedback(true); }}>
+                Send us a Message
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowShopPrompt(false)}>Stay Here</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showFeedback && (
         <div className="coming-soon-overlay" onClick={()=>{ if(feedbackStatus!=="sending") setShowFeedback(false); }}>
