@@ -110,7 +110,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [mood, setMood] = React.useState("neutral");
-  const [celebrating, setCelebrating] = React.useState(false);
+  const [celebrating, setCelebrating] = React.useState(()=>localStorage.getItem("sq_happy_day")===new Date().toISOString().slice(0,10));
+  const celebrateFlashTimer = React.useRef(null);
   const [showDiary, setShowDiary] = React.useState(false);
   const [diaryEntry, setDiaryEntry] = React.useState("");
   const [diaryPhoto, setDiaryPhoto] = React.useState("");
@@ -222,12 +223,22 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   },[habits,customHabits]);
   const activeHabits = React.useMemo(()=>allHabits.filter(h=>activeHabitIds.includes(h.id)),[allHabits,activeHabitIds]);
 
-  const toggleHabit = (id) => setCompleted(prev=>{
-    const n=new Set(prev); n.has(id)?n.delete(id):n.add(id);
-    localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...n]}));
-    return n;
-  });
-  const togglePower = (id) => setPowerups(prev=>{ const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n; });
+  const flashHappy = () => {
+    if(localStorage.getItem("sq_happy_day") === today) return;
+    setCelebrating(true);
+    if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
+    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(false), 800);
+  };
+
+  const toggleHabit = (id) => {
+    flashHappy();
+    setCompleted(prev=>{
+      const n=new Set(prev); n.has(id)?n.delete(id):n.add(id);
+      localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...n]}));
+      return n;
+    });
+  };
+  const togglePower = (id) => { flashHappy(); setPowerups(prev=>{ const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n; }); };
   const setGrat = (i,v) => setGratitude(g=>{ const n=[...g]; n[i]=v; return n; });
 
   const toggleActiveHabit = (id) => setActiveHabitIds(prev=>{
@@ -401,14 +412,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
 
-  // Celebration fires once when doneCount first hits 3 today
+  // Once 3 things done — baby stays happy all day, confetti fires once
   React.useEffect(()=>{
-    if(localStorage.getItem("sq_celebrated") === today) return;
     if(doneCount >= 3){
-      localStorage.setItem("sq_celebrated", today);
+      if(localStorage.getItem("sq_happy_day") !== today){
+        localStorage.setItem("sq_happy_day", today);
+        if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
+      }
       setCelebrating(true);
-      setTimeout(()=>setCelebrate(true), 800);
-      setTimeout(()=>setCelebrating(false), 3500);
+      if(localStorage.getItem("sq_celebrated") !== today){
+        localStorage.setItem("sq_celebrated", today);
+        setTimeout(()=>setCelebrate(true), 800);
+      }
     }
   }, [doneCount]);
 
