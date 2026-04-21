@@ -235,5 +235,85 @@ function ResetPassword({ accessToken, onDone }){
   );
 }
 
+function EmailConfirmed({ onContinue }){
+  const [isIOS] = React.useState(()=> /iphone|ipad|ipod/i.test(navigator.userAgent));
+  const [isAndroid] = React.useState(()=> /android/i.test(navigator.userAgent));
+  const [showInstructions, setShowInstructions] = React.useState(false);
+
+  return (
+    <div className="app-shell">
+      <div className="scene-img scene-onboarding"/>
+      <div className="scene-veil"/>
+      <div className="onboard-safe-top"/>
+
+      <h1 className="hero-title">
+        <Icon name="sparkle" size={28}/>
+        Serenity Quest
+        <Icon name="sparkle" size={28}/>
+      </h1>
+
+      <div style={{display:"flex",justifyContent:"center",padding:"0 16px",marginTop:24}}>
+        <div className="panel" style={{maxWidth:420,width:"100%",textAlign:"center"}}>
+
+          <div style={{fontSize:48,marginBottom:8}}>🌸</div>
+          <h2 style={{fontSize:18,color:"var(--gold)",marginBottom:6,fontFamily:"Silkscreen,monospace",letterSpacing:".04em"}}>
+            You're in!
+          </h2>
+          <p style={{fontSize:13,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",lineHeight:1.7,marginBottom:24}}>
+            Your email is confirmed. Welcome to your Serenity Quest — your 21-day journey starts now. ✦
+          </p>
+
+          <div style={{background:"rgba(201,127,165,.12)",border:"1px solid var(--rose)",borderRadius:8,padding:"16px",marginBottom:20}}>
+            <p style={{fontSize:13,fontFamily:"Silkscreen,monospace",color:"var(--plum)",marginBottom:10,lineHeight:1.5}}>
+              ✦ Add to your Home Screen
+            </p>
+            <p style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",lineHeight:1.6,marginBottom:12}}>
+              Serenity Quest works best as an app on your phone — no app store needed.
+            </p>
+
+            {!showInstructions ? (
+              <button className="coming-soon-btn" onClick={()=>setShowInstructions(true)} style={{width:"100%"}}>
+                Show Me How ✦
+              </button>
+            ) : (
+              <div style={{textAlign:"left"}}>
+                {isIOS && (
+                  <ol style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",lineHeight:2,paddingLeft:18,margin:0}}>
+                    <li>Tap the <strong>Share</strong> button at the bottom of Safari <span style={{fontSize:16}}>⎙</span></li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                    <li>Tap <strong>Add</strong> in the top right</li>
+                    <li>Open <strong>Serenity Quest</strong> from your home screen ✦</li>
+                  </ol>
+                )}
+                {isAndroid && (
+                  <ol style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",lineHeight:2,paddingLeft:18,margin:0}}>
+                    <li>Tap the <strong>⋮ menu</strong> in Chrome (top right)</li>
+                    <li>Tap <strong>"Add to Home screen"</strong></li>
+                    <li>Tap <strong>Add</strong></li>
+                    <li>Open <strong>Serenity Quest</strong> from your home screen ✦</li>
+                  </ol>
+                )}
+                {!isIOS && !isAndroid && (
+                  <div style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",lineHeight:1.7}}>
+                    On your phone, open this page in <strong>Safari (iPhone)</strong> or <strong>Chrome (Android)</strong> and use the browser menu to <strong>"Add to Home Screen"</strong>.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <button className="btn-primary" onClick={onContinue} style={{width:"100%"}}>
+            <Icon name="sparkle" size={16}/>
+            Continue to My Quest
+            <Icon name="sparkle" size={16}/>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 window.Auth = Auth;
 window.ResetPassword = ResetPassword;
+window.EmailConfirmed = EmailConfirmed;

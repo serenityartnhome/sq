@@ -40,6 +40,10 @@ function App(){
     const p = parseHashParams();
     return p.type === "recovery" && p.access_token ? p.access_token : null;
   });
+  const [showConfirmed, setShowConfirmed] = React.useState(()=>{
+    const p = parseHashParams();
+    return p.type === "signup" && !!p.access_token;
+  });
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
     petMood: window.__SQ_DEFAULTS.petMood,
@@ -194,11 +198,13 @@ function App(){
     <>
       {recoveryToken
         ? <ResetPassword accessToken={recoveryToken} onDone={()=>{ window.location.hash=""; setRecoveryToken(null); }}/>
-        : !saved
-          ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
-          : <Dashboard profile={saved.profile} habits={saved.habits}
-                       onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
-                       onUpdateProfile={handleUpdateProfile}/>
+        : showConfirmed
+          ? <EmailConfirmed onContinue={()=>setShowConfirmed(false)}/>
+          : !saved
+            ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
+            : <Dashboard profile={saved.profile} habits={saved.habits}
+                         onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
+                         onUpdateProfile={handleUpdateProfile}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
     </>
