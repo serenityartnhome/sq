@@ -113,6 +113,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [mood, setMood] = React.useState("neutral");
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
+  const isFlashing = React.useRef(false);
   const [showDiary, setShowDiary] = React.useState(false);
   const [diaryEntry, setDiaryEntry] = React.useState("");
   const [diaryPhoto, setDiaryPhoto] = React.useState("");
@@ -234,9 +235,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const activeHabits = React.useMemo(()=>allHabits.filter(h=>activeHabitIds.includes(h.id)),[allHabits,activeHabitIds]);
 
   const flashHappy = () => {
+    isFlashing.current = true;
     setCelebrating(true);
     if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
-    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(doneCountRef.current >= 3), 2000);
+    celebrateFlashTimer.current = setTimeout(()=>{
+      isFlashing.current = false;
+      setCelebrating(doneCountRef.current >= 3);
+    }, 2000);
   };
 
   const toggleHabit = (id) => {
@@ -433,7 +438,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         setTimeout(()=>setCelebrate(true), 800);
       }
     } else {
-      setCelebrating(false);
+      if(!isFlashing.current) setCelebrating(false);
     }
   }, [doneCount]);
 
