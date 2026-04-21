@@ -59,9 +59,60 @@ function TopBarClock(){
   );
 }
 
+const TIPS = {
+  days_flow: {
+    icon:"flame", title:"Days in Flow ✦",
+    body: "Your Days in Flow tracks how many days in a row you've completed your Daily Quest. The longer your streak, the more Serenity Quest opens up — new features unlock, your pet grows, and your energy deepens. Don't break the chain! ✦"
+  },
+  calendar: {
+    icon:"calendar", title:"Your Journey Calendar ✦",
+    body: "Everything you do is saved here. Every day you complete your quest, your mood, energy, habits, gratitude, and journal entries are recorded. Come back any time to see patterns, re-read past journal entries, and watch how far you've come. ✦"
+  },
+  community: {
+    icon:"earth", title:"The Gratitude Wall ✦",
+    body: "A shared space where Serenity Quest adventurers post what they're grateful for each day. Spread positivity, be inspired by others, and know you're not on this journey alone. ✦"
+  },
+  intention: {
+    icon:"lotus", title:"Daily Intention ✦",
+    body: "Setting an intention focuses your mind on what matters most today. It's a micro-commitment to yourself — a single guiding word to carry through your day. Choose one and let it anchor you. ✦"
+  },
+  pet: {
+    icon:"lotus-bud", title:"Your Zodiac Companion ✦",
+    body: "This is your living zodiac companion — a reflection of your consistency and energy. Show up every day and watch your pet hatch, grow, and evolve. Neglect your quest and your pet will feel it too. Take care of yourself, and they'll thrive. ✦"
+  },
+  energy: {
+    icon:"energy-heart", title:"Your Energy ✦",
+    body: "Your Energy bar fills as you complete habits, power-ups, and gratitude. Think of it as your life force — built daily through small consistent actions. Visit the Calendar tab at any time to see your energy history and track how it grows across your journey. ✦"
+  },
+  mood: {
+    icon:"heart", title:"Your Mood is Recorded ✦",
+    body: "Every time you check in with how you're feeling, it's saved to your journey. Over time you'll be able to see emotional patterns — the highs, the lows, and the shifts. Visit the Calendar tab to look back at your mood across any day, week, or month. ✦"
+  },
+  gratitude: {
+    icon:"sparkle", title:"The Practice of Gratitude ✦",
+    body: "Gratitude is one of the most scientifically proven practices for wellbeing. Studies show that writing down what you're grateful for daily rewires your brain toward positivity, reduces cortisol, improves sleep, and builds emotional resilience. Make this your non-negotiable daily ritual. ✦"
+  },
+  first_quest: {
+    icon:"flame", title:"First Quest Complete! ✦",
+    body: "You did it — your first quest is ticked! 🎉 Every habit you complete builds your streak and fills your energy. Each habit tracks its own streak, and the longer you keep them going the more you'll be celebrated. Complete at least 3 quests today to earn your Day in Flow. Keep going! ✦"
+  },
+};
+
 function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail }){
   const today = new Date().toISOString().slice(0,10);
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
+
+  const [activeTip, setActiveTip] = React.useState(null);
+  const shownTips = React.useRef(new Set(
+    Object.keys(TIPS).filter(k=>localStorage.getItem("sq_tip_"+k))
+  ));
+  const showTip = (key) => {
+    if(shownTips.current.has(key)) return;
+    shownTips.current.add(key);
+    localStorage.setItem("sq_tip_"+key,"1");
+    setActiveTip(key);
+  };
+  const dismissTip = () => setActiveTip(null);
 
   const [completed, setCompleted] = React.useState(()=>{
     try {
@@ -277,13 +328,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const toggleHabit = (id) => {
     setCompleted(prev=>{
       const n=new Set(prev);
-      if(n.has(id)){ n.delete(id); } else { n.add(id); flashHappy(); }
+      if(n.has(id)){ n.delete(id); } else {
+        n.add(id); flashHappy();
+        if(n.size === 1) showTip("first_quest");
+      }
       localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...n]}));
       return n;
     });
   };
   const togglePower = (id) => setPowerups(prev=>{ const n=new Set(prev); if(n.has(id)){ n.delete(id); } else { n.add(id); flashHappy(); } return n; });
-  const setGrat = (i,v) => setGratitude(g=>{ const n=[...g]; n[i]=v; return n; });
+  const setGrat = (i,v) => {
+    if(v.length === 1 && gratitude[i].length === 0) showTip("gratitude");
+    setGratitude(g=>{ const n=[...g]; n[i]=v; return n; });
+  };
 
   const toggleActiveHabit = (id) => setActiveHabitIds(prev=>{
     const next = prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id];
@@ -549,7 +606,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       <div className="scene-veil"/>
 
       <div className="top-bar">
-        <div className="streak"><Icon name="flame" size={22}/> {(()=>{
+        <div className="streak" style={{cursor:"pointer"}} onClick={()=>showTip("days_flow")}><Icon name="flame" size={22}/> {(()=>{
           try {
             const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
             let count = 0;
@@ -587,7 +644,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="home"?"active":"")} onClick={()=>setTab("home")}>
           <Icon name="home" size={54}/>Home
         </button>
-        <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
+        <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>{ setTab("calendar"); showTip("calendar"); }}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
         <button className="rail-btn" style={{opacity:.85}} onClick={()=>setShowFriendsSoon(true)}>
@@ -598,7 +655,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           </div>
           Friends
         </button>
-        <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
+        <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>{ setTab("community"); showTip("community"); }}>
           <div style={{position:"relative",display:"inline-block"}}>
             <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>
             {isAdmin && pendingReports > 0 && (
@@ -655,7 +712,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Top spacer — pushes intention + monkey down to center */}
             <div style={{flex:1}}/>
             {/* Today's Intention sits above the monkey */}
-            <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>setShowIntentPicker(v=>!v)}>
+            <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>{ showTip("intention"); setShowIntentPicker(v=>!v); }}>
               <div className="intention-side-label">Today's Intention</div>
               <div className={"intention-side-word"+(intention?"":" unset")}>
                 {intention || "Set intention"}
@@ -686,7 +743,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>setShowPetMenu(true)} style={{cursor:"pointer"}} title="My account">
+            <div className="pet-cloud-stage" onClick={()=>{ showTip("pet"); setShowPetMenu(true); }} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
@@ -723,7 +780,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Bottom spacer — equal to top spacer, keeps content centered */}
             <div style={{flex:1}}/>
             {/* Energy bar pinned to bottom */}
-            <div className="pet-energy-bar">
+            <div className="pet-energy-bar" onClick={()=>showTip("energy")} style={{cursor:"pointer"}}>
               <div className="pet-energy-header">
                 <Icon name="energy-heart" size={15}/>
                 <span className="pet-energy-label">Energy</span>
@@ -1028,7 +1085,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               {/* Top half: How are you feeling */}
               <div className="emotions-half">
                 <div className="div-sparkle emotions-heading" style={{marginTop:0}}>✦ How Are You Feeling Today? ✦</div>
-                <MoodPicker value={mood} onChange={setMood}/>
+                <MoodPicker value={mood} onChange={m=>{ setMood(m); showTip("mood"); }}/>
               </div>
 
               {/* Bottom half: Grateful (left) + Diary fills full height (right) */}
@@ -1153,6 +1210,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {activeTip && TIPS[activeTip] && (
+        <div className="coming-soon-overlay" onClick={dismissTip}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
+            <div className="coming-soon-lock">
+              <Icon name={TIPS[activeTip].icon} size={42}/>
+            </div>
+            <h3 className="coming-soon-title">{TIPS[activeTip].title}</h3>
+            <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8}}>
+              {TIPS[activeTip].body}
+            </p>
+            <button className="coming-soon-btn" onClick={dismissTip}>Got it ✦</button>
           </div>
         </div>
       )}
