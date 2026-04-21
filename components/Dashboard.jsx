@@ -226,7 +226,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const flashHappy = () => {
     setCelebrating(true);
     if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
-    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(doneCountRef.current >= 3), 800);
+    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(doneCountRef.current >= 3), 2000);
   };
 
   const toggleHabit = (id) => {
