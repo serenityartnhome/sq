@@ -837,15 +837,19 @@ body{
   line-height:1.8;
 }
 .grat-wall-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
+  columns:2;
+  column-gap:8px;
   padding:0 2px;
 }
 @media(min-width:600px){
-  .grat-wall-grid{ grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+  .grat-wall-grid{ columns:3; }
 }
 .grat-card{
+  break-inside:avoid;
+  -webkit-column-break-inside:avoid;
+  display:inline-block;
+  width:100%;
+  margin-bottom:8px;
   position:relative;
   background:var(--parchment);
   border:2px solid var(--plum);
