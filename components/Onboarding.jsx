@@ -515,6 +515,13 @@ function Onboarding({ onComplete, onLogin }){
         )}
       </div>
 
+      <div style={{textAlign:"center",padding:"24px 0 8px",fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum-soft)"}}>
+        <a href="privacy.html" target="_blank" rel="noopener"
+          style={{color:"var(--plum-soft)",textDecoration:"underline",marginRight:16}}>Privacy Policy</a>
+        <a href="terms.html" target="_blank" rel="noopener"
+          style={{color:"var(--plum-soft)",textDecoration:"underline"}}>Terms of Service</a>
+      </div>
+
       </div>{/* /onboard-center-wrap */}
 
       {showLoginPopup && (
