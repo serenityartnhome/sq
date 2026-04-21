@@ -195,7 +195,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     } catch{ return 0; }
   }, [completed, powerups, gratitude, diaryEntry]);
 
-  const isHatched = hatched || daysInFlow >= 3;
+  const [adultUnlocked, setAdultUnlocked] = React.useState(()=>!!localStorage.getItem("sq_adult"));
+  const testStage = localStorage.getItem("sq_test_stage");
+  const petStage = testStage || (adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
 
   const EGG_SOUNDS = [
@@ -329,6 +331,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
     if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
     if(daysInFlow >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); }
+    if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); }
     if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
   }, [daysInFlow]);
 
@@ -441,8 +444,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <TopBarClock/>
           <div className="avatar" title={profile.name}>
-            {isHatched
+            {petStage==="adult"
               ? <ZodiacPet animal={animal} mood={happyMood?"happy":mood} size={36}/>
+              : petStage==="baby"
+              ? <BabyPet animal={animal} happy={happyMood} size={36}/>
               : <img src={eggSrc(mood)} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
             }
           </div>
@@ -539,7 +544,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <div style={{display:"flex",justifyContent:"center",marginBottom:4,marginTop:20}}>
               <div className="bubble" key={bubbleIdx}>
-                {isHatched ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
+                {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
             </div>
             <div className="pet-cloud-stage" onClick={()=>{
@@ -550,15 +555,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 setShowProfileEdit(true);
               }} style={{cursor:"pointer"}} title="Edit your profile">
               <div className="pet-on-cloud">
-                {isHatched && !isHatching ? (
-                  <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={Math.round(Math.min(160, window.innerHeight*0.17))}/>
-                ) : (
-                  <img src={eggSrc(mood)} alt="egg"
+                {(()=>{
+                  const sz = Math.round(Math.min(160, window.innerHeight*0.17));
+                  if(petStage==="adult" && !isHatching)
+                    return <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={sz}/>;
+                  if(petStage==="baby" && !isHatching)
+                    return <BabyPet animal={animal} happy={happyMood} neglected={daysInFlow===0&&hatched} size={sz}/>;
+                  return <img src={eggSrc(mood)} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
-                    style={{width:Math.round(Math.min(160,window.innerHeight*0.17)),height:Math.round(Math.min(160,window.innerHeight*0.17)),imageRendering:"pixelated",display:"block"}}
+                    style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
                     onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); } }}
-                  />
-                )}
+                  />;
+                })()}
               </div>
               <img src="assets/cloud.png" alt="" className="pet-cloud"
                    style={{width:"min(360px,100%)"}} aria-hidden="true"/>
@@ -1132,8 +1140,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="celebrate" onClick={()=>setCelebrate(false)}>
           <div className="card" onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"center"}}>
-              {isHatched
+              {petStage==="adult"
                 ? <ZodiacPet animal={animal} mood="excited" size={140}/>
+                : petStage==="baby"
+                ? <BabyPet animal={animal} happy={true} size={140}/>
                 : <img src={eggSrc(mood)} className="egg-idle"
                     style={{width:140,height:140,imageRendering:"pixelated"}} alt="egg"/>
               }

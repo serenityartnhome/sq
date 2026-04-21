@@ -1402,6 +1402,34 @@ body{
 }
 
 /* ============================================================
+   BABY SPRITE ANIMATION
+   ============================================================ */
+@keyframes babyIdle {
+  0%   { background-position: 0px 0px; }
+  50%  { background-position: calc(var(--bframe) * -1) 0px; }
+  100% { background-position: 0px 0px; }
+}
+@keyframes babyHappy {
+  0%   { background-position: calc(var(--bframe) * -2) 0px; }
+  33%  { background-position: calc(var(--bframe) * -3) 0px; }
+  66%  { background-position: calc(var(--bframe) * -4) 0px; }
+  100% { background-position: calc(var(--bframe) * -2) 0px; }
+}
+@keyframes babyNeglected {
+  0%   { background-position: calc(var(--bframe) * -5) 0px; }
+  50%  { background-position: calc(var(--bframe) * -6) 0px; }
+  100% { background-position: calc(var(--bframe) * -5) 0px; }
+}
+.baby-sprite {
+  display: block;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.baby-sprite.baby-idle      { animation: babyIdle     1.2s steps(1) infinite; }
+.baby-sprite.baby-happy     { animation: babyHappy    0.7s steps(1) infinite; }
+.baby-sprite.baby-neglected { animation: babyNeglected 1.8s steps(1) infinite; }
+
+/* ============================================================
    ZODIAC + MOOD PICKER
    ============================================================ */
 .pixel.zodiac-pet{

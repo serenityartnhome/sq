@@ -24,7 +24,23 @@ function HabitIcon({ kind, size=24 }){
 function Sparkle({ size=18 }){ return <Icon name="sparkle" size={size}/>; }
 function Flame(){ return <Icon name="flame" size={22}/>; }
 
+function BabyPet({ animal, happy, neglected, size=64 }){
+  const animClass = neglected ? "baby-neglected" : happy ? "baby-happy" : "baby-idle";
+  return (
+    <div className={`baby-sprite ${animClass}`}
+      style={{
+        width: size,
+        height: size,
+        "--bframe": `${size}px`,
+        backgroundImage: `url(assets/zodiac/baby-${animal}-sheet.png?v=1)`,
+        backgroundSize: `${size * 7}px ${size}px`,
+      }}
+    />
+  );
+}
+
 window.Icon = Icon;
 window.HabitIcon = HabitIcon;
 window.Sparkle = Sparkle;
 window.Flame = Flame;
+window.BabyPet = BabyPet;
