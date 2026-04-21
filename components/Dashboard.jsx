@@ -101,6 +101,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
   const [showDiaryLocked, setShowDiaryLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
+  const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
@@ -378,7 +379,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn" style={{opacity:.75}} onClick={()=>{}}>
+        <button className="rail-btn" style={{opacity:.85}} onClick={()=>setShowFriendsSoon(true)}>
           <div style={{position:"relative",display:"inline-block"}}>
             <Icon name="heart" size={54}/>
             <img src="assets/icon-lock.png?v=1" alt="locked"
@@ -817,6 +818,29 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
+          </div>
+        </div>
+      )}
+
+      {showFriendsSoon && (
+        <div className="coming-soon-overlay" onClick={()=>setShowFriendsSoon(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:4}}>
+              <img src="assets/icon-account-rabbit.png?v=1" style={{width:64,height:64,imageRendering:"pixelated"}} alt=""/>
+            </div>
+            <h3 className="coming-soon-title">✦ Friends ✦</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.8}}>
+              Your future friends are still finding their way to the quest…<br/>
+              <span style={{fontSize:13,color:"var(--jade-deep)"}}>
+                ✦ Send letters by carrier pigeon ✦<br/>
+                ✦ Challenge friends to streak battles ✦<br/>
+                ✦ Gift energy charms ✦
+              </span><br/>
+              <span style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
+                coming soon, adventurer!
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowFriendsSoon(false)}>Can't Wait ✦</button>
           </div>
         </div>
       )}
