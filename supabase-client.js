@@ -96,7 +96,7 @@
 
     signInWithGoogle(){
       const redirectTo = "https://app.serenityartnhome.com";
-      window.location.href = URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirectTo);
+      window.location.href = URL+"/auth/v1/authorize?provider=google&prompt=select_account&redirect_to="+encodeURIComponent(redirectTo);
     },
 
     async updatePassword(newPassword, accessToken){
