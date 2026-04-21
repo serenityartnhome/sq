@@ -455,6 +455,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [wallRulesChecked, setWallRulesChecked] = React.useState(false);
   const [wallBanned, setWallBanned] = React.useState(false);
   const [shareStatus, setShareStatus] = React.useState(null);
+  const [shareLoc, setShareLoc] = React.useState(()=>localStorage.getItem("sq_share_loc")!=="0");
 
   const PROFANITY = ["fuck","shit","bitch","asshole","bastard","cunt","dick","pussy","nigger","nigga","faggot","fag","retard","whore","slut","cock","motherfucker","bullshit","twat","wanker","prick","arse","bollocks"];
   const hasProfanity = (text) => {
@@ -495,7 +496,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   };
 
   const [shareError, setShareError] = React.useState("");
-  const shareToWall = async (content) => {
+  const shareToWall = async (content, useShareLoc) => {
     if(!userId || !window.SB || !content.trim()) return;
     if(hasProfanity(content)){
       setShareError("Your message contains inappropriate language. Please keep the wall positive ✦");
@@ -507,23 +508,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       const streak = (()=>{
         try {
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-          let count = 0;
-          const d = new Date();
-          d.setDate(d.getDate()-1);
-          while(true){
-            const k = d.toISOString().slice(0,10);
-            if(!hist[k]) break;
-            count++;
-            d.setDate(d.getDate()-1);
-          }
+          let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
+          while(true){ const k=d.toISOString().slice(0,10); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
           return count;
         } catch{ return 0; }
       })();
+      const locVal = useShareLoc ? (profile.loc||"") : "";
       const attempts = [
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, loc: profile.loc||"", animal, streak, pet_stage: petStage },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, loc: profile.loc||"", animal, pet_stage: petStage },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, animal, pet_stage: petStage },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent },
+        { user_id:userId, display_name:profile.name||"Adventurer", content:cleanContent, loc:locVal, animal, streak, pet_stage:petStage },
+        { user_id:userId, display_name:profile.name||"Adventurer", content:cleanContent, loc:locVal, animal, pet_stage:petStage },
+        { user_id:userId, display_name:profile.name||"Adventurer", content:cleanContent, loc:locVal, animal },
+        { user_id:userId, display_name:profile.name||"Adventurer", content:cleanContent, animal },
+        { user_id:userId, display_name:profile.name||"Adventurer", content:cleanContent },
       ];
       let lastErr = null;
       for(const row of attempts){
@@ -1569,15 +1565,31 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 <span style={{fontSize:11,opacity:.8}}>{shareError}</span>
               </div>
             ) : (
-              <div className="grat-share-pick-list">
-                {gratitude.filter(g=>g.trim()).map((g,i)=>(
-                  <button key={i} className="grat-share-pick-item"
-                    disabled={shareStatus==="sharing"}
-                    onClick={()=>shareToWall(g)}>
-                    {g}
-                  </button>
-                ))}
-              </div>
+              <>
+                <div className="grat-share-pick-list">
+                  {gratitude.filter(g=>g.trim()).map((g,i)=>(
+                    <button key={i} className="grat-share-pick-item"
+                      disabled={shareStatus==="sharing"}
+                      onClick={()=>shareToWall(g, shareLoc)}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                {profile.loc && (
+                  <label style={{display:"flex",alignItems:"center",gap:8,marginTop:10,cursor:"pointer",
+                                  fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",
+                                  textTransform:"uppercase",letterSpacing:".04em"}}>
+                    <input type="checkbox" checked={shareLoc}
+                      onChange={e=>{
+                        const v=e.target.checked;
+                        setShareLoc(v);
+                        localStorage.setItem("sq_share_loc", v?"1":"0");
+                      }}
+                      style={{width:14,height:14,cursor:"pointer"}}/>
+                    Share my location ({profile.loc})
+                  </label>
+                )}
+              </>
             )}
             {shareStatus!=="done" && (
               <button className="coming-soon-btn"
