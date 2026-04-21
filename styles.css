@@ -399,7 +399,7 @@ body{
 }
 .rail-btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 rgba(0,0,0,.35), inset 0 0 0 2px var(--gold)}
 .rail-btn.active{background:var(--blush);border-color:var(--rose);box-shadow:3px 3px 0 var(--rose), inset 0 0 0 2px var(--gold)}
-.rail-btn img{width:54px;height:54px}
+.rail-btn img{width:68px;height:68px}
 .rail-btn-locked{opacity:.5;cursor:not-allowed;filter:grayscale(.4);}
 .rail-btn-locked:hover{transform:none;box-shadow:3px 3px 0 rgba(0,0,0,.25);}
 .rail-lock-badge{
@@ -1269,7 +1269,7 @@ body{
     background:var(--parchment);
   }
   .rail-btn.active{ background:var(--blush) !important; border-color:var(--rose) !important; }
-  .rail-btn img{ width:26px;height:26px; }
+  .rail-btn img{ width:36px;height:36px; }
 
   /* ── Onboarding ── */
   .hero-title{ font-size:clamp(18px,6vw,28px);gap:8px;margin:10px 0 4px; }
