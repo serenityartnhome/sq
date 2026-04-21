@@ -131,13 +131,14 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const doReport = async (postId) => {
     setReportConfirm(null);
     setReported(prev => { const n = new Set(prev); n.add(postId); return n; });
+    // Hide immediately for this user
+    setPosts(prev => prev.filter(p => p.id !== postId));
     try {
       await window.SB.from("post_reports").insert({ user_id: userId, post_id: postId });
       const { data: reportData } = await window.SB.from("post_reports").select("post_id").eq("post_id", postId);
       if (reportData && reportData.length >= 3) {
         const post = posts.find(p => p.id === postId);
         if (post) {
-          // Log for admin review — no auto-ban, admin decides
           await window.SB.from("moderation_log").insert({
             post_id: String(postId),
             user_id: post.user_id,
@@ -146,8 +147,6 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
             reason: "3 reports — pending review"
           });
         }
-        // Hide post from wall pending review
-        setPosts(prev => prev.filter(p => p.id !== postId));
       }
     } catch {}
   };
@@ -236,23 +235,19 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
       {reportConfirm && (
         <div className="coming-soon-overlay" onClick={()=>setReportConfirm(null)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%",textAlign:"center"}}>
-            <div style={{fontSize:28,marginBottom:8}}>⚑</div>
-            <h3 className="coming-soon-title" style={{fontSize:13}}>Report this post?</h3>
-            <p className="coming-soon-body" style={{fontSize:12,marginBottom:16}}>
-              Posts reported by 3 or more users are hidden and reviewed by our team.
-            </p>
+            <h3 className="coming-soon-title" style={{fontSize:13,marginBottom:20}}>Report this post?</h3>
             <div style={{display:"flex",gap:10,justifyContent:"center"}}>
               <button onClick={()=>doReport(reportConfirm)}
                 style={{background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
                         textTransform:"uppercase",boxShadow:"none"}}>
-                Yes, Report
+                Yes
               </button>
               <button onClick={()=>setReportConfirm(null)}
                 style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
                         textTransform:"uppercase",boxShadow:"none"}}>
-                Cancel
+                No
               </button>
             </div>
           </div>
