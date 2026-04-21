@@ -99,10 +99,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
+  const [photoUnlocked, setPhotoUnlocked] = React.useState(()=>!!localStorage.getItem("sq_photo_unlocked"));
+  const [powerupsUnlocked, setPowerupsUnlocked] = React.useState(()=>!!localStorage.getItem("sq_powerups_unlocked"));
   const [showDiaryLocked, setShowDiaryLocked] = React.useState(false);
+  const [showPhotoLocked, setShowPhotoLocked] = React.useState(false);
+  const [showPowerupsLocked, setShowPowerupsLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
-  const [showShopPrompt, setShowShopPrompt] = React.useState(false);
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [feedbackMsg, setFeedbackMsg] = React.useState("");
+  const [feedbackStatus, setFeedbackStatus] = React.useState(null);
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [mood, setMood] = React.useState("calm");
@@ -263,10 +269,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       // Check if this completes day 3 — trigger hatch
       let days = 0; const dd = new Date();
       while(hist[dd.toISOString().slice(0,10)]){ days++; dd.setDate(dd.getDate()-1); }
+      if(days >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
       if(days >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
-      if(days >= 7 && !localStorage.getItem("sq_diary_unlocked")){
-        localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true);
-      }
+      if(days >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); }
+      if(days >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
     } catch{}
     if(userId && window.SB){
       window.SB.from("daily_data").upsert({
@@ -315,6 +321,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       setShareError(lastErr?.message||"Unknown error");
       setShareStatus("error");
     } catch(e) { setShareError(e?.message||"Unknown error"); setShareStatus("error"); }
+  };
+
+  const submitFeedback = async () => {
+    if(!feedbackMsg.trim()) return;
+    setFeedbackStatus("sending");
+    try {
+      const { error } = await window.SB.from("feedback").insert({
+        user_id: userId||null,
+        display_name: profile.name||"Adventurer",
+        message: feedbackMsg.trim()
+      });
+      if(error) throw error;
+      setFeedbackStatus("done");
+      setFeedbackMsg("");
+    } catch { setFeedbackStatus("error"); }
   };
 
   const gratitudeDone = gratitude.some(x=>x.trim().length>0);
@@ -379,7 +400,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn" style={{opacity:.85}} onClick={()=>setShowFriendsSoon(true)}>
+        <button className="rail-btn" style={{opacity:.85}} onClick={()=>{
+          const url = "https://app.serenityartnhome.com";
+          const text = "Join me on Serenity Quest — a daily feng shui habit tracker ✦";
+          if(navigator.share){ navigator.share({title:"Serenity Quest",text,url}).catch(()=>{}); }
+          else { setShowFriendsSoon(true); }
+        }}>
           <div style={{position:"relative",display:"inline-block"}}>
             <Icon name="heart" size={54}/>
             <img src="assets/icon-lock.png?v=1" alt="locked"
@@ -390,7 +416,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
           <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>Community
         </button>
-        <button className={"rail-btn "+(tab==="shop"?"active":"")} onClick={()=>setShowShopPrompt(true)}>
+        <button className="rail-btn" onClick={()=>{ setFeedbackMsg(""); setFeedbackStatus(null); setShowFeedback(true); }}>
           <Icon name="shop" size={54}/>Shop
         </button>
       </div>
@@ -611,12 +637,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           {/* Spacer pushes power-ups to the bottom */}
           <div style={{flex:1,minHeight:0}}/>
 
-          <h2 style={{textAlign:"center",fontSize:18,marginBottom:8,marginTop:4,
+          <h2 style={{textAlign:"center",fontSize:18,marginBottom:2,marginTop:4,
                      fontFamily:"Silkscreen, monospace",color:"var(--plum)",
                      textTransform:"uppercase",letterSpacing:".05em",
                      display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <Icon name="sparkle" size={18}/>Boost Your Energy with Power-Ups<Icon name="sparkle" size={18}/>
+            <Icon name="sparkle" size={18}/>Power-Ups<Icon name="sparkle" size={18}/>
           </h2>
+          <p style={{textAlign:"center",fontSize:11,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
+                     marginBottom:8,marginTop:0,lineHeight:1.5}}>
+            Small rituals that raise your energy and earn bonus XP.{(!powerupsUnlocked&&daysInFlow<2)&&<span style={{color:"var(--rose)"}}> Unlocks Day 2.</span>}
+          </p>
 
           {showPowerupPicker && (
             <div className="pu-picker-panel">
@@ -669,7 +699,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
           )}
 
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,
+                       ...(!powerupsUnlocked&&daysInFlow<2?{opacity:.45,pointerEvents:"none",filter:"grayscale(30%)"}:{})}}>
             {[...POWERUPS,...customPowerups].filter(p=>activePowerupIds.includes(p.id)).map(p=>(
               <button key={p.id} className={"power "+(powerups.has(p.id)?"active":"")}
                       onClick={()=>togglePower(p.id)}>
@@ -721,11 +752,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     <button className="diary-photo-remove" title="Remove photo" onClick={()=>setDiaryPhoto("")}>✕</button>
                   </div>
                 ) : (
-                  <button className="diary-photo-add" title="Add a memory" onClick={()=>diaryPhotoRef.current.click()}>
-                    <img src="assets/icon-camera.png" alt="camera"
-                      style={{width:64,height:64,imageRendering:"pixelated",display:"block"}}
-                      onError={e=>{e.currentTarget.replaceWith(Object.assign(document.createElement("span"),{textContent:"📷",style:"font-size:28px"}));}}/>
-                    <span className="diary-photo-lbl">Add a memory</span>
+                  <button className="diary-photo-add" title={photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}
+                    onClick={()=>{ if(photoUnlocked||daysInFlow>=7){ diaryPhotoRef.current.click(); } else { setShowPhotoLocked(true); } }}
+                    style={!photoUnlocked&&daysInFlow<7?{opacity:.5,cursor:"default"}:{}}>
+                    <div style={{position:"relative",display:"inline-block"}}>
+                      <img src="assets/icon-camera.png" alt="camera"
+                        style={{width:64,height:64,imageRendering:"pixelated",display:"block"}}
+                        onError={e=>{e.currentTarget.replaceWith(Object.assign(document.createElement("span"),{textContent:"📷",style:"font-size:28px"}));}}/>
+                      {!photoUnlocked && daysInFlow < 7 && (
+                        <img src="assets/icon-lock.png?v=1" alt="locked"
+                          style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated"}}/>
+                      )}
+                    </div>
+                    <span className="diary-photo-lbl">{photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}</span>
                   </button>
                 )}
               </div>
@@ -765,18 +804,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
-                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=7?setShowDiary(true):setShowDiaryLocked(true)}>
+                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=5?setShowDiary(true):setShowDiaryLocked(true)}>
                         <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
                              className="diary-icon" alt="diary"
-                             style={daysInFlow<7?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
+                             style={!diaryUnlocked&&daysInFlow<5?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
                       </button>
-                      {daysInFlow < 7 && (
+                      {!diaryUnlocked && daysInFlow < 5 && (
                         <img src="assets/icon-lock.png?v=1" alt="locked"
                           style={{position:"absolute",top:0,right:0,width:18,height:18,
                                   imageRendering:"pixelated",pointerEvents:"none"}}/>
                       )}
                     </div>
-                    <span className="diary-label">{diaryUnlocked||daysInFlow>=7?"Write in my Journal":"Unlocks Day 7"}</span>
+                    <span className="diary-label">{diaryUnlocked||daysInFlow>=5?"Write in my Journal":"Unlocks Day 5"}</span>
                   </div>
                 </div>
               </div>
@@ -785,21 +824,72 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       </div>
 
-      {showShopPrompt && (
-        <div className="coming-soon-overlay" onClick={()=>setShowShopPrompt(false)}>
+      {showFeedback && (
+        <div className="coming-soon-overlay" onClick={()=>{ if(feedbackStatus!=="sending") setShowFeedback(false); }}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
+            <div className="coming-soon-lock"><Icon name="sparkle" size={36}/></div>
+            <h3 className="coming-soon-title">✦ Talk to Us ✦</h3>
+            {feedbackStatus==="done" ? (
+              <div style={{textAlign:"center",padding:"16px 0"}}>
+                <div style={{fontSize:32,marginBottom:8}}>✦</div>
+                <p className="coming-soon-body">Your message has been received.<br/>
+                  <span style={{fontSize:12,color:"var(--jade-deep)"}}>We read every single one. Thank you! ♡</span>
+                </p>
+                <button className="coming-soon-btn" onClick={()=>setShowFeedback(false)}>Close ✦</button>
+              </div>
+            ) : (
+              <>
+                <p className="coming-soon-body" style={{marginBottom:10}}>
+                  Have a question, idea, or just want to say hi?<br/>
+                  <span style={{fontSize:11,color:"var(--plum-soft)"}}>We'd love to hear from you.</span>
+                </p>
+                <textarea
+                  value={feedbackMsg}
+                  onChange={e=>setFeedbackMsg(e.target.value.slice(0,500))}
+                  placeholder="Write your message here…"
+                  maxLength={500}
+                  style={{width:"100%",minHeight:100,padding:"8px 10px",fontFamily:"Pixelify Sans,monospace",
+                    fontSize:13,border:"2px solid var(--rose)",background:"var(--cream)",color:"var(--plum)",
+                    resize:"none",outline:"none",boxSizing:"border-box",marginBottom:6}}
+                />
+                <div style={{fontSize:10,textAlign:"right",color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",marginBottom:10}}>
+                  {feedbackMsg.length}/500
+                </div>
+                {feedbackStatus==="error" && (
+                  <p style={{color:"var(--rose)",fontSize:11,textAlign:"center",marginBottom:8}}>
+                    Something went wrong — please try again.
+                  </p>
+                )}
+                <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+                  <button className="coming-soon-btn"
+                    disabled={!feedbackMsg.trim()||feedbackStatus==="sending"}
+                    onClick={submitFeedback}>
+                    {feedbackStatus==="sending" ? "Sending…" : "Send Message ✦"}
+                  </button>
+                  <button className="coming-soon-btn"
+                    style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                    onClick={()=>setShowFeedback(false)}>Cancel</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showPhotoLocked && (
+        <div className="coming-soon-overlay" onClick={()=>setShowPhotoLocked(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
-            <div className="coming-soon-lock"><Icon name="shop" size={40}/></div>
-            <h3 className="coming-soon-title">Visit Our Shop</h3>
-            <p className="coming-soon-body">You're about to leave Serenity Quest<br/>and visit our online store.</p>
-            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="coming-soon-btn" onClick={()=>{ window.open("https://www.serenityartnhome.com/","_blank"); setShowShopPrompt(false); }}>
-                Visit Shop ✦
-              </button>
-              <button className="coming-soon-btn" style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
-                onClick={()=>setShowShopPrompt(false)}>
-                Stay Here
-              </button>
+            <div className="coming-soon-lock">
+              <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt="locked"/>
             </div>
+            <h3 className="coming-soon-title">Memory Photos Locked</h3>
+            <p className="coming-soon-body">
+              Complete 7 days in a row to add photos to your journal.<br/>
+              <span style={{fontSize:13,color:"var(--jade-deep)"}}>
+                You're on day {Math.max(daysInFlow,1)} — almost there! ✦
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowPhotoLocked(false)}>Got it ✦</button>
           </div>
         </div>
       )}
@@ -812,7 +902,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <h3 className="coming-soon-title">Journal Locked</h3>
             <p className="coming-soon-body">
-              Visit 7 days in a row to unlock your journal.<br/>
+              Complete 5 days in a row to unlock your journal.<br/>
               <span style={{fontSize:13,color:"var(--jade-deep)"}}>
                 You're on day {Math.max(daysInFlow,1)} — keep going! ✦
               </span>
@@ -825,22 +915,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {showFriendsSoon && (
         <div className="coming-soon-overlay" onClick={()=>setShowFriendsSoon(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,textAlign:"center"}}>
-            <div style={{fontSize:36,marginBottom:4}}>
-              <img src="assets/icon-account-rabbit.png?v=1" style={{width:64,height:64,imageRendering:"pixelated"}} alt=""/>
-            </div>
-            <h3 className="coming-soon-title">✦ Friends ✦</h3>
-            <p className="coming-soon-body" style={{lineHeight:1.8}}>
-              Your future friends are still finding their way to the quest…<br/>
-              <span style={{fontSize:13,color:"var(--jade-deep)"}}>
-                ✦ Send letters by carrier pigeon ✦<br/>
-                ✦ Challenge friends to streak battles ✦<br/>
-                ✦ Gift energy charms ✦
-              </span><br/>
-              <span style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
-                coming soon, adventurer!
+            <div style={{marginBottom:8}}><Icon name="heart" size={48}/></div>
+            <h3 className="coming-soon-title">✦ Invite a Friend ✦</h3>
+            <p className="coming-soon-body">Share your quest with someone special.</p>
+            <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--cream)",
+              border:"2px solid var(--rose)",padding:"6px 10px",marginBottom:12,cursor:"text"}}>
+              <span style={{flex:1,fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)",
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                app.serenityartnhome.com
               </span>
-            </p>
-            <button className="coming-soon-btn" onClick={()=>setShowFriendsSoon(false)}>Can't Wait ✦</button>
+              <button className="coming-soon-btn"
+                style={{padding:"4px 10px",fontSize:11,margin:0,flexShrink:0}}
+                onClick={()=>{
+                  navigator.clipboard.writeText("https://app.serenityartnhome.com").catch(()=>{});
+                  setShowFriendsSoon(false);
+                }}>Copy ✦</button>
+            </div>
+            <button className="coming-soon-btn"
+              style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+              onClick={()=>setShowFriendsSoon(false)}>Close</button>
           </div>
         </div>
       )}
