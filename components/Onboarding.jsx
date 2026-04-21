@@ -167,7 +167,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
             placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&submit()}/>
         </div>
         <div className="field">
-          <label style={{fontWeight:"normal"}}>Password <span style={{fontSize:10,color:"var(--plum-soft)",fontWeight:"normal"}}>(min 8 chars, letters &amp; numbers)</span></label>
+          <label>Password</label>
           <div style={{position:"relative",display:"flex"}}>
             <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
               placeholder="••••••••" style={{flex:1,paddingRight:36}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
@@ -178,6 +178,15 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
                 style={{width:20,height:20,imageRendering:"pixelated"}} alt={showPw?"hide":"show"}/>
             </button>
           </div>
+          {password.length > 0 && (()=>{
+            const err = validatePassword(password);
+            return (
+              <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",marginTop:4,
+                           color: err ? "#c0392b" : "#27ae60"}}>
+                {err ? "✗ "+err : "✓ Looks good"}
+              </div>
+            );
+          })()}
         </div>
         <div className="field" style={{marginBottom:14}}>
           <label>Confirm Password</label>
