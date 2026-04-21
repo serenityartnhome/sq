@@ -61,6 +61,7 @@ function TopBarClock(){
 
 function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail }){
   const today = new Date().toISOString().slice(0,10);
+  const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
   const [completed, setCompleted] = React.useState(()=>{
     try {
@@ -112,7 +113,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [showPetMenu, setShowPetMenu] = React.useState(false);
   const [pendingReports, setPendingReports] = React.useState(0);
-  const isAdmin = userEmail === "serenityartnhome@gmail.com";
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState(null);

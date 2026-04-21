@@ -153,11 +153,15 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
 
   const deletePost = async (postId) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
-    try {
-      await window.SB.from("post_likes").delete().eq("post_id", postId);
-      await window.SB.from("post_reports").delete().eq("post_id", postId);
-      await window.SB.from("gratitude_posts").delete().eq("id", postId);
-    } catch {}
+    const { error: e1 } = await window.SB.from("post_likes").delete().eq("post_id", postId);
+    const { error: e2 } = await window.SB.from("post_reports").delete().eq("post_id", postId);
+    const { error: e3 } = await window.SB.from("gratitude_posts").delete().eq("id", postId);
+    if(e3) {
+      console.error("Delete failed:", e3.message);
+      // Revert optimistic remove and show error
+      setErr("Delete failed: " + e3.message);
+      loadPosts();
+    }
   };
 
   const timeAgo = (ts) => {
