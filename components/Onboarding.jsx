@@ -340,15 +340,17 @@ function Onboarding({ onComplete, onLogin, authUser }){
               <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
                 <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
               </button>
-              <button onClick={()=>setShowLoginPopup(true)}
-                style={{width:"100%",background:"var(--cream)",color:"var(--plum)",
-                        border:"3px solid var(--plum)",borderRadius:4,
-                        boxShadow:"3px 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px var(--gold)",
-                        cursor:"pointer",padding:"12px 20px",
-                        fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em",
-                        display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                Already have an account? Log in →
-              </button>
+              {!authUser && (
+                <button onClick={()=>setShowLoginPopup(true)}
+                  style={{width:"100%",background:"var(--cream)",color:"var(--plum)",
+                          border:"3px solid var(--plum)",borderRadius:4,
+                          boxShadow:"3px 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px var(--gold)",
+                          cursor:"pointer",padding:"12px 20px",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em",
+                          display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+                  Already have an account? Log in →
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -507,20 +509,24 @@ function Onboarding({ onComplete, onLogin, authUser }){
               {authUser ? "Begin My Quest ✦ Save Progress" : "Save My Progress"}
               <Icon name="sparkle" size={18}/>
             </button>
-            <button onClick={()=>{ if(canSubmit) onComplete(profileData(), null); }} disabled={!canSubmit}
-              style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",
-                      color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",fontSize:11,
-                      padding:"8px",cursor:canSubmit?"pointer":"not-allowed",borderRadius:4,
-                      letterSpacing:".04em"}}>
-              Begin My Quest (no save)
-            </button>
-            <div style={{width:"100%",borderTop:"1px solid var(--gold-soft)",paddingTop:10,textAlign:"center"}}>
-              <button onClick={()=>setShowLoginPopup(true)}
-                style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
-                        fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
-                Already have an account? Log in
-              </button>
-            </div>
+            {!authUser && (
+              <>
+                <button onClick={()=>{ if(canSubmit) onComplete(profileData(), null); }} disabled={!canSubmit}
+                  style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",
+                          color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",fontSize:11,
+                          padding:"8px",cursor:canSubmit?"pointer":"not-allowed",borderRadius:4,
+                          letterSpacing:".04em"}}>
+                  Begin My Quest (no save)
+                </button>
+                <div style={{width:"100%",borderTop:"1px solid var(--gold-soft)",paddingTop:10,textAlign:"center"}}>
+                  <button onClick={()=>setShowLoginPopup(true)}
+                    style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
+                            fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                    Already have an account? Log in
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
         )}

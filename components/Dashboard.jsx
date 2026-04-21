@@ -1294,7 +1294,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:8,lineHeight:1.5}}>
                   Permanently delete all your data &amp; account. This cannot be undone.
                 </div>
-                <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a"}}
+                <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
                   onClick={async()=>{
                     setShowResetConfirm(false);
                     if(userId && window.SB){
