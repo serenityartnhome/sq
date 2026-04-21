@@ -147,6 +147,24 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [editBdayDay,   setEditBdayDay]   = React.useState(()=>parseBday(profile.bday).d);
   const [editBdayMonth, setEditBdayMonth] = React.useState(()=>parseBday(profile.bday).m);
   const [editBdayYear,  setEditBdayYear]  = React.useState(()=>parseBday(profile.bday).y);
+  const [showChangeEmail, setShowChangeEmail] = React.useState(false);
+  const [newEmail, setNewEmail]   = React.useState("");
+  const [emailMsg, setEmailMsg]   = React.useState(null);
+  const [emailLoading, setEmailLoading] = React.useState(false);
+
+  const doChangeEmail = async () => {
+    if(!newEmail.trim()){ setEmailMsg({err:true,text:"Please enter a new email"}); return; }
+    setEmailLoading(true); setEmailMsg(null);
+    try {
+      const { error } = await window.SB.auth.updateUser({ email: newEmail.trim() });
+      if(error) throw error;
+      setEmailMsg({err:false,text:"Confirmation sent to "+newEmail.trim()+". Check your inbox."});
+      setNewEmail("");
+    } catch(e){
+      setEmailMsg({err:true,text:e.message||"Could not update email"});
+    }
+    setEmailLoading(false);
+  };
 
   const saveProfileEdit = () => {
     const newBday = editBdayYear && editBdayMonth && editBdayDay
@@ -1337,6 +1355,43 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <input value={editLoc} onChange={e=>setEditLoc(e.target.value)}
                 placeholder="City, Country…"/>
             </div>
+            {userEmail && !isGuest && (
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:6}}>Email</div>
+                <div style={{fontSize:13,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginBottom:8,wordBreak:"break-all"}}>{userEmail}</div>
+                {!showChangeEmail ? (
+                  <button onClick={()=>{ setShowChangeEmail(true); setEmailMsg(null); setNewEmail(""); }}
+                    style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
+                            fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                    Change Email
+                  </button>
+                ) : (
+                  <div>
+                    <div className="field" style={{marginBottom:6}}>
+                      <input type="email" value={newEmail} onChange={e=>setNewEmail(e.target.value)}
+                        placeholder="New email address…" onKeyDown={e=>e.key==="Enter"&&doChangeEmail()}/>
+                    </div>
+                    {emailMsg && (
+                      <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",marginBottom:6,
+                                   color:emailMsg.err?"#c0392b":"#27ae60"}}>
+                        {emailMsg.err?"✗ ":"✓ "}{emailMsg.text}
+                      </div>
+                    )}
+                    <div style={{display:"flex",gap:6}}>
+                      <button className="coming-soon-btn" onClick={doChangeEmail} disabled={emailLoading}
+                        style={{fontSize:10,padding:"5px 12px"}}>
+                        {emailLoading?"Sending…":"Send Confirmation"}
+                      </button>
+                      <button onClick={()=>{ setShowChangeEmail(false); setEmailMsg(null); }}
+                        style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                                fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="coming-soon-btn" onClick={saveProfileEdit}>Save ✦</button>
               <button className="coming-soon-btn"
