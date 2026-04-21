@@ -447,7 +447,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {petStage==="adult"
               ? <ZodiacPet animal={animal} mood={happyMood?"happy":mood} size={36}/>
               : petStage==="baby"
-              ? <BabyPet animal={animal} happy={happyMood} size={36}/>
+              ? <BabyPet animal={animal} happy={happyMood} size={22}/>
               : <img src={eggSrc(mood)} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
             }
           </div>
@@ -560,7 +560,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   if(petStage==="adult" && !isHatching)
                     return <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
-                    return <BabyPet animal={animal} happy={happyMood} neglected={daysInFlow===0&&hatched} size={sz}/>;
+                    return <BabyPet animal={animal} happy={happyMood} neglected={daysInFlow===0&&hatched} size={Math.round(sz*0.3)}/>;
                   return <img src={eggSrc(mood)} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
                     style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
@@ -1143,7 +1143,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               {petStage==="adult"
                 ? <ZodiacPet animal={animal} mood="excited" size={140}/>
                 : petStage==="baby"
-                ? <BabyPet animal={animal} happy={true} size={140}/>
+                ? <BabyPet animal={animal} happy={true} size={42}/>
                 : <img src={eggSrc(mood)} className="egg-idle"
                     style={{width:140,height:140,imageRendering:"pixelated"}} alt="egg"/>
               }
