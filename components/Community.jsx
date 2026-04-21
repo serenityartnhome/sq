@@ -279,17 +279,9 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
             const isReported = reported.has(post.id);
             const isOwn = userId === post.user_id;
             const streak = post.streak || 0;
-            const stage = post.pet_stage || "adult";
-            const avatarEl = stage === "egg"
-              ? <img src="assets/icon-egg-neutral.png" alt="egg"
-                  style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}/>
-              : stage === "baby"
-              ? <div style={{width:24,height:24,imageRendering:"pixelated",
-                             backgroundImage:`url(assets/zodiac/baby-${animal}-sheet.png?v=1)`,
-                             backgroundSize:"168px 24px",backgroundPosition:"0 0",backgroundRepeat:"no-repeat"}}/>
-              : <img src={`assets/zodiac/${animal}-neutral.png?v=2`} alt={animal}
-                  style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}
-                  onError={e=>{e.currentTarget.style.opacity=0;}}/>;
+            const avatarEl = <img src={`assets/icon-account-${animal}.png`} alt={animal}
+                style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}
+                onError={e=>{e.currentTarget.style.opacity=0;}}/>;
             return (
               <div key={post.id} className="grat-card"
                 style={isAdmin && post.reportCount >= 3 ? {borderColor:"#c0392b",opacity:.85} : {}}>
