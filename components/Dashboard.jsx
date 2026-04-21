@@ -765,9 +765,38 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                           onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
                           <HabitIcon kind={p.kind||"sparkle"} size={20}/>
                           <span>{p.name}</span>
+                          {p.custom && <span className="pu-remove" onClick={e=>{e.stopPropagation();setCustomPowerups(cs=>cs.filter(c=>c.id!==p.id));setActivePowerupIds(ids=>ids.filter(x=>x!==p.id));}}>✕</span>}
                         </button>
                       );
                     })}
+                  </div>
+                  <div className="pu-custom-form">
+                    <div className="pu-custom-title">✦ Create Custom</div>
+                    <div className="pu-custom-row">
+                      <input value={newPuName} onChange={e=>setNewPuName(e.target.value)}
+                        placeholder="Name…" maxLength={20} className="pu-add-input" style={{flex:1}}/>
+                      <label className="pu-xp-label">XP
+                        <input type="number" min={1} max={99} value={newPuXp}
+                          onChange={e=>setNewPuXp(Math.max(1,Math.min(99,Number(e.target.value)||1)))}
+                          className="pu-xp-input"/>
+                      </label>
+                    </div>
+                    <div className="pu-icon-grid">
+                      {ALL_ICONS.map(ic=>(
+                        <button key={ic} className={"pu-icon-btn"+(newPuKind===ic?" on":"")}
+                          onClick={()=>setNewPuKind(ic)} title={ic}>
+                          <img src={`assets/icon-${ic}.png?v=5`} alt={ic} style={{width:20,height:20,imageRendering:"pixelated"}}/>
+                        </button>
+                      ))}
+                    </div>
+                    <button className="pu-add-btn" disabled={!newPuName.trim()}
+                      onClick={()=>{
+                        const id="custom-"+Date.now();
+                        const p={id,name:newPuName.trim(),kind:newPuKind,xp:newPuXp,custom:true};
+                        setCustomPowerups(cs=>[...cs,p]);
+                        setActivePowerupIds(ids=>[...ids,id]);
+                        setNewPuName(""); setNewPuXp(10); setNewPuKind("sparkle");
+                      }}>+ Add Power-Up</button>
                   </div>
                   <p style={{textAlign:"center",fontSize:10,color:"var(--rose)",fontFamily:"Silkscreen,monospace",
                              marginTop:8,marginBottom:0,textTransform:"uppercase",letterSpacing:".04em"}}>
