@@ -830,7 +830,7 @@ body{
 }
 .grat-wall-grid{
   display:grid;
-  grid-template-columns:1fr;
+  grid-template-columns:repeat(2,1fr);
   gap:8px;
   padding:0 2px;
 }
@@ -842,10 +842,10 @@ body{
   background:var(--parchment);
   border:2px solid var(--plum);
   box-shadow:3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 1px var(--gold-soft);
-  padding:8px 10px 6px;
+  padding:5px 8px 4px;
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:2px;
 }
 .grat-card-streak{
   display:flex;
@@ -940,19 +940,19 @@ body{
 .grat-card-delete:hover{ opacity:1;color:var(--plum); }
 .grat-card-report{
   background:transparent;
-  border:none;
+  border:1px solid var(--rose);
   color:var(--plum-soft);
   font-family:"Silkscreen",monospace;
-  font-size:9px;
+  font-size:11px;
   cursor:pointer;
   text-transform:uppercase;
   letter-spacing:.04em;
-  opacity:.5;
-  padding:4px 6px;
+  opacity:1;
+  padding:4px 8px;
   transition:all .1s steps(2);
 }
-.grat-card-report:hover{ opacity:1;color:var(--rose); }
-.grat-card-report.reported{ opacity:1;color:var(--rose);cursor:default; }
+.grat-card-report:hover{ background:var(--blush);color:var(--plum); }
+.grat-card-report.reported{ background:var(--blush);color:var(--rose);border-color:var(--rose);cursor:default; }
 
 /* Share to wall button in gratitude section */
 .grat-share-btn{

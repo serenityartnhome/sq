@@ -279,15 +279,22 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
             const isReported = reported.has(post.id);
             const isOwn = userId === post.user_id;
             const streak = post.streak || 0;
+            const stage = post.pet_stage || "adult";
+            const avatarEl = stage === "egg"
+              ? <img src="assets/icon-egg-neutral.png" alt="egg"
+                  style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}/>
+              : stage === "baby"
+              ? <div style={{width:24,height:24,imageRendering:"pixelated",
+                             backgroundImage:`url(assets/zodiac/baby-${animal}-sheet.png?v=1)`,
+                             backgroundSize:"168px 24px",backgroundPosition:"0 0",backgroundRepeat:"no-repeat"}}/>
+              : <img src={`assets/zodiac/${animal}-neutral.png?v=2`} alt={animal}
+                  style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}
+                  onError={e=>{e.currentTarget.style.opacity=0;}}/>;
             return (
               <div key={post.id} className="grat-card"
                 style={isAdmin && post.reportCount >= 3 ? {borderColor:"#c0392b",opacity:.85} : {}}>
                 <div className="grat-card-top">
-                  <div className="grat-card-avatar">
-                    <img src={`assets/zodiac/${animal}-neutral.png?v=2`} alt={animal}
-                      style={{width:24,height:24,imageRendering:"pixelated",display:"block"}}
-                      onError={e=>{e.currentTarget.style.opacity=0;}}/>
-                  </div>
+                  <div className="grat-card-avatar">{avatarEl}</div>
                   <div className="grat-card-meta">
                     <div className="grat-card-name">{firstName}</div>
                     {post.loc && post.loc.trim() && <div className="grat-card-loc">{post.loc.trim()}</div>}
@@ -302,15 +309,18 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
                 <div className="grat-card-footer">
                   <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    {(isOwn || isAdmin) ? (
+                    {isOwn ? (
                       <button onClick={()=>deletePost(post.id)} className="grat-card-delete">delete</button>
                     ) : userId ? (
                       <button onClick={()=>confirmReport(post.id)}
                         className={"grat-card-report"+(isReported?" reported":"")}
                         disabled={isReported} title="Report this post">
-                        {isReported ? "⚑ reported" : "⚑ report"}
+                        {isReported ? "⚑" : "⚑"}
                       </button>
                     ) : null}
+                    {isAdmin && !isOwn && (
+                      <button onClick={()=>deletePost(post.id)} className="grat-card-delete">del</button>
+                    )}
                     <button onClick={()=>toggleLike(post.id)} className={"grat-card-like"+(isLiked?" liked":"")}>
                       ♥ {post.likeCount}
                     </button>

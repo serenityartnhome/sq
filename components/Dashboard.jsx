@@ -444,8 +444,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         } catch{ return 0; }
       })();
       const attempts = [
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, loc: profile.loc||"", animal, streak },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, animal, streak },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, loc: profile.loc||"", animal, streak, pet_stage: petStage },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, animal, streak, pet_stage: petStage },
         { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent },
       ];
       let lastErr = null;
