@@ -380,23 +380,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </button>
         <button className="rail-btn" style={{opacity:.75}} onClick={()=>{}}>
           <div style={{position:"relative",display:"inline-block"}}>
-            <img src="assets/icon-friends.png?v=1" width={54} height={54}
-              style={{imageRendering:"pixelated",display:"block",opacity:.55,filter:"grayscale(20%)"}} alt="friends"/>
+            <Icon name="heart" size={54}/>
             <img src="assets/icon-lock.png?v=1" alt="locked"
               style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated",pointerEvents:"none"}}/>
           </div>
           Friends
         </button>
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
-          <Icon name="heart" size={54}/>Community
+          <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>Community
         </button>
         <button className={"rail-btn "+(tab==="shop"?"active":"")} onClick={()=>setShowShopPrompt(true)}>
           <Icon name="shop" size={54}/>Shop
-        </button>
-        <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
-          <img src={isHatched ? `assets/icon-account-${animal}.png?v=1` : eggSrc(mood)}
-            alt="account" width={42} height={42} style={{imageRendering:"pixelated"}}/>
-          {isGuest ? "Guest" : "Account"}
         </button>
       </div>
 
@@ -871,11 +865,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <input value={editLoc} onChange={e=>setEditLoc(e.target.value)}
                 placeholder="City, Country…"/>
             </div>
-            <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+            <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="coming-soon-btn" onClick={saveProfileEdit}>Save ✦</button>
               <button className="coming-soon-btn"
                 style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
                 onClick={()=>setShowProfileEdit(false)}>Cancel</button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"#c0392b",borderColor:"#c0392b"}}
+                onClick={()=>{ setShowProfileEdit(false); onSignOut(); }}>Log Out</button>
             </div>
           </div>
         </div>
