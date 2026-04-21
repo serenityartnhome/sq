@@ -97,9 +97,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
   const [justHatched, setJustHatched] = React.useState(false);
-  const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
-  const [photoUnlocked, setPhotoUnlocked] = React.useState(()=>!!localStorage.getItem("sq_photo_unlocked"));
-  const [powerupsUnlocked, setPowerupsUnlocked] = React.useState(()=>!!localStorage.getItem("sq_powerups_unlocked"));
+  const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_diary_unlocked"));
+  const [photoUnlocked, setPhotoUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_photo_unlocked"));
+  const [powerupsUnlocked, setPowerupsUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_powerups_unlocked"));
   const [showDiaryLocked, setShowDiaryLocked] = React.useState(false);
   const [showPhotoLocked, setShowPhotoLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
@@ -206,9 +206,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     } catch{ return 0; }
   }, [completed, powerups, gratitude, diaryEntry]);
 
-  const [adultUnlocked, setAdultUnlocked] = React.useState(()=>!!localStorage.getItem("sq_adult"));
+  const [adultUnlocked, setAdultUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_adult"));
   const testStage = localStorage.getItem("sq_test_stage");
-  const petStage = testStage || (adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
+  const petStage = testStage || (isAdmin || adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
 
   const EGG_SOUNDS = [
