@@ -157,6 +157,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
+  const [saveStatus, setSaveStatus] = React.useState(null); // null | "saving" | "saved" | "error"
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [feedbackMsg, setFeedbackMsg] = React.useState("");
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
@@ -392,6 +393,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     }, 3000);
     return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
   }, [completed, mood, gratitude, powerups, diaryEntry]);
+
+  const saveProgressNow = async () => {
+    setSaveStatus("saving");
+    try {
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention, done: doneCount >= 3 };
+      localStorage.setItem("sq_history", JSON.stringify(hist));
+      if(userId && window.SB){
+        const { error } = await window.SB.from("daily_data").upsert({
+          user_id:userId, date:today, mood, energy,
+          completed:[...completed], powerups:[...powerups],
+          gratitude, diary:diaryEntry
+        });
+        if(error) throw error;
+      }
+      setSaveStatus("saved");
+    } catch{ setSaveStatus("error"); }
+    setTimeout(()=>setSaveStatus(null), 2500);
+  };
 
   // Recalculate habit streaks once per day on app open; sync with Supabase
   React.useEffect(()=>{
@@ -894,6 +914,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
             </div>
           )}
+
+          <button className="btn-primary btn-pink" onClick={saveProgressNow}
+            disabled={saveStatus==="saving"}
+            style={{width:"100%",marginBottom:6,fontSize:12,padding:"9px 16px",
+                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
+                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
+            <Icon name="sparkle" size={14}/>
+            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
+            <Icon name="sparkle" size={14}/>
+          </button>
 
           <div className="progress-label">
             Complete <b>{doneCount} / {totalSlots}</b> &nbsp;•&nbsp; {canComplete ? "ready to seal the day" : `${3-doneCount} more to unlock`}
