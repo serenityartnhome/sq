@@ -1429,6 +1429,15 @@ body{
 /* ============================================================
    BABY SPRITE ANIMATION
    ============================================================ */
+@keyframes intentShake {
+  0%,100% { transform: translateX(0); }
+  15%     { transform: translateX(-4px) rotate(-2deg); }
+  30%     { transform: translateX(4px) rotate(2deg); }
+  45%     { transform: translateX(-3px) rotate(-1deg); }
+  60%     { transform: translateX(3px) rotate(1deg); }
+  75%     { transform: translateX(-1px); }
+}
+.intent-shake { animation: intentShake 0.6s ease-in-out; }
 @keyframes babyIdle {
   0%   { background-position: 0px 0px; }
   50%  { background-position: calc(var(--bframe) * -1) 0px; }

@@ -91,6 +91,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [customIntent, setCustomIntent] = React.useState("");
   const [showCustomI, setShowCustomI] = React.useState(false);
   const [showIntentPicker, setShowIntentPicker] = React.useState(false);
+  const [intentShake, setIntentShake] = React.useState(false);
   const [bubbleIdx, setBubbleIdx] = React.useState(0);
   const [celebrate, setCelebrate] = React.useState(false);
   const [isHatching, setIsHatching] = React.useState(false);
@@ -214,6 +215,15 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const t = setInterval(()=>setBubbleIdx(i=>(i+1)%BUBBLES.length), 6500);
     return ()=>clearInterval(t);
   },[]);
+
+  React.useEffect(()=>{
+    if(intention) return;
+    const t = setInterval(()=>{
+      setIntentShake(true);
+      setTimeout(()=>setIntentShake(false), 600);
+    }, 12000);
+    return ()=>clearInterval(t);
+  }, [intention]);
 
   const allHabits = React.useMemo(()=>{
     // Merge presets with any icon customizations from onboarding, then add custom habits
@@ -535,7 +545,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Top spacer — pushes intention + monkey down to center */}
             <div style={{flex:1}}/>
             {/* Today's Intention sits above the monkey */}
-            <div className="intention-side-box" onClick={()=>setShowIntentPicker(v=>!v)}>
+            <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>setShowIntentPicker(v=>!v)}>
               <div className="intention-side-label">Today's Intention</div>
               <div className={"intention-side-word"+(intention?"":" unset")}>
                 {intention || "Set intention"}
