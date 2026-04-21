@@ -1140,28 +1140,30 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </p>
             ) : null}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>{
-                setEditName(profile.name||"");
-                setEditLoc(profile.loc||"");
-                const bd = parseBday(profile.bday);
-                setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
-                setShowPetMenu(false); setShowProfileEdit(true);
-              }}>Edit Profile</button>
-              <button className="coming-soon-btn" style={{width:"100%"}} onClick={async()=>{
-                setResetPwStatus(null);
-                const email = typeof authUser==="object" ? authUser?.email : null;
-                if(!email){ setResetPwStatus("error"); return; }
-                const { error } = await window.SB.auth.resetPasswordForEmail(email);
-                setResetPwStatus(error ? "error" : "sent");
-              }}>Reset Password</button>
-              <button className="coming-soon-btn" style={{width:"100%",color:"#c0392b",borderColor:"#c0392b",background:"rgba(192,57,43,.08)"}}
-                onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}>
+              {[
+                { label:"Edit Profile", onClick:()=>{ setEditName(profile.name||""); setEditLoc(profile.loc||""); const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y); setShowPetMenu(false); setShowProfileEdit(true); } },
+                { label:"Reset Password", onClick:async()=>{ setResetPwStatus(null); const email=typeof authUser==="object"?authUser?.email:null; if(!email){setResetPwStatus("error");return;} const{error}=await window.SB.auth.resetPasswordForEmail(email); setResetPwStatus(error?"error":"sent"); } },
+                { label:"Log Out", onClick:()=>{ setShowPetMenu(false); onSignOut(); } },
+              ].map(({label,onClick})=>(
+                <button key={label} onClick={onClick}
+                  style={{width:"100%",background:"#fce4ec",color:"#a0547a",border:"2px solid #f8bbd0",
+                          borderRadius:6,padding:"10px 16px",cursor:"pointer",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em"}}>
+                  {label}
+                </button>
+              ))}
+              <button onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}
+                style={{width:"100%",background:"#fce4ec",color:"#c0392b",border:"2px solid #f8bbd0",
+                        borderRadius:6,padding:"10px 16px",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em"}}>
                 Reset Everything
               </button>
-              <button className="coming-soon-btn" style={{width:"100%",borderColor:"var(--rose)",color:"var(--rose)"}}
-                onClick={()=>{ setShowPetMenu(false); onSignOut(); }}>Log Out</button>
-              <button className="coming-soon-btn" style={{width:"100%",background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
-                onClick={()=>setShowPetMenu(false)}>Cancel</button>
+              <button onClick={()=>setShowPetMenu(false)}
+                style={{width:"100%",background:"var(--cream)",color:"var(--plum)",border:"2px solid #f8bbd0",
+                        borderRadius:6,padding:"10px 16px",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,letterSpacing:".04em"}}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
