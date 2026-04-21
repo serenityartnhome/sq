@@ -232,4 +232,31 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+class ErrorBoundary extends React.Component {
+  constructor(props){ super(props); this.state = { crashed: false }; }
+  static getDerivedStateFromError(){ return { crashed: true }; }
+  render(){
+    if(!this.state.crashed) return this.props.children;
+    return (
+      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",
+                   justifyContent:"center",background:"#1a0e2e",padding:24,textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:16}}>🌸</div>
+        <div style={{fontFamily:"Silkscreen,monospace",fontSize:14,color:"#f5c9cc",marginBottom:8,letterSpacing:".04em"}}>
+          Oops — something went wrong
+        </div>
+        <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"rgba(255,255,255,.6)",marginBottom:28,lineHeight:1.7}}>
+          A new version may be loading.<br/>Tap below to refresh.
+        </div>
+        <button onClick={()=>window.location.reload()}
+          style={{background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
+                  fontFamily:"Silkscreen,monospace",fontSize:12,padding:"12px 28px",
+                  cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",
+                  boxShadow:"4px 4px 0 rgba(0,0,0,.3)"}}>
+          ✦ Reload App ✦
+        </button>
+      </div>
+    );
+  }
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App/></ErrorBoundary>);
