@@ -338,17 +338,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
   }, [daysInFlow]);
 
-  // Celebration fires once when doneCount first hits 3 today
-  React.useEffect(()=>{
-    if(localStorage.getItem("sq_celebrated") === today) return;
-    if(doneCount >= 3){
-      localStorage.setItem("sq_celebrated", today);
-      setCelebrating(true);
-      setTimeout(()=>setCelebrate(true), 800);
-      setTimeout(()=>setCelebrating(false), 3500);
-    }
-  }, [doneCount]);
-
   const [showGratShare, setShowGratShare] = React.useState(false);
   const [shareStatus, setShareStatus] = React.useState(null);
 
@@ -411,6 +400,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
+
+  // Celebration fires once when doneCount first hits 3 today
+  React.useEffect(()=>{
+    if(localStorage.getItem("sq_celebrated") === today) return;
+    if(doneCount >= 3){
+      localStorage.setItem("sq_celebrated", today);
+      setCelebrating(true);
+      setTimeout(()=>setCelebrate(true), 800);
+      setTimeout(()=>setCelebrating(false), 3500);
+    }
+  }, [doneCount]);
 
   const addCustomIntent = () => {
     const t = customIntent.trim();
