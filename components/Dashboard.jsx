@@ -463,8 +463,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {isHatched ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>setShowProfileEdit(true)}
-              style={{cursor:"pointer"}} title="Edit your profile">
+            <div className="pet-cloud-stage" onClick={()=>{
+                setEditName(profile.name||"");
+                setEditLoc(profile.loc||"");
+                const bd = parseBday(profile.bday);
+                setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
+                setShowProfileEdit(true);
+              }} style={{cursor:"pointer"}} title="Edit your profile">
               <div className="pet-on-cloud">
                 {isHatched && !isHatching ? (
                   <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={Math.round(Math.min(160, window.innerHeight*0.17))}/>
