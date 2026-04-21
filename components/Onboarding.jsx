@@ -228,7 +228,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
 }
 
 /* ── Main Onboarding ─────────────────────────────────────────── */
-function Onboarding({ onComplete, onLogin }){
+function Onboarding({ onComplete, onLogin, authUser }){
   const [name, setName] = React.useState("");
   const [bdayDay, setBdayDay]     = React.useState("");
   const [bdayMonth, setBdayMonth] = React.useState("");
@@ -500,9 +500,11 @@ function Onboarding({ onComplete, onLogin }){
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>
-            <button className="btn-primary btn-pink" disabled={!canSubmit} onClick={()=>setShowSavePopup(true)} style={{width:"100%"}}>
+            <button className="btn-primary btn-pink" disabled={!canSubmit}
+              onClick={()=>{ if(authUser){ onComplete(profileData(), null); } else { setShowSavePopup(true); } }}
+              style={{width:"100%"}}>
               <Icon name="sparkle" size={18}/>
-              Save My Progress
+              {authUser ? "Begin My Quest ✦ Save Progress" : "Save My Progress"}
               <Icon name="sparkle" size={18}/>
             </button>
             <button onClick={()=>{ if(canSubmit) onComplete(profileData(), null); }} disabled={!canSubmit}

@@ -140,21 +140,33 @@ function App(){
   const completeOnboarding = async (data, credentials)=>{
     save(data);
     setSaved(data);
-    if(!credentials || !window.SB) return;
+    if(!window.SB) return;
+    // Already signed in via Google — just save profile to their account
+    if(!credentials && authUser){
+      try {
+        await window.SB.from("profiles").upsert({
+          id:authUser.id, name:data.profile.name, bday:data.profile.bday||"",
+          loc:data.profile.loc||"", why:data.profile.why||"",
+          cursor:data.profile.cursor||null, habits:data.habits||[]
+        });
+      } catch{}
+      return;
+    }
+    if(!credentials) return;
     try {
-      let authUser = null;
+      let user = null;
       const { data:signUpData, error:signUpErr } = await window.SB.auth.signUp({ email:credentials.email, password:credentials.password });
       if(!signUpErr && signUpData?.user){
-        authUser = signUpData.user;
+        user = signUpData.user;
       } else {
         // Email already registered — try signing in instead
         const { data:signInData, error:signInErr } = await window.SB.auth.signInWithPassword({ email:credentials.email, password:credentials.password });
-        if(!signInErr && signInData?.user) authUser = signInData.user;
+        if(!signInErr && signInData?.user) user = signInData.user;
       }
-      if(authUser){
-        setAuthUser(authUser);
+      if(user){
+        setAuthUser(user);
         await window.SB.from("profiles").upsert({
-          id:authUser.id, name:data.profile.name, bday:data.profile.bday||"",
+          id:user.id, name:data.profile.name, bday:data.profile.bday||"",
           loc:data.profile.loc||"", why:data.profile.why||"",
           cursor:data.profile.cursor||null, habits:data.habits||[]
         });
@@ -222,7 +234,7 @@ function App(){
         : showConfirmed
           ? <EmailConfirmed onContinue={()=>setShowConfirmed(false)}/>
           : !saved
-            ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
+            ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
                          onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}/>
