@@ -82,6 +82,16 @@
     onAuthStateChange(cb){
       _listeners.push(cb);
       return { data:{ subscription:{ unsubscribe(){ const i=_listeners.indexOf(cb); if(i>-1)_listeners.splice(i,1); }}}};
+    },
+
+    async resetPasswordForEmail(email){
+      const r = await fetch(URL+"/auth/v1/recover", {
+        method:"POST", headers:_hdrs(),
+        body: JSON.stringify({ email })
+      });
+      const d = await r.json();
+      if(d.error) return { error:{ message: d.error_description||d.error||"Reset failed" }};
+      return { error:null };
     }
   };
 

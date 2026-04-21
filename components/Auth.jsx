@@ -6,12 +6,31 @@ function Auth({ onAuth }) {
   const [error, setError] = React.useState("");
   const [message, setMessage] = React.useState("");
 
+  const validatePassword = (p) => {
+    if(p.length < 8) return "Password must be at least 8 characters";
+    if(!/[a-zA-Z]/.test(p)) return "Password must include at least one letter";
+    if(!/[0-9]/.test(p)) return "Password must include at least one number";
+    return null;
+  };
+
   const submit = async () => {
     setError(""); setMessage("");
-    if (!email.trim() || password.length < 6) {
-      setError(password.length < 6 && email.trim() ? "Password must be at least 6 characters" : "Please fill in all fields");
+    if(!email.trim()){ setError("Please enter your email"); return; }
+
+    if(mode === "forgot"){
+      setLoading(true);
+      try {
+        const { error: err } = await SB.auth.resetPasswordForEmail(email.trim());
+        if(err) throw err;
+        setMessage("Reset link sent! Check your email.");
+      } catch(e){ setError(e.message); }
+      setLoading(false);
       return;
     }
+
+    const pwErr = validatePassword(password);
+    if(pwErr){ setError(pwErr); return; }
+
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -52,11 +71,11 @@ function Auth({ onAuth }) {
       <div style={{display:"flex",justifyContent:"center",marginTop:24,padding:"0 16px"}}>
         <div className="panel" style={{maxWidth:420,width:"100%"}}>
           <h2 style={{textAlign:"center",fontSize:16,marginBottom:4}}>
-            {mode==="login" ? "✦ Welcome Back ✦" : "✦ Create Account ✦"}
+            {mode==="login" ? "✦ Welcome Back ✦" : mode==="signup" ? "✦ Create Account ✦" : "✦ Reset Password ✦"}
           </h2>
           <div style={{textAlign:"center",fontSize:12,color:"var(--plum-soft)",marginBottom:18,
                        fontFamily:"Pixelify Sans, monospace"}}>
-            {mode==="login" ? "Log in to continue your quest" : "Sign up to save your progress forever"}
+            {mode==="login" ? "Log in to continue your quest" : mode==="signup" ? "Sign up to save your progress forever" : "We'll send a reset link to your email"}
           </div>
 
           <div className="field">
@@ -66,12 +85,12 @@ function Auth({ onAuth }) {
               onKeyDown={e=>e.key==="Enter"&&submit()}/>
           </div>
 
-          <div className="field">
-            <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 6 characters)</span></label>
+          {mode !== "forgot" && <div className="field">
+            <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 8 characters, letters &amp; numbers)</span></label>
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
               placeholder="••••••••"
               onKeyDown={e=>e.key==="Enter"&&submit()}/>
-          </div>
+          </div>}
 
           {error && (
             <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,
@@ -91,13 +110,21 @@ function Auth({ onAuth }) {
           <button className="btn-primary" onClick={submit} disabled={loading}
             style={{width:"100%",marginTop:8}}>
             <Icon name="sparkle" size={16}/>
-            {loading ? "Please wait…" : mode==="login" ? "Log In" : "Create Account"}
+            {loading ? "Please wait…" : mode==="login" ? "Log In" : mode==="signup" ? "Create Account" : "Send Reset Link"}
             <Icon name="sparkle" size={16}/>
           </button>
 
           <div style={{textAlign:"center",marginTop:14,fontSize:11,
                        fontFamily:"Silkscreen,monospace",color:"var(--plum-soft)"}}>
-            {mode==="login" ? "No account? " : "Already have one? "}
+            {mode==="login" && <>
+              <button onClick={()=>{setMode("forgot");setError("");setMessage("");}}
+                style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,textDecoration:"underline",padding:0}}>
+                Forgot password?
+              </button>
+              <span style={{margin:"0 8px"}}>·</span>
+            </>}
+            {mode==="login" ? "No account? " : mode==="signup" ? "Already have one? " : "Remember it? "}
             <button onClick={()=>{setMode(mode==="login"?"signup":"login");setError("");setMessage("");}}
               style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
                       fontFamily:"Silkscreen,monospace",fontSize:11,textDecoration:"underline",
