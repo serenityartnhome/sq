@@ -445,7 +445,7 @@ body{
 }
 .hero-sub .dot{color:var(--gold-soft);margin:0 10px}
 
-.features-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.features-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;width:100%}
 .feature-pill{
   display:inline-flex;align-items:center;gap:8px;padding:6px 14px;
   background:var(--parchment);border:2px solid var(--plum);
@@ -462,7 +462,8 @@ body{
 .bday-select{flex:1;font:inherit;font-family:"Pixelify Sans",monospace;font-size:15px;background:var(--cream);border:2px solid var(--gold);padding:10px 8px;outline:none;color:var(--ink);height:42px;box-sizing:border-box;cursor:pointer;}
 .bday-select:focus{border-color:var(--rose);}
 .onboard-safe-top{ height:calc(env(safe-area-inset-top) + 16px); }
-.onboard-two{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;max-width:1180px;margin:0 auto}
+.onboard-center-wrap{width:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.onboard-two{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;max-width:1180px;margin:0 auto;width:100%}
 .onboard-two.onboard-centered{grid-template-columns:1fr;max-width:520px;}
 .onboard-cta-btn{width:100%;font-size:16px;padding:16px 24px;letter-spacing:.06em;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;}
 .cursor-pick-row{display:flex;gap:10px;justify-content:center;margin:10px 0;}

@@ -277,6 +277,7 @@ function Onboarding({ onComplete, onLogin }){
     <div className="app-shell">
       <div className="scene-img scene-onboarding"/>
       <div className="scene-veil"/>
+      <div className="onboard-center-wrap">
       <div className="onboard-safe-top"/>
 
       <h1 className="hero-title">
@@ -513,6 +514,8 @@ function Onboarding({ onComplete, onLogin }){
         </div>
         )}
       </div>
+
+      </div>{/* /onboard-center-wrap */}
 
       {showLoginPopup && (
         <LoginPopup
