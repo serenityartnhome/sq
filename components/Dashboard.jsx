@@ -115,7 +115,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
-  const [mood, setMood] = React.useState("neutral");
+  const [mood, setMood] = React.useState(null);
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
   const isFlashing = React.useRef(false);
@@ -662,7 +662,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </div>
               )}
             </div>
-            <div style={{display:"flex",justifyContent:"center",marginBottom:4,marginTop:20}}>
+            <div className="bubble-wrap">
               <div className="bubble" key={bubbleIdx}>
                 {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
@@ -670,9 +670,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div className="pet-cloud-stage" onClick={()=>setShowPetMenu(true)} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
-                  const sz = Math.round(Math.min(160, window.innerHeight*0.17));
+                  const sz = Math.round(Math.min(140, window.innerHeight*0.14));
                   if(petStage==="adult" && !isHatching)
-                    return <ZodiacPet animal={animal} mood={celebrating?"happy":mood} happy={celebrating} size={sz}/>;
+                    return <ZodiacPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} happy={celebrating} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
@@ -682,7 +682,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                           className={justHatched?"baby-pop":""}/>
                       </div>
                     );
-                  return <img src={eggSrc(mood)} alt="egg"
+                  return <img src={eggSrc(mood||"neutral")} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
                     style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
                     onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); } }}
@@ -1027,15 +1027,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         </div>
                       ))}
                     </div>
-                    <div style={{fontSize:10,color:"var(--plum-soft)",textAlign:"center",marginTop:"clamp(1px,0.4vh,4px)",
-                                 fontFamily:"Silkscreen, monospace",textTransform:"uppercase",flexShrink:1,overflow:"hidden",whiteSpace:"nowrap"}}>
-                      {gratitudeDone ? "✓ Gratitude counted" : "Fill at least one"}
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+                                 gap:6,marginTop:"clamp(1px,0.4vh,4px)",flexShrink:0}}>
+                      <div style={{fontSize:10,color:"var(--plum-soft)",
+                                   fontFamily:"Silkscreen, monospace",textTransform:"uppercase",
+                                   overflow:"hidden",whiteSpace:"nowrap",flexShrink:1}}>
+                        {gratitudeDone ? "✓ Gratitude counted" : "Fill at least one"}
+                      </div>
+                      {userId && gratitudeDone && (
+                        <button className="grat-share-btn" onClick={openShareWall}>
+                          ♥ Share to Wall
+                        </button>
+                      )}
                     </div>
-                    {userId && gratitudeDone && (
-                      <button className="grat-share-btn" onClick={openShareWall}>
-                        ♥ Share to Wall
-                      </button>
-                    )}
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
@@ -1448,7 +1452,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 ? <ZodiacPet animal={animal} mood="excited" size={140}/>
                 : petStage==="baby"
                 ? <BabyPet animal={animal} happy={true} size={42}/>
-                : <img src={eggSrc(mood)} className="egg-idle"
+                : <img src={eggSrc(mood||"neutral")} className="egg-idle"
                     style={{width:140,height:140,imageRendering:"pixelated"}} alt="egg"/>
               }
             </div>
