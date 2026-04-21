@@ -5,6 +5,7 @@ function Auth({ onAuth }) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [message, setMessage] = React.useState("");
+  const [emailOptIn, setEmailOptIn] = React.useState(false);
 
   const validatePassword = (p) => {
     if(p.length < 8) return "Password must be at least 8 characters";
@@ -34,7 +35,7 @@ function Auth({ onAuth }) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { data, error: err } = await SB.auth.signUp({ email: email.trim(), password });
+        const { data, error: err } = await SB.auth.signUp({ email: email.trim(), password, options: { data: { email_opt_in: emailOptIn } } });
         if (err) throw err;
         if (data.session) {
           onAuth(data.user);
@@ -91,6 +92,19 @@ function Auth({ onAuth }) {
               placeholder="••••••••"
               onKeyDown={e=>e.key==="Enter"&&submit()}/>
           </div>}
+
+          {mode === "signup" && (
+            <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:12,cursor:"pointer",padding:"8px",
+                           background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+              <input type="checkbox" checked={emailOptIn} onChange={e=>setEmailOptIn(e.target.checked)}
+                style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+              <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
+                ✦ Yes, send me wellness tips &amp; educational content from Serenity Quest
+                <br/>
+                <span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
+              </span>
+            </label>
+          )}
 
           {error && (
             <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,

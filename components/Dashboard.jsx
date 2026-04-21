@@ -1382,20 +1382,34 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 ⚑ Misuse will be reviewed and may result in a permanent ban.
               </p>
             </div>
-            <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-              <button onClick={()=>{ localStorage.setItem("sq_wall_agreed","1"); setShowWallRules(false); setShowGratShare(true); }}
-                style={{background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
-                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
-                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",
-                        borderRadius:2}}>
-                I Agree ✦
-              </button>
-              <button onClick={()=>setShowWallRules(false)}
-                style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
-                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
-                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"none",borderRadius:2}}>
-                Cancel
-              </button>
+            {(()=>{
+              const [checked, setChecked] = React.useState(false);
+              return <>
+                <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer"}}>
+                  <input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)}
+                    style={{marginTop:2,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+                  <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.6}}>
+                    I have read and agree to the Community Guidelines above
+                  </span>
+                </label>
+                <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+                  <button onClick={()=>{ localStorage.setItem("sq_wall_agreed","1"); setShowWallRules(false); setShowGratShare(true); }}
+                    disabled={!checked}
+                    style={{background:checked?"#f5c9cc":"#e0d0d8",color:"#5c2a35",border:"2px solid #e39aa0",
+                            fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:checked?"pointer":"default",
+                            textTransform:"uppercase",letterSpacing:".05em",boxShadow:checked?"3px 3px 0 rgba(92,42,53,.25)":"none",
+                            borderRadius:2,opacity:checked?1:0.55}}>
+                    I Agree ✦
+                  </button>
+                  <button onClick={()=>setShowWallRules(false)}
+                    style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
+                            fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
+                            textTransform:"uppercase",letterSpacing:".05em",boxShadow:"none",borderRadius:2}}>
+                    Cancel
+                  </button>
+                </div>
+              </>;
+            })()}
             </div>
           </div>
         </div>

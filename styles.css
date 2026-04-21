@@ -984,7 +984,8 @@ body{
   flex-shrink:0;
   white-space:nowrap;
   margin-top:0;
-  padding:4px 10px;
+  padding:2px 8px;
+  line-height:1;
   background:var(--blush);
   color:var(--plum);
   border:2px solid var(--rose);
@@ -1634,13 +1635,12 @@ body{
   font-size:clamp(8px, 1vh, 11px);
   flex-shrink:0;
 }
-/* Icon: never bigger than button height — clamp the glyph container */
+/* Icon: never bigger than button height */
 .emotions-panel .mood-btn .mood-glyph{
   max-height:44px;
 }
-/* When button is landscape (short viewport makes height < width), icon moves left */
-/* Threshold ~700px: below this, button height shrinks below button width */
-@media (max-height:700px) and (min-width:981px){
+/* Desktop: always row layout — icon on left of label (plenty of horizontal space) */
+@media (min-width:981px){
   .emotions-panel .mood-btn{
     flex-direction:row;
     justify-content:flex-start;
