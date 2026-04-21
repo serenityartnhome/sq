@@ -378,6 +378,15 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
+        <button className="rail-btn" style={{opacity:.75}} onClick={()=>{}}>
+          <div style={{position:"relative",display:"inline-block"}}>
+            <img src="assets/icon-friends.png?v=1" width={54} height={54}
+              style={{imageRendering:"pixelated",display:"block",opacity:.55,filter:"grayscale(20%)"}} alt="friends"/>
+            <img src="assets/icon-lock.png?v=1" alt="locked"
+              style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated",pointerEvents:"none"}}/>
+          </div>
+          Friends
+        </button>
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
           <Icon name="heart" size={54}/>Community
         </button>
@@ -386,7 +395,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </button>
         <button className="rail-btn" onClick={()=>setShowSignOut(true)} style={{opacity:.85}}>
           <img src={isHatched ? `assets/icon-account-${animal}.png?v=1` : eggSrc(mood)}
-            alt="account" style={{width:54,height:54,imageRendering:"pixelated"}}/>
+            alt="account" width={42} height={42} style={{imageRendering:"pixelated"}}/>
           {isGuest ? "Guest" : "Account"}
         </button>
       </div>
@@ -539,8 +548,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 <span className="lbl">{h.label}</span>
                 {(()=>{
                   const base = streaks[h.id]||0;
-                  const live = (!dayCompleted && completed.has(h.id) && base > 0) ? base+1 : base;
-                  return live > 0 ? <span className="habit-streak"><Icon name="flame" size={13}/>{live}</span> : null;
+                  return base > 0 ? <span className="habit-streak"><Icon name="flame" size={13}/>{base}</span> : null;
                 })()}
               </label>
             ))}
