@@ -94,14 +94,9 @@
       return { error:null };
     },
 
-    async signInWithGoogle(){
-      const redirectTo = window.location.origin + window.location.pathname;
-      const r = await fetch(URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirectTo), {
-        method:"GET", headers:_hdrs(), redirect:"manual"
-      });
-      const location = r.headers.get("location") || (await r.json())?.url;
-      if(location) window.location.href = location;
-      else return { error:{ message:"Could not get Google sign-in URL" }};
+    signInWithGoogle(){
+      const redirectTo = "https://app.serenityartnhome.com";
+      window.location.href = URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirectTo);
     },
 
     async updatePassword(newPassword, accessToken){
