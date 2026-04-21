@@ -400,12 +400,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>setTab("calendar")}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn" style={{opacity:.85}} onClick={()=>{
-          const url = "https://app.serenityartnhome.com";
-          const text = "Join me on Serenity Quest — a daily feng shui habit tracker ✦";
-          if(navigator.share){ navigator.share({title:"Serenity Quest",text,url}).catch(()=>{}); }
-          else { setShowFriendsSoon(true); }
-        }}>
+        <button className="rail-btn" style={{opacity:.85}} onClick={()=>setShowFriendsSoon(true)}>
           <div style={{position:"relative",display:"inline-block"}}>
             <Icon name="heart" size={54}/>
             <img src="assets/icon-lock.png?v=1" alt="locked"
@@ -915,25 +910,29 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {showFriendsSoon && (
         <div className="coming-soon-overlay" onClick={()=>setShowFriendsSoon(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,textAlign:"center"}}>
-            <div style={{marginBottom:8}}><Icon name="heart" size={48}/></div>
-            <h3 className="coming-soon-title">✦ Invite a Friend ✦</h3>
-            <p className="coming-soon-body">Share your quest with someone special.</p>
-            <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--cream)",
-              border:"2px solid var(--rose)",padding:"6px 10px",marginBottom:12,cursor:"text"}}>
-              <span style={{flex:1,fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)",
-                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                app.serenityartnhome.com
-              </span>
-              <button className="coming-soon-btn"
-                style={{padding:"4px 10px",fontSize:11,margin:0,flexShrink:0}}
-                onClick={()=>{
-                  navigator.clipboard.writeText("https://app.serenityartnhome.com").catch(()=>{});
-                  setShowFriendsSoon(false);
-                }}>Copy ✦</button>
+            <div style={{marginBottom:8}}>
+              <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt=""/>
             </div>
-            <button className="coming-soon-btn"
-              style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
-              onClick={()=>setShowFriendsSoon(false)}>Close</button>
+            <h3 className="coming-soon-title">✦ Something is Coming ✦</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.9}}>
+              The lanterns are being lit.<br/>
+              The path is almost ready.<br/>
+              <span style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
+                …stay on your quest, adventurer.
+              </span>
+            </p>
+            <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="coming-soon-btn"
+                onClick={()=>{
+                  const url="https://app.serenityartnhome.com";
+                  const text="Join me on Serenity Quest — a daily feng shui habit tracker ✦";
+                  if(navigator.share){ navigator.share({title:"Serenity Quest",text,url}).catch(()=>{}); }
+                  else { navigator.clipboard.writeText(url).catch(()=>{}); setShowFriendsSoon(false); }
+                }}>Share with Friends ✦</button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowFriendsSoon(false)}>I'll Wait ✦</button>
+            </div>
           </div>
         </div>
       )}
