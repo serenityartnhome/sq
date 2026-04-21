@@ -245,14 +245,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   };
 
   const toggleHabit = (id) => {
-    flashHappy();
     setCompleted(prev=>{
-      const n=new Set(prev); n.has(id)?n.delete(id):n.add(id);
+      const n=new Set(prev);
+      if(n.has(id)){ n.delete(id); } else { n.add(id); flashHappy(); }
       localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...n]}));
       return n;
     });
   };
-  const togglePower = (id) => { flashHappy(); setPowerups(prev=>{ const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n; }); };
+  const togglePower = (id) => setPowerups(prev=>{ const n=new Set(prev); if(n.has(id)){ n.delete(id); } else { n.add(id); flashHappy(); } return n; });
   const setGrat = (i,v) => setGratitude(g=>{ const n=[...g]; n[i]=v; return n; });
 
   const toggleActiveHabit = (id) => setActiveHabitIds(prev=>{
