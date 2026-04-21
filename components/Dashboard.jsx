@@ -558,7 +558,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               ? <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
               : petStage==="baby"
               ? <BabyPet animal={animal} happy={celebrating} size={22}/>
-              : <img src={eggSrc(mood)} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
+              : <img src={eggSrc(mood||"neutral")} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
             }
           </div>
         </div>
