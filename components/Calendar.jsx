@@ -23,7 +23,8 @@ function CalendarView({ habits, powerups, todayLive }){
   const [viewDate, setViewDate]   = React.useState(new Date());
   const [selectedDay, setSelectedDay] = React.useState(null);
   const [weekStartsMon, setWeekStartsMon] = React.useState(()=>{
-    return localStorage.getItem("sq_week_mon")==="1";
+    const stored = localStorage.getItem("sq_week_mon");
+    return stored === null ? true : stored === "1";
   });
   const [quickNotes, setQuickNotes]   = React.useState(()=>{
     try{ return localStorage.getItem("sq_notes")||""; }catch{ return ""; }
