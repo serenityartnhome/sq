@@ -178,15 +178,17 @@ function App(){
     if(confirm("Start over? Your progress will be cleared.")){
       ["serenity-quest:v1","sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits",
        "sq_notes","sq_week_mon","sq_hatched","sq_adult","sq_celebrated","sq_powerups_unlocked",
-       "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_sb_session"]
+       "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_wall_agreed"]
         .forEach(k=>localStorage.removeItem(k));
       if(authUser && window.SB){
         try {
           await window.SB.from("profiles").delete().eq("id",authUser.id);
           await window.SB.from("daily_data").delete().eq("user_id",authUser.id);
+          await window.SB.from("gratitude_posts").delete().eq("user_id",authUser.id);
         } catch{}
       }
-      setSaved(null); setAuthUser(null);
+      // Keep authUser so they return to onboarding as already-logged-in
+      setSaved(null);
     }
   };
 
