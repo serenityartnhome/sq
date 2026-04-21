@@ -926,16 +926,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                      fontFamily:"Silkscreen, monospace",color:"var(--plum)",
                      textTransform:"uppercase",letterSpacing:".05em",
                      display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <Icon name="sparkle" size={18}/>Power-Ups<Icon name="sparkle" size={18}/>
+            <Icon name="sparkle" size={18}/>Power-Ups
+            {!powerupsUnlocked && daysInFlow < 2 && (
+              <img src="assets/icon-lock.png?v=1" alt="locked"
+                style={{width:16,height:16,imageRendering:"pixelated",verticalAlign:"middle"}}/>
+            )}
+            <Icon name="sparkle" size={18}/>
           </h2>
 
           {(!powerupsUnlocked && daysInFlow < 2) ? (
             <>
               <button style={{width:"100%",marginBottom:6,padding:"12px 16px",
-                              background:"var(--parchment)",color:"var(--plum)",
-                              border:"3px solid var(--plum)",borderRadius:4,cursor:"pointer",
+                              background:"transparent",color:"#f5c9cc",
+                              border:"3px solid #f5c9cc",borderRadius:4,cursor:"pointer",
                               fontFamily:"Silkscreen,monospace",fontSize:16,letterSpacing:".04em",
-                              textTransform:"uppercase",boxShadow:"3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 2px var(--gold)",
+                              textTransform:"uppercase",boxShadow:"3px 3px 0 rgba(245,201,204,.2)",
                               display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
                 onClick={()=>setShowPowerupSetup(v=>!v)}>
                 <Icon name="sparkle" size={14}/>
