@@ -952,7 +952,7 @@ body{
 .grat-card-delete:hover{ opacity:1;color:var(--plum); }
 .grat-card-report{
   background:transparent;
-  border:1px solid var(--rose);
+  border:none;
   color:var(--plum-soft);
   font-family:"Silkscreen",monospace;
   font-size:11px;

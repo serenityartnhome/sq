@@ -301,17 +301,15 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
                 <div className="grat-card-footer">
                   <div className="grat-card-time">{timeAgo(post.created_at)}</div>
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    {isOwn ? (
-                      <button onClick={()=>deletePost(post.id)} className="grat-card-delete">delete</button>
-                    ) : userId ? (
+                    {(isOwn || (isAdmin && !isOwn)) && (
+                      <button onClick={()=>deletePost(post.id)} className="grat-card-delete">del</button>
+                    )}
+                    {!isOwn && userId && (
                       <button onClick={()=>confirmReport(post.id)}
                         className={"grat-card-report"+(isReported?" reported":"")}
                         disabled={isReported} title="Report this post">
                         {isReported ? "⚑" : "⚑"}
                       </button>
-                    ) : null}
-                    {isAdmin && !isOwn && (
-                      <button onClick={()=>deletePost(post.id)} className="grat-card-delete">del</button>
                     )}
                     <button onClick={()=>toggleLike(post.id)} className={"grat-card-like"+(isLiked?" liked":"")}>
                       ♥ {post.likeCount}
