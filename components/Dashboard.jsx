@@ -59,7 +59,7 @@ function TopBarClock(){
   );
 }
 
-function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail }){
   const today = new Date().toISOString().slice(0,10);
 
   const [completed, setCompleted] = React.useState(()=>{
@@ -111,6 +111,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [showPetMenu, setShowPetMenu] = React.useState(false);
+  const [pendingReports, setPendingReports] = React.useState(0);
+  const isAdmin = userEmail === "serenityartnhome@gmail.com";
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState("neutral");
@@ -219,6 +221,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const t = setInterval(()=>setBubbleIdx(i=>(i+1)%BUBBLES.length), 6500);
     return ()=>clearInterval(t);
   },[]);
+
+  React.useEffect(()=>{
+    if(!isAdmin || !window.SB) return;
+    window.SB.from("moderation_log").select("post_id").then(({data})=>{
+      setPendingReports((data||[]).length);
+    });
+  },[isAdmin]);
 
   React.useEffect(()=>{
     if(intention) return;
@@ -367,11 +376,56 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   }, [daysInFlow]);
 
   const [showGratShare, setShowGratShare] = React.useState(false);
+  const [showWallRules, setShowWallRules] = React.useState(false);
+  const [wallBanned, setWallBanned] = React.useState(false);
   const [shareStatus, setShareStatus] = React.useState(null);
+
+  const PROFANITY = ["fuck","shit","bitch","asshole","bastard","cunt","dick","pussy","nigger","nigga","faggot","fag","retard","whore","slut","cock","motherfucker","bullshit","twat","wanker","prick","arse","bollocks"];
+  const hasProfanity = (text) => {
+    const lower = text.toLowerCase().replace(/[^a-z0-9\s]/g,"");
+    return PROFANITY.some(w => new RegExp("\\b"+w+"\\b").test(lower));
+  };
+  const censorContent = (text) => {
+    let t = text;
+    // Censor profanity words
+    PROFANITY.forEach(w => {
+      t = t.replace(new RegExp("\\b"+w+"\\b","gi"), m => "*".repeat(m.length));
+    });
+    // Hide emails
+    t = t.replace(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g, "[email hidden]");
+    // Hide phone numbers (various formats)
+    t = t.replace(/(\+?[\d\s\-().]{7,15}\d)/g, (m) => /\d{7,}/.test(m.replace(/\D/g,"")) ? "[number hidden]" : m);
+    // Hide URLs
+    t = t.replace(/https?:\/\/\S+|www\.\S+/gi, "[link hidden]");
+    return t;
+  };
+
+  const openShareWall = async () => {
+    if(!userId || !window.SB) return;
+    // Check ban
+    try {
+      const { data } = await window.SB.from("banned_users").select("user_id").eq("user_id", userId).single();
+      if(data){ setWallBanned(true); return; }
+    } catch {}
+    // Check daily limit
+    if(localStorage.getItem("sq_wall_last_date") === today){
+      setShareStatus("already"); setShowGratShare(true); return;
+    }
+    // First-time rules
+    if(!localStorage.getItem("sq_wall_agreed")){
+      setShowWallRules(true); return;
+    }
+    setShowGratShare(true);
+  };
 
   const [shareError, setShareError] = React.useState("");
   const shareToWall = async (content) => {
     if(!userId || !window.SB || !content.trim()) return;
+    if(hasProfanity(content)){
+      setShareError("Your message contains inappropriate language. Please keep the wall positive ✦");
+      setShareStatus("error"); return;
+    }
+    const cleanContent = censorContent(content);
     setShareStatus("sharing"); setShareError("");
     try {
       const streak = (()=>{
@@ -379,7 +433,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
           let count = 0;
           const d = new Date();
-          d.setDate(d.getDate()-1); // start from yesterday — today is day 0
+          d.setDate(d.getDate()-1);
           while(true){
             const k = d.toISOString().slice(0,10);
             if(!hist[k]) break;
@@ -390,14 +444,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         } catch{ return 0; }
       })();
       const attempts = [
-        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), loc: profile.loc||"", animal, streak },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim(), animal, streak },
-        { user_id: userId, display_name: profile.name||"Adventurer", content: content.trim() },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, loc: profile.loc||"", animal, streak },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent, animal, streak },
+        { user_id: userId, display_name: profile.name||"Adventurer", content: cleanContent },
       ];
       let lastErr = null;
       for(const row of attempts){
         const { error } = await window.SB.from("gratitude_posts").insert(row);
-        if(!error){ setShareStatus("done"); setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); setShareError(""); }, 1400); return; }
+        if(!error){
+          localStorage.setItem("sq_wall_last_date", today);
+          setShareStatus("done");
+          setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); setShareError(""); }, 1400);
+          return;
+        }
         lastErr = error;
       }
       setShareError(lastErr?.message||"Unknown error");
@@ -408,16 +467,28 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const submitFeedback = async () => {
     if(!feedbackMsg.trim()) return;
     setFeedbackStatus("sending");
-    try {
-      const { error } = await window.SB.from("feedback").insert({
-        user_id: userId||null,
-        display_name: profile.name||"Adventurer",
-        message: feedbackMsg.trim()
-      });
-      if(error) throw error;
+    let sent = false;
+    if(window.SB){
+      try {
+        const { error } = await window.SB.from("feedback").insert({
+          user_id: userId||null,
+          display_name: profile.name||"Adventurer",
+          message: feedbackMsg.trim()
+        });
+        if(!error) sent = true;
+      } catch {}
+    }
+    if(sent){
       setFeedbackStatus("done");
       setFeedbackMsg("");
-    } catch { setFeedbackStatus("error"); }
+    } else {
+      // Fallback: open mailto
+      const subject = encodeURIComponent("Serenity Quest Message");
+      const body = encodeURIComponent(`From: ${profile.name||"Adventurer"}\n\n${feedbackMsg.trim()}`);
+      window.open(`mailto:serenityartnhome@gmail.com?subject=${subject}&body=${body}`);
+      setFeedbackStatus("done");
+      setFeedbackMsg("");
+    }
   };
 
   const gratitudeDone = gratitude.some(x=>x.trim().length>0);
@@ -508,7 +579,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           Friends
         </button>
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>setTab("community")}>
-          <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>Community
+          <div style={{position:"relative",display:"inline-block"}}>
+            <img src="assets/icon-earth.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="community"/>
+            {isAdmin && pendingReports > 0 && (
+              <span style={{position:"absolute",top:0,right:0,background:"#c0392b",color:"#fff",
+                            borderRadius:"50%",width:16,height:16,fontSize:9,fontFamily:"Silkscreen,monospace",
+                            display:"flex",alignItems:"center",justifyContent:"center",
+                            border:"2px solid #fff",lineHeight:1}}>
+                {pendingReports > 9 ? "9+" : pendingReports}
+              </span>
+            )}
+          </div>
+          Community
         </button>
         <button className="rail-btn" onClick={()=>setShowShopPrompt(true)}>
           <Icon name="shop" size={54}/>Shop
@@ -521,7 +603,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
       {tab === "community" && (
         <div className="community-view">
-          <CommunityBoard userId={userId} displayName={profile.name}/>
+          <CommunityBoard userId={userId} displayName={profile.name} pendingReports={pendingReports} onReportClear={()=>setPendingReports(0)} isAdmin={isAdmin}/>
         </div>
       )}
 
@@ -594,7 +676,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); return hatched && !hist[yd.toISOString().slice(0,10)]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[yd.toISOString().slice(0,10)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -744,9 +826,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
           {(!powerupsUnlocked && daysInFlow < 2) ? (
             <>
-              <button className="coming-soon-btn" style={{width:"100%",marginBottom:6}}
+              <button className="btn-primary btn-pink" style={{width:"100%",marginBottom:6}}
                 onClick={()=>setShowPowerupSetup(v=>!v)}>
-                {showPowerupSetup ? "Hide ✦" : "Set Up Power-Ups ✦"}
+                <Icon name="sparkle" size={14}/>
+                {showPowerupSetup ? "Hide" : "Set Up Power-Ups"}
+                <Icon name="sparkle" size={14}/>
               </button>
               {showPowerupSetup && (
                 <div className="pu-picker-panel" style={{marginBottom:0}}>
@@ -947,7 +1031,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                       {gratitudeDone ? "✓ Gratitude counted" : "Fill at least one"}
                     </div>
                     {userId && gratitudeDone && (
-                      <button className="grat-share-btn" onClick={()=>setShowGratShare(true)}>
+                      <button className="grat-share-btn" onClick={openShareWall}>
                         ♥ Share to Wall
                       </button>
                     )}
@@ -1142,11 +1226,32 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </p>
             ) : null}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>{ setEditName(profile.name||""); setEditLoc(profile.loc||""); const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y); setShowPetMenu(false); setShowProfileEdit(true); }}>Edit Profile</button>
-              <button className="coming-soon-btn" style={{width:"100%"}} onClick={async()=>{ setResetPwStatus(null); const email=typeof authUser==="object"?authUser?.email:null; if(!email){setResetPwStatus("error");return;} const{error}=await window.SB.auth.resetPasswordForEmail(email); setResetPwStatus(error?"error":"sent"); }}>Reset Password</button>
-              <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>{ setShowPetMenu(false); onSignOut(); }}>Log Out</button>
-              <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a"}} onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}>Reset Everything</button>
-              <button className="coming-soon-btn" style={{width:"100%",background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}} onClick={()=>setShowPetMenu(false)}>Cancel</button>
+              {[
+                {label:"Edit Profile", onClick:()=>{ setEditName(profile.name||""); setEditLoc(profile.loc||""); const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y); setShowPetMenu(false); setShowProfileEdit(true); }},
+                {label:"Reset Password", onClick:async()=>{ setResetPwStatus(null); const sess=JSON.parse(localStorage.getItem("sq_sb_session")||"null"); const email=sess?.user?.email||null; if(!email){setResetPwStatus("error");return;} const{error}=await window.SB.auth.resetPasswordForEmail(email); setResetPwStatus(error?"error":"sent"); }},
+                {label:"Log Out", onClick:()=>{ setShowPetMenu(false); onSignOut(); }},
+              ].map(({label,onClick})=>(
+                <button key={label} onClick={onClick}
+                  style={{width:"100%",background:"#f5a7bc",color:"#5a1a30",border:"2px solid #e8829f",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
+                          textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",
+                          borderRadius:0}}>
+                  {label}
+                </button>
+              ))}
+              <button onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}
+                style={{width:"100%",background:"#8b1a1a",color:"#fff",border:"2px solid #6b0e0e",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
+                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(0,0,0,.4)",
+                        borderRadius:2}}>
+                Reset Everything
+              </button>
+              <button onClick={()=>setShowPetMenu(false)}
+                style={{width:"100%",background:"#f5a7bc",color:"#5a1a30",border:"2px solid #e8829f",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
+                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",borderRadius:0}}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -1154,19 +1259,44 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
       {showResetConfirm && (
         <div className="coming-soon-overlay" onClick={()=>setShowResetConfirm(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%"}}>
-            <h3 className="coming-soon-title" style={{color:"#c0392b"}}>⚠ Reset Everything?</h3>
-            <p className="coming-soon-body">
-              This will permanently wipe all your past data — habits, streaks, diary, pet progress. This cannot be undone.
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%"}}>
+            <h3 className="coming-soon-title" style={{color:"#c0392b"}}>⚠ What would you like to do?</h3>
+            <p className="coming-soon-body" style={{marginBottom:6}}>
+              Choose how you'd like to start fresh:
             </p>
-            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <div style={{background:"rgba(192,57,43,.06)",border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"10px 12px"}}>
+                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"var(--plum)",marginBottom:4}}>Reset My Data</div>
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:8,lineHeight:1.5}}>
+                  Wipe habits, streaks, diary &amp; pet progress. Your account stays — you can log back in.
+                </div>
+                <button className="coming-soon-btn" style={{width:"100%",background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",boxShadow:"none"}}
+                  onClick={()=>{ setShowResetConfirm(false); onReset(); }}>
+                  Reset My Data
+                </button>
+              </div>
+              <div style={{background:"rgba(139,26,26,.06)",border:"1px solid rgba(139,26,26,.3)",borderRadius:6,padding:"10px 12px"}}>
+                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#8b1a1a",marginBottom:4}}>Delete Account</div>
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:8,lineHeight:1.5}}>
+                  Permanently delete all your data &amp; account. This cannot be undone.
+                </div>
+                <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a"}}
+                  onClick={async()=>{
+                    setShowResetConfirm(false);
+                    if(userId && window.SB){
+                      try {
+                        await window.SB.from("gratitude_posts").delete().eq("user_id",userId);
+                        await window.SB.from("daily_data").delete().eq("user_id",userId);
+                        await window.SB.from("profiles").delete().eq("id",userId);
+                      } catch{}
+                    }
+                    onReset();
+                  }}>
+                  Delete My Account
+                </button>
+              </div>
               <button className="coming-soon-btn"
-                style={{color:"#c0392b",borderColor:"#c0392b",background:"rgba(192,57,43,.08)"}}
-                onClick={()=>{ setShowResetConfirm(false); onReset(); }}>
-                Yes, wipe everything
-              </button>
-              <button className="coming-soon-btn"
-                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
                 onClick={()=>setShowResetConfirm(false)}>Cancel</button>
             </div>
           </div>
@@ -1221,6 +1351,61 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
+      {wallBanned && (
+        <div className="coming-soon-overlay" onClick={()=>setWallBanned(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%",textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:8}}>⚑</div>
+            <h3 className="coming-soon-title" style={{color:"#8b1a1a"}}>Account Suspended</h3>
+            <p className="coming-soon-body" style={{fontSize:12}}>
+              Your account has been permanently suspended from the Gratitude Wall due to community guideline violations.
+            </p>
+            <button className="coming-soon-btn"
+              style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",boxShadow:"none"}}
+              onClick={()=>setWallBanned(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {showWallRules && (
+        <div className="coming-soon-overlay" onClick={()=>setShowWallRules(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
+            <h3 className="coming-soon-title">✦ Community Guidelines ✦</h3>
+            <div style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
+                         lineHeight:1.9,marginBottom:16,textAlign:"left"}}>
+              <p style={{marginTop:0,marginBottom:8,fontFamily:"Silkscreen,monospace",fontSize:11,color:"var(--plum)"}}>
+                The Gratitude Wall is a positive space for sharing what you're grateful for. ✦
+              </p>
+              <ul style={{paddingLeft:18,margin:0}}>
+                <li>Share genuine gratitude — kind words, small joys, daily wins ✦</li>
+                <li>One share per day per account</li>
+                <li>No profanity, hate speech, or inappropriate content</li>
+                <li>No spam, advertising, or self-promotion</li>
+                <li>Treat every adventurer with respect</li>
+                <li>Posts reported by 3+ users are auto-removed</li>
+              </ul>
+              <p style={{marginBottom:0,marginTop:10,fontFamily:"Silkscreen,monospace",fontSize:10,color:"#8b1a1a"}}>
+                ⚑ Misuse will be reviewed and may result in a permanent ban.
+              </p>
+            </div>
+            <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+              <button onClick={()=>{ localStorage.setItem("sq_wall_agreed","1"); setShowWallRules(false); setShowGratShare(true); }}
+                style={{background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
+                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",
+                        borderRadius:2}}>
+                I Agree ✦
+              </button>
+              <button onClick={()=>setShowWallRules(false)}
+                style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
+                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"none",borderRadius:2}}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showGratShare && (
         <div className="coming-soon-overlay" onClick={()=>{ setShowGratShare(false); setShareStatus(null); }}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
@@ -1229,9 +1414,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {shareStatus==="done" ? (
               <div style={{textAlign:"center",padding:"20px 0",fontFamily:"Pixelify Sans,monospace",
                            color:"var(--jade-deep)",fontSize:16}}>✓ Shared to the Wall!</div>
+            ) : shareStatus==="already" ? (
+              <div style={{textAlign:"center",padding:"12px 10px",fontFamily:"Silkscreen,monospace",fontSize:11,
+                           color:"#5c2a35",background:"rgba(245,201,204,.3)",border:"1px solid #e39aa0",borderRadius:4,lineHeight:1.7}}>
+                You've already shared today ✦<br/>
+                <span style={{fontSize:11,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)"}}>
+                  One share per day — come back tomorrow!<br/>
+                  Or go to the <strong>Community Wall</strong> tab, delete your current post, then share again.
+                </span>
+              </div>
             ) : shareStatus==="error" ? (
               <div style={{textAlign:"center",padding:"12px 0",fontFamily:"Pixelify Sans,monospace",
-                           color:"var(--rose)",fontSize:13,lineHeight:1.5}}>
+                           color:"#c0392b",fontSize:13,lineHeight:1.5}}>
                 Couldn't share.<br/>
                 <span style={{fontSize:11,opacity:.8}}>{shareError}</span>
               </div>

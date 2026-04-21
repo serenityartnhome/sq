@@ -23,7 +23,7 @@
         body: JSON.stringify({ refresh_token: _session.refresh_token })
       });
       const d = await r.json();
-      if(d.access_token){ _session=d; localStorage.setItem(SESS, JSON.stringify(d)); return true; }
+      if(d.access_token){ _session={ ..._session, ...d }; localStorage.setItem(SESS, JSON.stringify(_session)); return true; }
     } catch{}
     return false;
   }

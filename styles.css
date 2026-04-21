@@ -471,6 +471,19 @@ body{
 .cursor-pick-btn:hover{background:var(--blush-soft);}
 .btn-pink{background:#f5a7bc !important;border-color:#e8829f !important;color:#5a1a30 !important;}
 .btn-pink:hover:not(:disabled){background:#f2c4d0 !important;border-color:#e8829f !important;}
+.btn-google-pixel{
+  width:100%;background:#fff;color:#3c4043;
+  border:3px solid #3c4043;
+  font-family:"Silkscreen",monospace;font-size:11px;
+  padding:10px 16px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:.06em;
+  box-shadow:4px 4px 0 #3c4043;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  border-radius:0;
+  transition:none;
+}
+.btn-google-pixel:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #3c4043;}
+.btn-google-pixel:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #3c4043;}
 .habit-pick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;}
 .dash-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:26px;align-items:start;max-width:1240px;margin:0 auto;padding-left:100px}
 
@@ -816,27 +829,19 @@ body{
 }
 .grat-wall-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:8px;
   padding:0 2px;
 }
 .grat-card{
   position:relative;
   background:var(--parchment);
-  border:3px solid var(--plum);
-  box-shadow:4px 4px 0 rgba(0,0,0,.3), inset 0 0 0 2px var(--gold-soft);
-  padding:14px 14px 10px;
+  border:2px solid var(--plum);
+  box-shadow:3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 1px var(--gold-soft);
+  padding:8px 10px 6px;
   display:flex;
   flex-direction:column;
-  gap:8px;
-}
-.grat-card-heart-deco{
-  position:absolute;
-  top:8px;right:10px;
-  font-size:16px;
-  color:var(--rose);
-  opacity:.5;
-  pointer-events:none;
+  gap:4px;
 }
 .grat-card-streak{
   display:flex;
@@ -852,11 +857,11 @@ body{
 .grat-card-top{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:7px;
 }
 .grat-card-avatar{
   flex-shrink:0;
-  width:46px;height:46px;
+  width:24px;height:24px;
   display:flex;align-items:center;justify-content:center;
 }
 .grat-card-meta{
@@ -872,9 +877,8 @@ body{
 }
 .grat-card-time{
   font-family:"Pixelify Sans",monospace;
-  font-size:11px;
+  font-size:10px;
   color:var(--plum-soft);
-  margin-top:2px;
 }
 .grat-card-loc{
   font-family:"Pixelify Sans",monospace;
@@ -885,7 +889,7 @@ body{
 }
 .grat-card-content{
   font-family:"Pixelify Sans",monospace;
-  font-size:15px;
+  font-size:13px;
   color:var(--plum);
   line-height:1.6;
   flex:1;
@@ -896,7 +900,7 @@ body{
 .grat-card-footer{
   display:flex;
   align-items:center;
-  justify-content:flex-end;
+  justify-content:space-between;
   gap:8px;
   margin-top:2px;
 }
@@ -955,18 +959,18 @@ body{
   width:100%;
   margin-top:6px;
   padding:8px 14px;
-  background:var(--plum);
-  color:#fff;
-  border:none;
+  background:var(--blush);
+  color:var(--plum);
+  border:2px solid var(--rose);
   font-family:"Silkscreen",monospace;
   font-size:10px;
   text-transform:uppercase;
   letter-spacing:.05em;
   cursor:pointer;
-  box-shadow:3px 3px 0 rgba(0,0,0,.3);
+  box-shadow:3px 3px 0 rgba(92,42,53,.25);
   transition:all .1s steps(2);
 }
-.grat-share-btn:hover{ background:var(--plum-soft);transform:translate(-1px,-1px); }
+.grat-share-btn:hover{ background:var(--blush-soft);border-color:var(--plum);transform:translate(-1px,-1px); }
 .grat-share-btn:disabled{ opacity:.45;cursor:default;transform:none; }
 
 /* Share picker modal entries */
@@ -1153,9 +1157,9 @@ body{
 .coming-soon-overlay{position:fixed;inset:0;background:rgba(20,6,12,.6);z-index:1000;
   display:flex;align-items:center;justify-content:center;}
 .coming-soon-box{
-  background:var(--parchment);border:4px solid var(--plum);
+  background:var(--parchment);border:4px solid #e8829f;
   padding:32px 36px;text-align:center;max-width:320px;
-  box-shadow:6px 6px 0 rgba(0,0,0,.5), inset 0 0 0 3px var(--gold);
+  box-shadow:6px 6px 0 rgba(0,0,0,.5), inset 0 0 0 3px #f5a7bc;
 }
 .coming-soon-lock{font-size:48px;margin-bottom:8px;}
 .coming-soon-title{
@@ -1167,12 +1171,12 @@ body{
   line-height:1.6;margin:0 0 20px;
 }
 .coming-soon-btn{
-  background:var(--plum);color:#fff;border:none;
+  background:#f5a7bc;color:#5a1a30;border:2px solid #e8829f;
   font-family:"Silkscreen",monospace;font-size:12px;
   padding:10px 24px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;
-  box-shadow:3px 3px 0 rgba(0,0,0,.4);
+  box-shadow:3px 3px 0 rgba(92,42,53,.25);
 }
-.coming-soon-btn:hover{background:var(--rose);}
+.coming-soon-btn:hover{background:#f2c4d0;border-color:#d4607e;}
 
 /* Celebrate */
 .celebrate{position:fixed;inset:0;background:rgba(30,10,20,.7);z-index:1000;
@@ -1228,16 +1232,18 @@ body{
   .rail-btn{
     flex:1;
     width:auto;
-    height:58px;
+    height:52px;
     min-width:0;
     font-size:9px;
-    gap:1px;
+    flex-direction:row;
+    align-items:center;
+    gap:5px;
     border:3px solid var(--plum) !important;
     box-shadow:3px 3px 0 rgba(0,0,0,.3), inset 0 0 0 2px var(--gold) !important;
     background:var(--parchment);
   }
   .rail-btn.active{ background:var(--blush) !important; border-color:var(--rose) !important; }
-  .rail-btn img{ width:28px;height:28px; }
+  .rail-btn img{ width:26px;height:26px; }
 
   /* ── Onboarding ── */
   .hero-title{ font-size:clamp(18px,6vw,28px);gap:8px;margin:10px 0 4px; }
@@ -1829,4 +1835,36 @@ body{
 .diary-textarea::-webkit-scrollbar-thumb:hover{
   background:var(--plum);
   border-color:var(--blush);
+}
+
+/* ============================================================
+   SHORT VIEWPORT HEIGHT — zodiac panel layout fixes
+   ============================================================ */
+@media (max-height: 700px) and (min-width: 600px) {
+  /* Compress spacers so intention + pet + energy all fit without overlap */
+  .zodiac-pet-col{ padding-bottom:8px; }
+  .zodiac-pet-col > div[style*="flex:1"]:first-child{ flex:0 0 4px !important; min-height:0 !important; }
+  .zodiac-pet-col > div[style*="flex:1"]:last-child{ flex:0 0 4px !important; min-height:0 !important; }
+  .pet-energy-bar{ margin-top:4px; }
+  /* Shrink pet to avoid overlap */
+  .zodiac-pet-col img.pixel[style*="width:clamp"]{
+    max-height:clamp(80px,18vh,140px) !important;
+  }
+}
+@media (max-height: 580px) and (min-width: 600px) {
+  /* Last resort: intention floats left of zodiac pet in a row */
+  .zodiac-pet-col{
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding-bottom:4px;
+  }
+  .zodiac-pet-col > div[style*="flex:1"]{ display:none !important; }
+  .intention-side-box{
+    align-self:center;
+    flex-shrink:0;
+    max-width:140px;
+  }
+  .pet-energy-bar{ margin-top:0; }
 }

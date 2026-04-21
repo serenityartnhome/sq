@@ -112,8 +112,26 @@ function App(){
 
         const { data:{ session } } = await window.SB.auth.getSession();
         if(!session) return;
-        setAuthUser(session.user);
-        if(session.user) await loadProfile(session.user.id);
+        let user = session.user;
+        if(!user && session.access_token){
+          try {
+            const SB_URL2 = "https://hplmgpxnbgmdmqmsuisz.supabase.co";
+            const SB_KEY2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbG1ncHhuYmdtZG1xbXN1aXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2ODM3OTAsImV4cCI6MjA5MjI1OTc5MH0.eKh6KMxsyOls_3V9KoCE0b7TECFKmpbYEDCDJ4QN67A";
+            const res = await fetch(SB_URL2+"/auth/v1/user", {
+              headers:{ "apikey": SB_KEY2, "Authorization": "Bearer "+session.access_token }
+            });
+            const fetched = await res.json();
+            if(fetched.id){
+              user = fetched;
+              const fixed = { ...session, user };
+              window.SB.auth._session = fixed;
+              try{ localStorage.setItem("sq_sb_session", JSON.stringify(fixed)); }catch{}
+            }
+          } catch{}
+        }
+        if(!user) return;
+        setAuthUser(user);
+        await loadProfile(user.id);
       } catch{}
     })();
   },[]);
@@ -146,7 +164,9 @@ function App(){
 
   const reset = async ()=>{
     if(confirm("Start over? Your progress will be cleared.")){
-      [STORAGE,"sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits","sq_notes","sq_week_mon"]
+      ["serenity-quest:v1","sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits",
+       "sq_notes","sq_week_mon","sq_hatched","sq_adult","sq_celebrated","sq_powerups_unlocked",
+       "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_sb_session"]
         .forEach(k=>localStorage.removeItem(k));
       if(authUser && window.SB){
         try {
@@ -205,7 +225,7 @@ function App(){
             ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
-                         onUpdateProfile={handleUpdateProfile}/>
+                         onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
     </>

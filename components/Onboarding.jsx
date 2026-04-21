@@ -99,7 +99,7 @@ function LoginPopup({ onClose, onLogin }){
             </div>
           )}
           {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
-          <button className="btn-primary" onClick={submit} disabled={loading} style={{width:"100%",marginBottom:10}}>
+          <button className="btn-primary btn-pink" onClick={submit} disabled={loading} style={{width:"100%",marginBottom:10}}>
             <Icon name="sparkle" size={16}/>
             {loading ? "Please wait…" : forgotMode ? "Send Reset Link" : "Log In"}
             <Icon name="sparkle" size={16}/>
@@ -110,15 +110,12 @@ function LoginPopup({ onClose, onLogin }){
               <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>or</span>
               <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
             </div>
-            <button onClick={()=>window.SB.auth.signInWithGoogle()}
-              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:10,
-                      background:"#fff",border:"1px solid #ddd",borderRadius:6,padding:"10px 16px",
-                      cursor:"pointer",fontSize:13,fontWeight:"600",color:"#3c3c3c",marginBottom:10}}>
-              <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            <button onClick={()=>window.SB.auth.signInWithGoogle()} className="btn-google-pixel" style={{marginBottom:10}}>
+              <svg width="16" height="16" viewBox="0 0 18 18" style={{flexShrink:0}}>
+                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.017 17.64 11.71 17.64 9.2z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
               </svg>
               Continue with Google
             </button>
@@ -195,7 +192,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
 
         {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
 
-        <button className="btn-primary" onClick={submit} disabled={submitting} style={{width:"100%",marginBottom:10}}>
+        <button className="btn-primary btn-pink" onClick={submit} disabled={submitting} style={{width:"100%",marginBottom:10}}>
           <Icon name="sparkle" size={16}/>
           {submitting ? "Creating account…" : "Begin My Quest & Save Progress"}
           <Icon name="sparkle" size={16}/>
@@ -207,15 +204,18 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
           <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
         </div>
 
-        <button onClick={()=>window.SB.auth.signInWithGoogle()} className="btn-primary"
-          style={{width:"100%",background:"var(--rose)",marginBottom:10}}>
-          <HabitIcon kind="sparkle" size={16}/> Continue with Google <HabitIcon kind="sparkle" size={16}/>
+        <button onClick={()=>window.SB.auth.signInWithGoogle()} className="btn-google-pixel">
+          <svg width="16" height="16" viewBox="0 0 18 18" style={{flexShrink:0}}>
+            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.017 17.64 11.71 17.64 9.2z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
+          </svg>
+          Continue with Google
         </button>
 
-        <button onClick={()=>onComplete(profileData, null)}
-          style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",color:"var(--plum-soft)",
-                  cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,padding:"8px",borderRadius:4,
-                  letterSpacing:".04em",marginBottom:6}}>
+        <button onClick={()=>onComplete(profileData, null)} className="btn-primary btn-pink"
+          style={{width:"100%",fontSize:11,marginBottom:6}}>
           Continue as Guest (no cloud save)
         </button>
         <button onClick={onClose}
@@ -500,7 +500,7 @@ function Onboarding({ onComplete, onLogin }){
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>
-            <button className="btn-primary" disabled={!canSubmit} onClick={()=>setShowSavePopup(true)} style={{width:"100%"}}>
+            <button className="btn-primary btn-pink" disabled={!canSubmit} onClick={()=>setShowSavePopup(true)} style={{width:"100%"}}>
               <Icon name="sparkle" size={18}/>
               Save My Progress
               <Icon name="sparkle" size={18}/>
