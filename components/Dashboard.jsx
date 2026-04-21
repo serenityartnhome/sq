@@ -110,7 +110,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [mood, setMood] = React.useState("neutral");
-  const [celebrating, setCelebrating] = React.useState(()=>localStorage.getItem("sq_happy_day")===new Date().toISOString().slice(0,10));
+  const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
   const [showDiary, setShowDiary] = React.useState(false);
   const [diaryEntry, setDiaryEntry] = React.useState("");
@@ -224,10 +224,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const activeHabits = React.useMemo(()=>allHabits.filter(h=>activeHabitIds.includes(h.id)),[allHabits,activeHabitIds]);
 
   const flashHappy = () => {
-    if(localStorage.getItem("sq_happy_day") === today) return;
     setCelebrating(true);
     if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
-    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(false), 800);
+    celebrateFlashTimer.current = setTimeout(()=>setCelebrating(doneCountRef.current >= 3), 800);
   };
 
   const toggleHabit = (id) => {
@@ -409,21 +408,22 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const habitsDone    = activeHabits.filter(h=>completed.has(h.id)).length;
   const totalSlots = activeHabits.length + 2;
   const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
+  const doneCountRef = React.useRef(doneCount);
+  doneCountRef.current = doneCount;
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
 
-  // Once 3 things done — baby stays happy all day, confetti fires once
+  // Baby stays happy while doneCount >= 3, returns to neutral if they untick below 3
   React.useEffect(()=>{
     if(doneCount >= 3){
-      if(localStorage.getItem("sq_happy_day") !== today){
-        localStorage.setItem("sq_happy_day", today);
-        if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
-      }
+      if(celebrateFlashTimer.current) clearTimeout(celebrateFlashTimer.current);
       setCelebrating(true);
       if(localStorage.getItem("sq_celebrated") !== today){
         localStorage.setItem("sq_celebrated", today);
         setTimeout(()=>setCelebrate(true), 800);
       }
+    } else {
+      setCelebrating(false);
     }
   }, [doneCount]);
 
