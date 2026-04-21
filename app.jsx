@@ -75,6 +75,15 @@ function App(){
   React.useEffect(()=>{
     if(!window.SB) return;
     try {
+      // Handle OAuth redirect (Google etc) — session arrives in URL hash
+      const hash = parseHashParams();
+      if(hash.access_token && hash.type !== "recovery"){
+        const session = { access_token: hash.access_token, refresh_token: hash.refresh_token, user: null };
+        window.SB.auth._session = session;
+        try{ localStorage.setItem("sq_sb_session", JSON.stringify(session)); }catch{}
+        window.location.hash = "";
+      }
+
       window.SB.auth.getSession().then(({ data:{ session } })=>{
         if(!session) return;
         setAuthUser(session.user);
