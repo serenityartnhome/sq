@@ -1269,7 +1269,7 @@ body{
     background:var(--parchment);
   }
   .rail-btn.active{ background:var(--blush) !important; border-color:var(--rose) !important; }
-  .rail-btn img{ width:36px;height:36px; }
+  .rail-btn img{ width:44px;height:44px; }
 
   /* ── Onboarding ── */
   .hero-title{ font-size:clamp(18px,6vw,28px);gap:8px;margin:10px 0 4px; }
