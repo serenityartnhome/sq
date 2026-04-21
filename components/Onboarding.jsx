@@ -167,7 +167,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
             placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&submit()}/>
         </div>
         <div className="field">
-          <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 8 chars, letters &amp; numbers)</span></label>
+          <label style={{fontWeight:"normal"}}>Password <span style={{fontSize:10,color:"var(--plum-soft)",fontWeight:"normal"}}>(min 8 chars, letters &amp; numbers)</span></label>
           <div style={{position:"relative",display:"flex"}}>
             <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
               placeholder="••••••••" style={{flex:1,paddingRight:36}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
@@ -205,7 +205,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
         </button>
 
         <button onClick={()=>onComplete(profileData, null)} className="btn-primary btn-pink"
-          style={{width:"100%",fontSize:11,marginBottom:6}}>
+          style={{width:"100%",fontSize:11,marginBottom:6,marginTop:14}}>
           Continue as Guest (no cloud save)
         </button>
         <button onClick={onClose}
