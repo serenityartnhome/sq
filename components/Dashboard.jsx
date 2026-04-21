@@ -915,16 +915,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
           )}
 
-          <button className="btn-primary btn-pink" onClick={saveProgressNow}
-            disabled={saveStatus==="saving"}
-            style={{width:"100%",marginBottom:6,fontSize:12,padding:"9px 16px",
-                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
-                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
-            <Icon name="sparkle" size={14}/>
-            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
-            <Icon name="sparkle" size={14}/>
-          </button>
-
           <div className="progress-label">
             Complete <b>{doneCount} / {totalSlots}</b> &nbsp;•&nbsp; {canComplete ? "ready to seal the day" : `${3-doneCount} more to unlock`}
           </div>
@@ -941,10 +931,15 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
           {(!powerupsUnlocked && daysInFlow < 2) ? (
             <>
-              <button className="btn-primary btn-pink" style={{width:"100%",marginBottom:6}}
+              <button style={{width:"100%",marginBottom:6,padding:"12px 16px",
+                              background:"var(--parchment)",color:"var(--plum)",
+                              border:"3px solid var(--plum)",borderRadius:4,cursor:"pointer",
+                              fontFamily:"Silkscreen,monospace",fontSize:16,letterSpacing:".04em",
+                              textTransform:"uppercase",boxShadow:"3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 2px var(--gold)",
+                              display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
                 onClick={()=>setShowPowerupSetup(v=>!v)}>
                 <Icon name="sparkle" size={14}/>
-                {showPowerupSetup ? "Hide" : "Set Up Power-Ups"}
+                {showPowerupSetup ? "Hide Power-Ups" : "Set Up Power-Ups"}
                 <Icon name="sparkle" size={14}/>
               </button>
               {showPowerupSetup && (
@@ -1069,6 +1064,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
             </>
           )}
+
+          <button className="btn-primary btn-pink" onClick={saveProgressNow}
+            disabled={saveStatus==="saving"}
+            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
+                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
+                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
+            <Icon name="sparkle" size={16}/>
+            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
+            <Icon name="sparkle" size={16}/>
+          </button>
 
         </div>
 
