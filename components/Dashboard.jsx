@@ -1181,12 +1181,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div className="coming-soon-lock">
               <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt="locked"/>
             </div>
-            <h3 className="coming-soon-title">Journal Locked</h3>
-            <p className="coming-soon-body">
-              Complete 5 days in a row to unlock your journal.<br/>
-              <span style={{fontSize:13,color:"var(--jade-deep)"}}>
-                You're on day {Math.max(daysInFlow,1)} — keep going! ✦
+            <h3 className="coming-soon-title">✦ Journal Locked ✦</h3>
+            <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8}}>
+              Serenity Quest is designed to be used <strong>every day</strong>. The more consistent you are, the more the app opens up for you.
+            </p>
+            <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8,marginTop:8}}>
+              Show up for <strong>5 days in a row</strong> and your personal journal will unlock — a private space to reflect, track your thoughts, and watch yourself grow.
+            </p>
+            <p className="coming-soon-body" style={{textAlign:"center",marginTop:8}}>
+              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
+                📖 Once unlocked, you can read back through past entries any time in the <strong>Calendar</strong> tab.
               </span>
+            </p>
+            <p style={{textAlign:"center",fontFamily:"Silkscreen,monospace",fontSize:12,color:"var(--rose)",marginTop:12}}>
+              You're on day {Math.max(daysInFlow,1)} — {5-Math.max(daysInFlow,1) > 0 ? `${5-Math.max(daysInFlow,1)} day${5-Math.max(daysInFlow,1)===1?"":"s"} to go ✦` : "almost there ✦"}
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
           </div>
