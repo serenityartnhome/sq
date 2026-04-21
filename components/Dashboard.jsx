@@ -1377,7 +1377,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 <li>No profanity, hate speech, or inappropriate content</li>
                 <li>No spam, advertising, or self-promotion</li>
                 <li>Treat every adventurer with respect</li>
-                <li>Posts reported by 3+ users are auto-removed</li>
               </ul>
               <p style={{marginBottom:0,marginTop:10,fontFamily:"Silkscreen,monospace",fontSize:10,color:"#8b1a1a"}}>
                 ⚑ Misuse will be reviewed and may result in a permanent ban.
