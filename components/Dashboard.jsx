@@ -110,6 +110,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
+  const [showPetMenu, setShowPetMenu] = React.useState(false);
+  const [showResetConfirm, setShowResetConfirm] = React.useState(false);
+  const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState("neutral");
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
@@ -581,13 +584,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>{
-                setEditName(profile.name||"");
-                setEditLoc(profile.loc||"");
-                const bd = parseBday(profile.bday);
-                setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
-                setShowProfileEdit(true);
-              }} style={{cursor:"pointer"}} title="Edit your profile">
+            <div className="pet-cloud-stage" onClick={()=>setShowPetMenu(true)} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(160, window.innerHeight*0.17));
@@ -1129,6 +1126,68 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
+      {showPetMenu && (
+        <div className="coming-soon-overlay" onClick={()=>{setShowPetMenu(false);setResetPwStatus(null);}}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%"}}>
+            <h3 className="coming-soon-title">✦ My Account ✦</h3>
+            {resetPwStatus==="sent" ? (
+              <p style={{textAlign:"center",fontSize:12,color:"#27ae60",fontFamily:"Silkscreen,monospace",margin:"0 0 14px"}}>
+                Reset link sent! Check your email.
+              </p>
+            ) : resetPwStatus==="error" ? (
+              <p style={{textAlign:"center",fontSize:12,color:"#c0392b",fontFamily:"Silkscreen,monospace",margin:"0 0 14px"}}>
+                Couldn't send reset email. Try again.
+              </p>
+            ) : null}
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>{
+                setEditName(profile.name||"");
+                setEditLoc(profile.loc||"");
+                const bd = parseBday(profile.bday);
+                setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
+                setShowPetMenu(false); setShowProfileEdit(true);
+              }}>Edit Profile</button>
+              <button className="coming-soon-btn" style={{width:"100%"}} onClick={async()=>{
+                setResetPwStatus(null);
+                const email = typeof authUser==="object" ? authUser?.email : null;
+                if(!email){ setResetPwStatus("error"); return; }
+                const { error } = await window.SB.auth.resetPasswordForEmail(email);
+                setResetPwStatus(error ? "error" : "sent");
+              }}>Reset Password</button>
+              <button className="coming-soon-btn" style={{width:"100%",color:"#c0392b",borderColor:"#c0392b",background:"rgba(192,57,43,.08)"}}
+                onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}>
+                Reset Everything
+              </button>
+              <button className="coming-soon-btn" style={{width:"100%",borderColor:"var(--rose)",color:"var(--rose)"}}
+                onClick={()=>{ setShowPetMenu(false); onSignOut(); }}>Log Out</button>
+              <button className="coming-soon-btn" style={{width:"100%",background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowPetMenu(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setShowResetConfirm(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%"}}>
+            <h3 className="coming-soon-title" style={{color:"#c0392b"}}>⚠ Reset Everything?</h3>
+            <p className="coming-soon-body">
+              This will permanently wipe all your past data — habits, streaks, diary, pet progress. This cannot be undone.
+            </p>
+            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="coming-soon-btn"
+                style={{color:"#c0392b",borderColor:"#c0392b",background:"rgba(192,57,43,.08)"}}
+                onClick={()=>{ setShowResetConfirm(false); onReset(); }}>
+                Yes, wipe everything
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
+                onClick={()=>setShowResetConfirm(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showProfileEdit && (
         <div className="coming-soon-overlay" onClick={()=>setShowProfileEdit(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
@@ -1172,9 +1231,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <button className="coming-soon-btn"
                 style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--gold)"}}
                 onClick={()=>setShowProfileEdit(false)}>Cancel</button>
-              <button className="coming-soon-btn"
-                style={{background:"var(--cream)",color:"#c0392b",borderColor:"#c0392b"}}
-                onClick={()=>{ setShowProfileEdit(false); onSignOut(); }}>Log Out</button>
             </div>
           </div>
         </div>
