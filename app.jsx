@@ -75,25 +75,40 @@ function App(){
   React.useEffect(()=>{
     if(!window.SB) return;
     try {
-      // Handle OAuth redirect (Google etc) — session arrives in URL hash
+      const loadProfile = async (userId) => {
+        const { data } = await window.SB.from("profiles").select("*").eq("id", userId).single();
+        if(data && data.name){
+          const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
+          setSaved(p); save(p);
+        }
+      };
+
+      // Handle email confirm / OAuth redirect — session arrives in URL hash
       const hash = parseHashParams();
       if(hash.access_token && hash.type !== "recovery"){
-        const session = { access_token: hash.access_token, refresh_token: hash.refresh_token, user: null };
-        window.SB.auth._session = session;
-        try{ localStorage.setItem("sq_sb_session", JSON.stringify(session)); }catch{}
+        const SB_URL = "https://hplmgpxnbgmdmqmsuisz.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbG1ncHhuYmdtZG1xbXN1aXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2ODM3OTAsImV4cCI6MjA5MjI1OTc5MH0.eKh6KMxsyOls_3V9KoCE0b7TECFKmpbYEDCDJ4QN67A";
         window.location.hash = "";
+        try {
+          const res = await fetch(SB_URL+"/auth/v1/user", {
+            headers:{ "apikey": SB_KEY, "Authorization": "Bearer "+hash.access_token }
+          });
+          const user = await res.json();
+          if(user.id){
+            const session = { access_token: hash.access_token, refresh_token: hash.refresh_token||"", user };
+            window.SB.auth._session = session;
+            try{ localStorage.setItem("sq_sb_session", JSON.stringify(session)); }catch{}
+            setAuthUser(user);
+            await loadProfile(user.id);
+            return;
+          }
+        } catch{}
       }
 
-      window.SB.auth.getSession().then(({ data:{ session } })=>{
+      window.SB.auth.getSession().then(async ({ data:{ session } })=>{
         if(!session) return;
         setAuthUser(session.user);
-        window.SB.from("profiles").select("*").eq("id", session.user.id).single()
-          .then(({ data })=>{
-            if(data && data.name){
-              const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
-              setSaved(p); save(p);
-            }
-          }).catch(()=>{});
+        if(session.user) await loadProfile(session.user.id);
       }).catch(()=>{});
     } catch{}
   },[]);
