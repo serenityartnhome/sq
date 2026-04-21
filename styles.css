@@ -471,7 +471,15 @@ body{
 .cursor-pick-btn:hover{background:var(--blush-soft);}
 .btn-pink{background:#f5c9cc !important;border-color:#e39aa0 !important;color:#5c2a35 !important;}
 .btn-pink:hover:not(:disabled){background:#fbe0e2 !important;border-color:#e39aa0 !important;}
-.btn-white-cancel{background:#fff !important;}
+.acct-btn{
+  width:100%;background:transparent;color:var(--plum);
+  border:2px solid #e39aa0;
+  font-family:"Silkscreen",monospace;font-size:11px;
+  padding:8px 16px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:.05em;
+  box-shadow:2px 2px 0 rgba(92,42,53,.15);
+}
+.acct-btn:hover{background:var(--blush);}
 .btn-google-pixel{
   width:100%;background:#fff;color:#3c4043;
   border:3px solid #3c4043;
