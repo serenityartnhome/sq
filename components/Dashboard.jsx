@@ -1407,7 +1407,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 Cancel
               </button>
             </div>
-            </div>
           </div>
         </div>
       )}
