@@ -92,6 +92,17 @@
       const d = await r.json();
       if(d.error) return { error:{ message: d.error_description||d.error||"Reset failed" }};
       return { error:null };
+    },
+
+    async updatePassword(newPassword, accessToken){
+      const hdrs = { "apikey": KEY, "Content-Type": "application/json", "Authorization": "Bearer "+(accessToken||(_session&&_session.access_token)||"") };
+      const r = await fetch(URL+"/auth/v1/user", {
+        method:"PUT", headers:hdrs,
+        body: JSON.stringify({ password: newPassword })
+      });
+      const d = await r.json();
+      if(d.error||d.msg) return { error:{ message: d.error_description||d.msg||"Update failed" }};
+      return { error:null };
     }
   };
 

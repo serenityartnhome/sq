@@ -148,4 +148,72 @@ function Auth({ onAuth }) {
   );
 }
 
+function ResetPassword({ accessToken, onDone }){
+  const [password, setPassword] = React.useState("");
+  const [confirm, setConfirm]   = React.useState("");
+  const [loading, setLoading]   = React.useState(false);
+  const [error, setError]       = React.useState("");
+  const [done, setDone]         = React.useState(false);
+
+  const validatePassword = (p) => {
+    if(p.length < 8) return "Password must be at least 8 characters";
+    if(!/[a-zA-Z]/.test(p)) return "Password must include at least one letter";
+    if(!/[0-9]/.test(p)) return "Password must include at least one number";
+    return null;
+  };
+
+  const submit = async () => {
+    setError("");
+    const pwErr = validatePassword(password);
+    if(pwErr){ setError(pwErr); return; }
+    if(password !== confirm){ setError("Passwords don't match"); return; }
+    setLoading(true);
+    try {
+      const { error: err } = await SB.auth.updatePassword(password, accessToken);
+      if(err) throw err;
+      setDone(true);
+      setTimeout(onDone, 2000);
+    } catch(e){ setError(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="app-shell">
+      <div className="scene-img scene-onboarding"/>
+      <div className="scene-veil"/>
+      <div className="onboard-safe-top"/>
+      <h1 className="hero-title"><Icon name="sparkle" size={28}/> Serenity Quest <Icon name="sparkle" size={28}/></h1>
+      <div style={{display:"flex",justifyContent:"center",marginTop:24,padding:"0 16px"}}>
+        <div className="panel" style={{maxWidth:420,width:"100%"}}>
+          <h2 style={{textAlign:"center",fontSize:16,marginBottom:4}}>✦ Set New Password ✦</h2>
+          <div style={{textAlign:"center",fontSize:12,color:"var(--plum-soft)",marginBottom:18,fontFamily:"Pixelify Sans, monospace"}}>
+            Choose a strong password to protect your quest
+          </div>
+          {done ? (
+            <div style={{color:"#27ae60",fontSize:12,textAlign:"center",padding:"12px 8px",background:"rgba(39,174,96,.1)",border:"1px solid rgba(39,174,96,.3)",borderRadius:4,fontFamily:"Silkscreen,monospace"}}>
+              Password updated! Redirecting…
+            </div>
+          ) : <>
+            <div className="field">
+              <label>New Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 8 chars, letters &amp; numbers)</span></label>
+              <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+            </div>
+            <div className="field">
+              <label>Confirm Password</label>
+              <input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+            </div>
+            {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
+            <button className="btn-primary" onClick={submit} disabled={loading} style={{width:"100%",marginTop:8}}>
+              <Icon name="sparkle" size={16}/>
+              {loading ? "Saving…" : "Update Password"}
+              <Icon name="sparkle" size={16}/>
+            </button>
+          </>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 window.Auth = Auth;
+window.ResetPassword = ResetPassword;

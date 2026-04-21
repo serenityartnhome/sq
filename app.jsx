@@ -26,9 +26,20 @@ function applyCursor(name){
 function load(){ try{ const s=localStorage.getItem(STORAGE); return s?JSON.parse(s):null; }catch{ return null; } }
 function save(s){ try{ localStorage.setItem(STORAGE,JSON.stringify(s)); }catch{} }
 
+function parseHashParams(){
+  try {
+    const h = window.location.hash.replace(/^#/,"");
+    return Object.fromEntries(h.split("&").map(p=>p.split("=").map(decodeURIComponent)));
+  } catch{ return {}; }
+}
+
 function App(){
   const [saved, setSaved]         = React.useState(()=>load());
   const [authUser, setAuthUser]   = React.useState(null);
+  const [recoveryToken, setRecoveryToken] = React.useState(()=>{
+    const p = parseHashParams();
+    return p.type === "recovery" && p.access_token ? p.access_token : null;
+  });
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
     petMood: window.__SQ_DEFAULTS.petMood,
@@ -157,11 +168,13 @@ function App(){
 
   return (
     <>
-      {!saved
-        ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
-        : <Dashboard profile={saved.profile} habits={saved.habits}
-                     onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
-                     onUpdateProfile={handleUpdateProfile}/>
+      {recoveryToken
+        ? <ResetPassword accessToken={recoveryToken} onDone={()=>{ window.location.hash=""; setRecoveryToken(null); }}/>
+        : !saved
+          ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin}/>
+          : <Dashboard profile={saved.profile} habits={saved.habits}
+                       onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
+                       onUpdateProfile={handleUpdateProfile}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
     </>
