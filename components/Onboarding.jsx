@@ -19,6 +19,224 @@ const DEFAULT_HABITS = [
   { id:"screen",   label:"Limit Screen Time",kind:"screen",   preset:true },
 ];
 
+const ALL_ICONS = ["affirm","bed","bowl","cake","charm","clean","declutter","diary",
+  "diet","energy-heart","flame","focus","goals","heart","journal","learning","lotus","lotus-bud",
+  "meditate","nature","network","planning","protein","read","screen","selfaff","skills",
+  "sleep","sparkle","steps","sun","tea","treat","water","work","workout"];
+
+function validatePassword(p){
+  if(p.length < 8) return "Password must be at least 8 characters";
+  if(!/[a-zA-Z]/.test(p)) return "Password must include at least one letter";
+  if(!/[0-9]/.test(p)) return "Password must include at least one number";
+  return null;
+}
+
+/* ── Login popup ─────────────────────────────────────────────── */
+function LoginPopup({ onClose, onLogin }){
+  const [email, setEmail]       = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError]       = React.useState("");
+  const [loading, setLoading]   = React.useState(false);
+  const [forgotSent, setForgotSent] = React.useState(false);
+  const [forgotMode, setForgotMode] = React.useState(false);
+
+  const submit = async () => {
+    setError("");
+    if(!email.trim()){ setError("Please enter your email"); return; }
+    if(forgotMode){
+      setLoading(true);
+      try {
+        const { error: err } = await window.SB.auth.resetPasswordForEmail(email.trim());
+        if(err) throw err;
+        setForgotSent(true);
+      } catch(e){ setError(e.message||"Could not send reset email"); }
+      setLoading(false);
+      return;
+    }
+    if(!password){ setError("Please enter your password"); return; }
+    setLoading(true);
+    try {
+      const { data, error: err } = await window.SB.auth.signInWithPassword({ email:email.trim(), password });
+      if(err) throw err;
+      if(onLogin) await onLogin(data.user);
+      onClose();
+    } catch(e){ setError(e.message||"Login failed"); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="coming-soon-overlay" onClick={onClose}>
+      <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
+        <h3 className="coming-soon-title">{forgotMode ? "✦ Reset Password ✦" : "✦ Welcome Back ✦"}</h3>
+        <div style={{textAlign:"center",fontSize:12,color:"var(--plum-soft)",marginBottom:16,fontFamily:"Pixelify Sans,monospace"}}>
+          {forgotMode ? "We'll send a reset link to your email" : "Log in to continue your quest"}
+        </div>
+
+        {forgotSent ? (
+          <div style={{textAlign:"center",padding:"12px 8px",background:"rgba(39,174,96,.1)",border:"1px solid rgba(39,174,96,.3)",borderRadius:4,color:"#27ae60",fontSize:12,fontFamily:"Silkscreen,monospace",marginBottom:12}}>
+            Reset link sent! Check your email.
+          </div>
+        ) : <>
+          <div className="field">
+            <label>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+              placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+          </div>
+          {!forgotMode && (
+            <div className="field" style={{marginBottom:6}}>
+              <label>Password</label>
+              <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+                placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+            </div>
+          )}
+          {!forgotMode && (
+            <div style={{textAlign:"right",marginBottom:12}}>
+              <button onClick={()=>{setForgotMode(true);setError("");}}
+                style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                        fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                Forgot password?
+              </button>
+            </div>
+          )}
+          {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
+          <button className="btn-primary" onClick={submit} disabled={loading} style={{width:"100%",marginBottom:10}}>
+            <Icon name="sparkle" size={16}/>
+            {loading ? "Please wait…" : forgotMode ? "Send Reset Link" : "Log In"}
+            <Icon name="sparkle" size={16}/>
+          </button>
+          {!forgotMode && <>
+            <div style={{display:"flex",alignItems:"center",gap:8,margin:"4px 0 10px"}}>
+              <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
+              <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>or</span>
+              <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
+            </div>
+            <button onClick={()=>window.SB.auth.signInWithGoogle()}
+              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:10,
+                      background:"#fff",border:"1px solid #ddd",borderRadius:6,padding:"10px 16px",
+                      cursor:"pointer",fontSize:13,fontWeight:"600",color:"#3c3c3c",marginBottom:10}}>
+              <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+              Continue with Google
+            </button>
+          </>}
+        </>}
+        {forgotMode && !forgotSent && (
+          <button onClick={()=>{setForgotMode(false);setError("");}}
+            style={{width:"100%",background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                    fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:"4px 0"}}>
+            ← Back to login
+          </button>
+        )}
+        <button onClick={onClose}
+          style={{width:"100%",marginTop:6,background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                  fontFamily:"Silkscreen,monospace",fontSize:10,padding:"4px 0"}}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Save Progress popup ─────────────────────────────────────── */
+function SaveProgressPopup({ profileData, onComplete, onClose }){
+  const [email, setEmail]       = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirmPw, setConfirmPw] = React.useState("");
+  const [showPw, setShowPw]     = React.useState(false);
+  const [error, setError]       = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const submit = async () => {
+    setError("");
+    if(!email.trim()){ setError("Please enter your email"); return; }
+    const pwErr = validatePassword(password);
+    if(pwErr){ setError(pwErr); return; }
+    if(password !== confirmPw){ setError("Passwords do not match"); return; }
+    setSubmitting(true);
+    await onComplete(profileData, { email:email.trim(), password });
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="coming-soon-overlay" onClick={onClose}>
+      <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:380,width:"92%"}}>
+        <h3 className="coming-soon-title">✦ Save Your Progress ✦</h3>
+        <div style={{textAlign:"center",fontSize:12,color:"var(--plum-soft)",marginBottom:16,fontFamily:"Pixelify Sans,monospace"}}>
+          Create an account to sync across devices and never lose your journey
+        </div>
+
+        <div className="field">
+          <label>Email</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+            placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+        </div>
+        <div className="field">
+          <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 8 chars, letters &amp; numbers)</span></label>
+          <div style={{position:"relative",display:"flex"}}>
+            <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
+              placeholder="••••••••" style={{flex:1,paddingRight:36}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
+            <button type="button" onClick={()=>setShowPw(v=>!v)}
+              style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",
+                      background:"none",border:"none",cursor:"pointer",padding:"2px 4px"}}>
+              <img src={showPw?"assets/icon-eye-closed.png":"assets/icon-eye-open.png"}
+                style={{width:20,height:20,imageRendering:"pixelated"}} alt={showPw?"hide":"show"}/>
+            </button>
+          </div>
+        </div>
+        <div className="field" style={{marginBottom:14}}>
+          <label>Confirm Password</label>
+          <input type={showPw?"text":"password"} value={confirmPw} onChange={e=>setConfirmPw(e.target.value)}
+            placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
+        </div>
+
+        {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
+
+        <button className="btn-primary" onClick={submit} disabled={submitting} style={{width:"100%",marginBottom:10}}>
+          <Icon name="sparkle" size={16}/>
+          {submitting ? "Creating account…" : "Begin My Quest & Save Progress"}
+          <Icon name="sparkle" size={16}/>
+        </button>
+
+        <div style={{display:"flex",alignItems:"center",gap:8,margin:"4px 0 10px"}}>
+          <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
+          <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>or</span>
+          <div style={{flex:1,height:1,background:"var(--gold-soft)"}}/>
+        </div>
+
+        <button onClick={()=>window.SB.auth.signInWithGoogle()}
+          style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:10,
+                  background:"#fff",border:"1px solid #ddd",borderRadius:6,padding:"10px 16px",
+                  cursor:"pointer",fontSize:13,fontWeight:"600",color:"#3c3c3c",marginBottom:10}}>
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <button onClick={()=>onComplete(profileData, null)}
+          style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",color:"var(--plum-soft)",
+                  cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,padding:"8px",borderRadius:4,
+                  letterSpacing:".04em",marginBottom:6}}>
+          Continue as Guest (no cloud save)
+        </button>
+        <button onClick={onClose}
+          style={{width:"100%",background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                  fontFamily:"Silkscreen,monospace",fontSize:10,padding:"4px 0",textDecoration:"underline"}}>
+          ← Back to profile
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Onboarding ─────────────────────────────────────────── */
 function Onboarding({ onComplete, onLogin }){
   const [name, setName] = React.useState("");
   const [bdayDay, setBdayDay]     = React.useState("");
@@ -36,6 +254,8 @@ function Onboarding({ onComplete, onLogin }){
   const [editingIconFor, setEditingIconFor] = React.useState(null);
   const [showForm, setShowForm] = React.useState(false);
   const [cursor, setCursor] = React.useState(null);
+  const [showSavePopup, setShowSavePopup] = React.useState(false);
+  const [showLoginPopup, setShowLoginPopup] = React.useState(false);
 
   const CURSORS = [null,"cursor-1","cursor-2","cursor-3","cursor-4","cursor-5","cursor-6"];
   React.useEffect(()=>{
@@ -47,16 +267,13 @@ function Onboarding({ onComplete, onLogin }){
     setHabits(hs => hs.map(h => h.id===id ? {...h, kind} : h));
     setEditingIconFor(null);
   };
-  const ALL_ICONS = ["affirm","bed","bowl","cake","charm","clean","declutter","diary",
-    "diet","energy-heart","flame","focus","goals","heart","journal","learning","lotus","lotus-bud",
-    "meditate","nature","network","planning","protein","read","screen","selfaff","skills",
-    "sleep","sparkle","steps","sun","tea","treat","water","work","workout"];
 
   const toggleHabit = (id) => setSelected(prev=>{
     const next = new Set(prev);
     next.has(id) ? next.delete(id) : next.add(id);
     return next;
   });
+
   const addCustom = () => {
     const t = customDraft.trim();
     if(!t) return;
@@ -66,57 +283,13 @@ function Onboarding({ onComplete, onLogin }){
     setCustomDraft(""); setCustomKind("sparkle"); setShowCustomInput(false);
   };
 
-  const [email, setEmail]           = React.useState("");
-  const [password, setPassword]     = React.useState("");
-  const [confirmPw, setConfirmPw]   = React.useState("");
-  const [showPw, setShowPw]         = React.useState(false);
-  const [authError, setAuthError]   = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const [showLoginDirect, setShowLoginDirect] = React.useState(false);
-  const [showLogin, setShowLogin]       = React.useState(false);
-  const [loginEmail, setLoginEmail]     = React.useState("");
-  const [loginPassword, setLoginPassword] = React.useState("");
-  const [loginError, setLoginError]     = React.useState("");
-  const [loginLoading, setLoginLoading] = React.useState(false);
-
-  const handleLogin = async () => {
-    setLoginError("");
-    if(!loginEmail.trim() || !loginPassword){ setLoginError("Enter email and password"); return; }
-    setLoginLoading(true);
-    try {
-      const sb = window.SB;
-      if(!sb) throw new Error("Please refresh the page and try again");
-      const { data, error } = await sb.auth.signInWithPassword({ email:loginEmail.trim(), password:loginPassword });
-      if(error) throw error;
-      if(onLogin) await onLogin(data.user);
-    } catch(e){
-      setLoginError(e.message||"Login failed");
-    }
-    setLoginLoading(false);
-  };
-
   const selCount = selected.size;
   const canSubmit = name.trim().length > 0 && selCount >= 3 && selCount <= 8;
 
-  const submitGuest = () => {
-    if(!canSubmit) return;
-    const chosen = habits.filter(h=>selected.has(h.id));
-    onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen }, null);
-  };
-
-  const submitWithAccount = async () => {
-    if(!canSubmit) return;
-    setAuthError("");
-    if(!email.trim()){ setAuthError("Please enter your email"); return; }
-    if(password.length < 6){ setAuthError("Password must be at least 6 characters"); return; }
-    if(password !== confirmPw){ setAuthError("Passwords do not match"); return; }
-    setSubmitting(true);
-    const chosen = habits.filter(h=>selected.has(h.id));
-    await onComplete({ profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor }, habits:chosen },
-                     { email:email.trim(), password });
-    setSubmitting(false);
-  };
+  const profileData = () => ({
+    profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor },
+    habits: habits.filter(h=>selected.has(h.id))
+  });
 
   return (
     <div className="app-shell">
@@ -141,12 +314,10 @@ function Onboarding({ onComplete, onLogin }){
       </div>
 
       <div className={"onboard-two"+(showForm?" onboard-form-open":" onboard-centered")}>
-        {/* LEFT: Journey + CTA button */}
+        {/* LEFT: Journey + CTA buttons */}
         <div>
           <div className="panel">
-            <h2 style={{textAlign:"center",fontSize:16,marginBottom:12}}>
-              ✦ Your Journey Starts Here ✦
-            </h2>
+            <h2 style={{textAlign:"center",fontSize:16,marginBottom:12}}>✦ Your Journey Starts Here ✦</h2>
             <ul className="journey">
               <li>
                 <span className="mini"><Icon name="lotus-bud" size={28}/></span>
@@ -173,13 +344,12 @@ function Onboarding({ onComplete, onLogin }){
           </div>
 
           {!showForm && (
-            <div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="btn-primary btn-pink onboard-cta-btn" onClick={()=>setShowForm(true)}>
                 <HabitIcon kind="lotus-bud" size={22}/> Create Your Profile <HabitIcon kind="lotus-bud" size={22}/>
               </button>
-              <button onClick={()=>{setShowLoginDirect(true);setLoginError("");}}
-                style={{width:"100%",marginTop:10,
-                        background:"var(--cream)",color:"var(--plum)",
+              <button onClick={()=>setShowLoginPopup(true)}
+                style={{width:"100%",background:"var(--cream)",color:"var(--plum)",
                         border:"3px solid var(--plum)",borderRadius:4,
                         boxShadow:"3px 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px var(--gold)",
                         cursor:"pointer",padding:"12px 20px",
@@ -191,47 +361,11 @@ function Onboarding({ onComplete, onLogin }){
           )}
         </div>
 
-        {/* RIGHT: Direct login panel — shown when user clicks "Already have an account?" */}
-        {!showForm && showLoginDirect && (
-          <div className="panel">
-            <h2 style={{textAlign:"center",fontSize:16}}>✦ Welcome Back ✦</h2>
-            <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:18,
-                         fontFamily:"Pixelify Sans,monospace"}}>
-              Log in to continue your quest
-            </div>
-            <div className="field">
-              <label>Email</label>
-              <input type="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
-                placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-            </div>
-            <div className="field" style={{marginBottom:14}}>
-              <label>Password</label>
-              <input type="password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}
-                placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-            </div>
-            {loginError && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,
-                                        fontFamily:"Silkscreen,monospace"}}>{loginError}</div>}
-            <button className="btn-primary" onClick={handleLogin} disabled={loginLoading} style={{width:"100%",marginBottom:10}}>
-              <Icon name="sparkle" size={16}/> {loginLoading ? "Logging in…" : "Log In & Continue"} <Icon name="sparkle" size={16}/>
-            </button>
-            <div style={{textAlign:"center"}}>
-              <button onClick={()=>setShowLoginDirect(false)}
-                style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
-                        fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
-                ← Back
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* RIGHT: Profile + Habits form — only shown after button click */}
+        {/* RIGHT: Profile + Habits form */}
         {showForm && (
         <div className="panel">
           <h2 style={{textAlign:"center",fontSize:16}}>✦ Create Your Profile ✦</h2>
-
-          <div>
-          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:14,
-                       fontFamily:"Pixelify Sans, monospace"}}>
+          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:14,fontFamily:"Pixelify Sans, monospace"}}>
             Tell us about yourself to begin your journey
           </div>
 
@@ -277,8 +411,7 @@ function Onboarding({ onComplete, onLogin }){
           </div>
 
           <div className="div-sparkle">✦ Select Your Habits ✦</div>
-          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:10,
-                       fontFamily:"Pixelify Sans, monospace"}}>
+          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:10,fontFamily:"Pixelify Sans, monospace"}}>
             Choose or create daily habits (pick 3–8)
           </div>
 
@@ -346,116 +479,73 @@ function Onboarding({ onComplete, onLogin }){
           )}
 
           <div className="cursor-section">
-          <div className="div-sparkle" style={{marginTop:16}}>✦ Choose Your Cursor ✦</div>
-          <div className="cursor-pick-row">
-            {CURSORS.map(c=>(
-              <button key={c||"none"} className={"cursor-pick-btn"+(cursor===c?" active":"")}
-                onClick={()=>setCursor(c)} title={c||"Default"}>
-                {c ? (
-                  <img src={`assets/${c}.png?v=5`} alt={c}
-                    style={{width:40,height:40,imageRendering:"pixelated",display:"block"}}
-                    onError={e=>{e.currentTarget.style.opacity=".3";e.currentTarget.onerror=null;}}/>
-                ) : (
-                  <span style={{width:40,height:40,display:"flex",alignItems:"center",
-                    justifyContent:"center",fontSize:10,fontFamily:"Silkscreen,monospace",
-                    color:"var(--plum-soft)",textAlign:"center",lineHeight:1.2}}>
-                    Default
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-          </div>{/* end cursor-section */}
-
-          <div className="div-sparkle" style={{marginTop:18}}>✦ Save Your Progress ✦</div>
-
-          <div className="field" style={{marginTop:10}}>
-            <label>Email <span style={{fontSize:10,color:"var(--plum-soft)"}}>(to save your progress)</span></label>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
-              placeholder="your@email.com"/>
-          </div>
-          <div className="field">
-            <label>Password <span style={{fontSize:10,color:"var(--plum-soft)"}}>(min 6 characters)</span></label>
-            <div style={{position:"relative",display:"flex"}}>
-              <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
-                placeholder="••••••••" style={{flex:1,paddingRight:36}}/>
-              <button type="button" onClick={()=>setShowPw(v=>!v)}
-                style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",
-                        background:"none",border:"none",cursor:"pointer",
-                        color:"var(--plum-soft)",fontSize:14,padding:"2px 4px",lineHeight:1}}>
-                <img src={showPw?"assets/icon-eye-closed.png":"assets/icon-eye-open.png"}
-                  style={{width:20,height:20,imageRendering:"pixelated"}} alt={showPw?"hide":"show"}/>
-              </button>
-            </div>
-          </div>
-          <div className="field">
-            <label>Confirm Password</label>
-            <div style={{position:"relative",display:"flex"}}>
-              <input type={showPw?"text":"password"} value={confirmPw} onChange={e=>setConfirmPw(e.target.value)}
-                placeholder="••••••••" style={{flex:1,paddingRight:36}}/>
+            <div className="div-sparkle" style={{marginTop:16}}>✦ Choose Your Cursor ✦</div>
+            <div className="cursor-pick-row">
+              {CURSORS.map(c=>(
+                <button key={c||"none"} className={"cursor-pick-btn"+(cursor===c?" active":"")}
+                  onClick={()=>setCursor(c)} title={c||"Default"}>
+                  {c ? (
+                    <img src={`assets/${c}.png?v=5`} alt={c}
+                      style={{width:40,height:40,imageRendering:"pixelated",display:"block"}}
+                      onError={e=>{e.currentTarget.style.opacity=".3";e.currentTarget.onerror=null;}}/>
+                  ) : (
+                    <span style={{width:40,height:40,display:"flex",alignItems:"center",
+                      justifyContent:"center",fontSize:10,fontFamily:"Silkscreen,monospace",
+                      color:"var(--plum-soft)",textAlign:"center",lineHeight:1.2}}>
+                      Default
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
-          {authError && (
-            <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,
-                         fontFamily:"Silkscreen,monospace"}}>
-              {authError}
-            </div>
-          )}
-
-          <div style={{marginTop:10,display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
-            <button className="btn-primary" disabled={!canSubmit||submitting} onClick={submitWithAccount} style={{width:"100%"}}>
-              <Icon name="sparkle" size={18}/>
-              {submitting ? "Creating account…" : "Begin My Quest & Save Progress"}
-              <Icon name="sparkle" size={18}/>
-            </button>
-            <button onClick={submitGuest} disabled={!canSubmit}
-              style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",
-                      color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",fontSize:11,
-                      padding:"8px",cursor:canSubmit?"pointer":"not-allowed",borderRadius:4,
-                      letterSpacing:".04em"}}>
-              Continue as Guest (no cloud save)
-            </button>
+          <div style={{marginTop:18,display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
             <div style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen, monospace",
-                         textTransform:"uppercase",letterSpacing:".04em"}}>
+                         textTransform:"uppercase",letterSpacing:".04em",textAlign:"center"}}>
               {selCount < 3 ? `Pick ${3-selCount} more habit${3-selCount===1?"":"s"} to begin` :
                selCount > 8 ? "Pick at most 8 habits" :
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>
-
-            {/* Already have an account — below the submit buttons */}
+            <button className="btn-primary" disabled={!canSubmit} onClick={()=>setShowSavePopup(true)} style={{width:"100%"}}>
+              <Icon name="sparkle" size={18}/>
+              Save My Progress
+              <Icon name="sparkle" size={18}/>
+            </button>
+            <button onClick={()=>{ if(canSubmit) onComplete(profileData(), null); }} disabled={!canSubmit}
+              style={{width:"100%",background:"none",border:"2px solid var(--gold-soft)",
+                      color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",fontSize:11,
+                      padding:"8px",cursor:canSubmit?"pointer":"not-allowed",borderRadius:4,
+                      letterSpacing:".04em"}}>
+              Begin My Quest (no save)
+            </button>
             <div style={{width:"100%",borderTop:"1px solid var(--gold-soft)",paddingTop:10,textAlign:"center"}}>
-              <button onClick={()=>{setShowLogin(v=>!v);setLoginError("");}}
+              <button onClick={()=>setShowLoginPopup(true)}
                 style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
                         fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
-                {showLogin ? "← Hide login" : "Already have an account? Log in"}
+                Already have an account? Log in
               </button>
             </div>
-
-            {showLogin && (
-              <div style={{width:"100%"}}>
-                <div className="field">
-                  <label>Email</label>
-                  <input type="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
-                    placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-                </div>
-                <div className="field">
-                  <label>Password</label>
-                  <input type="password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}
-                    placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
-                </div>
-                {loginError && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:8,fontFamily:"Silkscreen,monospace"}}>{loginError}</div>}
-                <button className="btn-primary" onClick={handleLogin} disabled={loginLoading} style={{width:"100%"}}>
-                  <Icon name="sparkle" size={16}/> {loginLoading ? "Logging in…" : "Log In & Continue"} <Icon name="sparkle" size={16}/>
-                </button>
-              </div>
-            )}
           </div>
-        </div>
         </div>
         )}
       </div>
+
+      {showLoginPopup && (
+        <LoginPopup
+          onClose={()=>setShowLoginPopup(false)}
+          onLogin={onLogin}
+        />
+      )}
+
+      {showSavePopup && (
+        <SaveProgressPopup
+          profileData={profileData()}
+          onComplete={onComplete}
+          onClose={()=>setShowSavePopup(false)}
+        />
+      )}
     </div>
   );
 }
