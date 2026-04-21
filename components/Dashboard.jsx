@@ -567,7 +567,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={daysInFlow===0&&hatched}
+                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); return hatched && !hist[yd.toISOString().slice(0,10)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
