@@ -180,7 +180,7 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
 
       {/* Admin panel */}
       {isAdmin && (
-        <div style={{marginBottom:16,background:"rgba(139,26,26,.06)",border:"2px solid #c0392b",borderRadius:6,padding:"10px 14px"}}>
+        <div style={{marginBottom:16,background:"#fff0f0",border:"3px solid #c0392b",borderRadius:0,boxShadow:"4px 4px 0 rgba(139,26,26,.3), inset 0 0 0 2px #f5c9cc",padding:"10px 14px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:showAdmin?10:0}}>
             <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#8b1a1a",display:"flex",alignItems:"center",gap:8}}>
               ⚑ Admin — Reports

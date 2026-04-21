@@ -1232,7 +1232,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {label:"Log Out", onClick:()=>{ setShowPetMenu(false); onSignOut(); }},
               ].map(({label,onClick})=>(
                 <button key={label} onClick={onClick}
-                  style={{width:"100%",background:"#f5a7bc",color:"#5a1a30",border:"2px solid #e8829f",
+                  style={{width:"100%",background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
                           fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
                           textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",
                           borderRadius:0}}>
@@ -1247,7 +1247,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 Reset Everything
               </button>
               <button onClick={()=>setShowPetMenu(false)}
-                style={{width:"100%",background:"#f5a7bc",color:"#5a1a30",border:"2px solid #e8829f",
+                style={{width:"100%",background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 16px",cursor:"pointer",
                         textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(92,42,53,.25)",borderRadius:0}}>
                 Cancel
