@@ -276,32 +276,52 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
   }, [completed, mood, gratitude, powerups, diaryEntry]);
 
-  // Recalculate habit streaks once per day on app open
+  // Recalculate habit streaks once per day on app open; sync with Supabase
   React.useEffect(()=>{
-    try {
-      if(localStorage.getItem("sq_streaks_date") === today) return;
-      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-      const yd = new Date(); yd.setDate(yd.getDate()-1);
-      const yesterdayKey = yd.toISOString().slice(0,10);
-      const yesterdayData = hist[yesterdayKey];
-      const newStreaks = {};
-      [...PRESET_HABITS, ...customHabits].forEach(h=>{
-        if((yesterdayData?.completed||[]).includes(h.id)){
-          let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
-          while(true){
-            const k = d.toISOString().slice(0,10);
-            if(!(hist[k]?.completed||[]).includes(h.id)) break;
-            count++; d.setDate(d.getDate()-1);
+    const run = async () => {
+      try {
+        // If no local streaks, pull from Supabase first (new device / cleared storage)
+        const localStreaksDate = localStorage.getItem("sq_streaks_date");
+        if(!localStreaksDate && userId && window.SB){
+          const { data } = await window.SB.from("profiles").select("streaks,streaks_date").eq("id",userId).single();
+          if(data?.streaks && Object.keys(data.streaks).length > 0){
+            setStreaks(data.streaks);
+            localStorage.setItem("sq_streaks", JSON.stringify(data.streaks));
+            localStorage.setItem("sq_streaks_date", data.streaks_date||"");
           }
-          newStreaks[h.id] = count;
-        } else {
-          newStreaks[h.id] = 0;
         }
-      });
-      setStreaks(newStreaks);
-      localStorage.setItem("sq_streaks", JSON.stringify(newStreaks));
-      localStorage.setItem("sq_streaks_date", today);
-    } catch{}
+
+        if(localStorage.getItem("sq_streaks_date") === today) return;
+
+        const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+        const yd = new Date(); yd.setDate(yd.getDate()-1);
+        const yesterdayKey = yd.toISOString().slice(0,10);
+        const yesterdayData = hist[yesterdayKey];
+        const newStreaks = {};
+        [...PRESET_HABITS, ...customHabits].forEach(h=>{
+          if((yesterdayData?.completed||[]).includes(h.id)){
+            let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
+            while(true){
+              const k = d.toISOString().slice(0,10);
+              if(!(hist[k]?.completed||[]).includes(h.id)) break;
+              count++; d.setDate(d.getDate()-1);
+            }
+            newStreaks[h.id] = count;
+          } else {
+            newStreaks[h.id] = 0;
+          }
+        });
+        setStreaks(newStreaks);
+        localStorage.setItem("sq_streaks", JSON.stringify(newStreaks));
+        localStorage.setItem("sq_streaks_date", today);
+
+        // Save to Supabase profiles
+        if(userId && window.SB){
+          window.SB.from("profiles").update({ streaks: newStreaks, streaks_date: today }).eq("id", userId).then(()=>{});
+        }
+      } catch{}
+    };
+    run();
   }, []);
 
   // Unlock checks when daysInFlow changes
