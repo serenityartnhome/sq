@@ -484,9 +484,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       const { data } = await window.SB.from("banned_users").select("user_id").eq("user_id", userId).single();
       if(data){ setWallBanned(true); return; }
     } catch {}
-    // Check daily limit
+    // Check daily limit — verify the post still exists
     if(localStorage.getItem("sq_wall_last_date") === today){
-      setShareStatus("already"); setShowGratShare(true); return;
+      const savedPostId = localStorage.getItem("sq_wall_last_post_id");
+      let postStillExists = false;
+      if(savedPostId){
+        const { data } = await window.SB.from("gratitude_posts").select("id").eq("id", savedPostId).limit(1);
+        postStillExists = !!(data && data.length > 0);
+      }
+      if(!postStillExists){
+        localStorage.removeItem("sq_wall_last_date");
+        localStorage.removeItem("sq_wall_last_post_id");
+      } else {
+        setShareStatus("already"); setShowGratShare(true); return;
+      }
     }
     // First-time rules
     if(!localStorage.getItem("sq_wall_agreed")){
@@ -526,6 +537,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         const { error } = await window.SB.from("gratitude_posts").insert(row);
         if(!error){
           localStorage.setItem("sq_wall_last_date", today);
+          if(Array.isArray(data) && data[0]?.id) localStorage.setItem("sq_wall_last_post_id", String(data[0].id));
           setShareStatus("done");
           setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); setShareError(""); }, 1400);
           return;
