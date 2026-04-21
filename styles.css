@@ -1401,6 +1401,31 @@ body{
   display: block;
 }
 
+@keyframes hatchFlash {
+  0%   { opacity:0; transform:scale(0.5); }
+  25%  { opacity:1; transform:scale(1.6); }
+  60%  { opacity:0.6; transform:scale(1.2); }
+  100% { opacity:0; transform:scale(2); }
+}
+@keyframes babyPop {
+  0%   { transform:scale(0) rotate(-15deg); opacity:0; }
+  50%  { transform:scale(1.35) rotate(8deg); opacity:1; }
+  70%  { transform:scale(0.9) rotate(-4deg); }
+  85%  { transform:scale(1.1) rotate(2deg); }
+  100% { transform:scale(1) rotate(0deg); opacity:1; }
+}
+.hatch-flash {
+  position:absolute;
+  inset:-30px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,230,100,0.95) 0%, rgba(255,180,50,0.6) 40%, transparent 70%);
+  animation:hatchFlash 0.9s ease-out forwards;
+  pointer-events:none;
+}
+.baby-pop {
+  animation:babyPop 0.65s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+}
+
 /* ============================================================
    BABY SPRITE ANIMATION
    ============================================================ */

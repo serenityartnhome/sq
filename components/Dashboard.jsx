@@ -95,6 +95,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [celebrate, setCelebrate] = React.useState(false);
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
+  const [justHatched, setJustHatched] = React.useState(false);
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>!!localStorage.getItem("sq_diary_unlocked"));
   const [photoUnlocked, setPhotoUnlocked] = React.useState(()=>!!localStorage.getItem("sq_photo_unlocked"));
   const [powerupsUnlocked, setPowerupsUnlocked] = React.useState(()=>!!localStorage.getItem("sq_powerups_unlocked"));
@@ -108,7 +109,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
-  const [mood, setMood] = React.useState("calm");
+  const [mood, setMood] = React.useState("neutral");
+  const [celebrating, setCelebrating] = React.useState(false);
   const [showDiary, setShowDiary] = React.useState(false);
   const [diaryEntry, setDiaryEntry] = React.useState("");
   const [diaryPhoto, setDiaryPhoto] = React.useState("");
@@ -172,6 +174,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [activePowerupIds, setActivePowerupIds] = React.useState(()=>DEFAULT_ACTIVE);
   const [customPowerups, setCustomPowerups] = React.useState([]);
   const [showPowerupPicker, setShowPowerupPicker] = React.useState(false);
+  const [showPowerupSetup, setShowPowerupSetup] = React.useState(false);
   const [newPuName, setNewPuName] = React.useState("");
   const [newPuXp,   setNewPuXp]   = React.useState(10);
   const [newPuKind, setNewPuKind] = React.useState("sparkle");
@@ -340,7 +343,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(localStorage.getItem("sq_celebrated") === today) return;
     if(doneCount >= 3){
       localStorage.setItem("sq_celebrated", today);
+      setCelebrating(true);
       setTimeout(()=>setCelebrate(true), 800);
+      setTimeout(()=>setCelebrating(false), 3500);
     }
   }, [doneCount]);
 
@@ -406,7 +411,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
-  const happyMood = doneCount>=3;
 
   const addCustomIntent = () => {
     const t = customIntent.trim();
@@ -445,9 +449,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <TopBarClock/>
           <div className="avatar" title={profile.name}>
             {petStage==="adult"
-              ? <ZodiacPet animal={animal} mood={happyMood?"happy":mood} size={36}/>
+              ? <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
               : petStage==="baby"
-              ? <BabyPet animal={animal} happy={happyMood} size={22}/>
+              ? <BabyPet animal={animal} happy={celebrating} size={22}/>
               : <img src={eggSrc(mood)} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
             }
           </div>
@@ -558,13 +562,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {(()=>{
                   const sz = Math.round(Math.min(160, window.innerHeight*0.17));
                   if(petStage==="adult" && !isHatching)
-                    return <ZodiacPet animal={animal} mood={happyMood?"happy":mood} happy={happyMood} size={sz}/>;
+                    return <ZodiacPet animal={animal} mood={celebrating?"happy":mood} happy={celebrating} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
-                    return <BabyPet animal={animal} happy={happyMood} neglected={daysInFlow===0&&hatched} size={Math.round(sz*0.3)}/>;
+                    return (
+                      <div style={{position:"relative",display:"inline-block"}}>
+                        {justHatched && <div className="hatch-flash"/>}
+                        <BabyPet animal={animal} happy={celebrating} neglected={daysInFlow===0&&hatched}
+                          size={Math.round(sz*0.3)}
+                          className={justHatched?"baby-pop":""}/>
+                      </div>
+                    );
                   return <img src={eggSrc(mood)} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
                     style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
-                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); } }}
+                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); } }}
                   />;
                 })()}
               </div>
@@ -705,28 +716,36 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           </h2>
 
           {(!powerupsUnlocked && daysInFlow < 2) ? (
-            <div className="pu-picker-panel" style={{marginBottom:0}}>
-              <p style={{textAlign:"center",fontSize:12,color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",
-                         lineHeight:1.6,marginBottom:10,marginTop:0}}>
-                Power-ups are the little things that give <em>you</em> energy — a walk, a cosy ritual, a moment of joy. They're personal to you. Pick your favourites below and they'll activate tomorrow when you return. ✦ You can change them any time.
-              </p>
-              <div className="pu-picker-grid">
-                {[...POWERUPS, ...customPowerups].map(p=>{
-                  const on = activePowerupIds.includes(p.id);
-                  return (
-                    <button key={p.id} className={"pu-pick-btn "+(on?"on":"")}
-                      onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
-                      <HabitIcon kind={p.kind||"sparkle"} size={20}/>
-                      <span>{p.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p style={{textAlign:"center",fontSize:10,color:"var(--rose)",fontFamily:"Silkscreen,monospace",
-                         marginTop:8,marginBottom:0,textTransform:"uppercase",letterSpacing:".04em"}}>
-                ✦ Activates Day 2 ✦
-              </p>
-            </div>
+            <>
+              <button className="coming-soon-btn" style={{width:"100%",marginBottom:6}}
+                onClick={()=>setShowPowerupSetup(v=>!v)}>
+                {showPowerupSetup ? "Hide ✦" : "Set Up Power-Ups ✦"}
+              </button>
+              {showPowerupSetup && (
+                <div className="pu-picker-panel" style={{marginBottom:0}}>
+                  <p style={{textAlign:"center",fontSize:12,color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",
+                             lineHeight:1.6,marginBottom:10,marginTop:0}}>
+                    Power-ups are the little things that give <em>you</em> energy — a walk, a cosy ritual, a moment of joy. Pick your favourites now and they'll activate tomorrow. ✦ You can change them any time.
+                  </p>
+                  <div className="pu-picker-grid">
+                    {[...POWERUPS, ...customPowerups].map(p=>{
+                      const on = activePowerupIds.includes(p.id);
+                      return (
+                        <button key={p.id} className={"pu-pick-btn "+(on?"on":"")}
+                          onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
+                          <HabitIcon kind={p.kind||"sparkle"} size={20}/>
+                          <span>{p.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p style={{textAlign:"center",fontSize:10,color:"var(--rose)",fontFamily:"Silkscreen,monospace",
+                             marginTop:8,marginBottom:0,textTransform:"uppercase",letterSpacing:".04em"}}>
+                    ✦ Activates Day 2 ✦
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <>
               <p style={{textAlign:"center",fontSize:11,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",

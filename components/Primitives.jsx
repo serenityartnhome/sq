@@ -24,10 +24,10 @@ function HabitIcon({ kind, size=24 }){
 function Sparkle({ size=18 }){ return <Icon name="sparkle" size={size}/>; }
 function Flame(){ return <Icon name="flame" size={22}/>; }
 
-function BabyPet({ animal, happy, neglected, size=64 }){
+function BabyPet({ animal, happy, neglected, size=64, className="" }){
   const animClass = neglected ? "baby-neglected" : happy ? "baby-happy" : "baby-idle";
   return (
-    <div className={`baby-sprite ${animClass}`}
+    <div className={`baby-sprite ${animClass} ${className}`}
       style={{
         width: size,
         height: size,
