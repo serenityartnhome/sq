@@ -118,6 +118,17 @@
       const d = await r.json();
       if(d.error||d.msg) return { error:{ message: d.error_description||d.msg||"Update failed" }};
       return { error:null };
+    },
+
+    async updateUser(attrs){
+      const r = await fetch(URL+"/auth/v1/user", {
+        method:"PUT", headers:_hdrs(),
+        body: JSON.stringify(attrs)
+      });
+      const d = await r.json();
+      if(d.error||d.msg) return { data:null, error:{ message: d.error_description||d.msg||"Update failed" }};
+      if(d.id && _session){ _session = { ..._session, user: d }; try{ localStorage.setItem(SESS, JSON.stringify(_session)); }catch{} }
+      return { data:{ user: d }, error:null };
     }
   };
 

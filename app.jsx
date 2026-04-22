@@ -165,6 +165,9 @@ function App(){
           loc:data.profile.loc||"", why:data.profile.why||"",
           cursor:data.profile.cursor||null, habits:data.habits||[]
         });
+        if(data.emailOptIn !== undefined){
+          await window.SB.auth.updateUser({ data:{ email_opt_in: !!data.emailOptIn } });
+        }
       } catch{}
       return;
     }
@@ -269,7 +272,8 @@ function App(){
             ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser} onSignOut={signOut}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
-                         onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}/>
+                         onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}
+                         authUserMeta={authUser?.user_metadata||null}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
       {checkEmailMsg && (

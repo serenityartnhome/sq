@@ -258,6 +258,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
   const [cursor, setCursor] = React.useState(null);
   const [showSavePopup, setShowSavePopup] = React.useState(false);
   const [showLoginPopup, setShowLoginPopup] = React.useState(false);
+  const [googleOptIn, setGoogleOptIn] = React.useState(true);
 
   const CURSORS = [null,"cursor-1","cursor-2","cursor-3","cursor-4","cursor-5","cursor-6"];
   React.useEffect(()=>{
@@ -513,8 +514,19 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>
+            {authUser && (
+              <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:10,cursor:"pointer",
+                             padding:"8px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+                <input type="checkbox" checked={googleOptIn} onChange={e=>setGoogleOptIn(e.target.checked)}
+                  style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+                <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
+                  ✦ Yes, send me wellness tips &amp; updates
+                  <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
+                </span>
+              </label>
+            )}
             <button className="btn-primary btn-pink" disabled={!canSubmit}
-              onClick={()=>{ if(authUser){ onComplete(profileData(), null); } else { setShowSavePopup(true); } }}
+              onClick={()=>{ if(authUser){ onComplete({...profileData(), emailOptIn:googleOptIn}, null); } else { setShowSavePopup(true); } }}
               style={{width:"100%"}}>
               <Icon name="sparkle" size={18}/>
               {authUser ? "Begin My Quest ✦ Save Progress" : "Save My Progress"}

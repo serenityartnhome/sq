@@ -98,7 +98,7 @@ const TIPS = {
   },
 };
 
-function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta }){
   const today = new Date().toISOString().slice(0,10);
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
@@ -212,6 +212,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [newEmail, setNewEmail]   = React.useState("");
   const [emailMsg, setEmailMsg]   = React.useState(null);
   const [emailLoading, setEmailLoading] = React.useState(false);
+  const [editEmailOptIn, setEditEmailOptIn] = React.useState(()=> authUserMeta?.email_opt_in !== false);
 
   const doChangeEmail = async () => {
     if(!newEmail.trim()){ setEmailMsg({err:true,text:"Please enter a new email"}); return; }
@@ -236,6 +237,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       s.profile = { ...s.profile, ...updates };
       localStorage.setItem("serenity-quest:v1", JSON.stringify(s));
     } catch{}
+    if(!isGuest && window.SB){
+      window.SB.auth.updateUser({ data:{ email_opt_in: editEmailOptIn } }).catch(()=>{});
+    }
     if(userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId, name: updates.name, bday: updates.bday, loc: updates.loc,
@@ -1571,6 +1575,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                 )}
               </div>
+            )}
+            {!isGuest && (
+              <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer",
+                             padding:"8px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+                <input type="checkbox" checked={editEmailOptIn} onChange={e=>setEditEmailOptIn(e.target.checked)}
+                  style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+                <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
+                  ✦ Send me wellness tips &amp; updates
+                  <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
+                </span>
+              </label>
             )}
             <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="coming-soon-btn" onClick={saveProfileEdit}>Save ✦</button>
