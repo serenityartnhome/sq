@@ -655,9 +655,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   ];
 
 
+  const bubblePauseUntil = React.useRef(0);
+
   React.useEffect(()=>{
     const pick = () => {
       if(petStageRef.current === "egg") return;
+      if(Date.now() < bubblePauseUntil.current) return;
       setPetBubble(pickPetBubble(petStageRef.current, moodRef.current, doneCountRef.current, totalSlotsRef.current, daysInFlowRef.current));
     };
     pick();
@@ -1592,20 +1595,24 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 <MoodPicker value={mood} onChange={m=>{
                   setMood(m);
                   showTip("mood");
-                  const countKey = "sq_mq_count";
-                  const dateKey  = "sq_mq_date";
+                  const dateKey   = "sq_mq_date";
+                  const countsKey = "sq_mq_counts";
                   const storedDate = localStorage.getItem(dateKey);
-                  const count = storedDate === today ? parseInt(localStorage.getItem(countKey)||"0",10) : 0;
-                  if(count >= 3){ setMoodQuest(null); return; }
+                  const counts = storedDate === today ? JSON.parse(localStorage.getItem(countsKey)||"{}") : {};
+                  if((counts[m]||0) >= 2){ setMoodQuest(null); return; }
                   const pool = MOOD_QUESTS[m];
                   if(pool?.length) {
                     const last = lastMoodQuestIdx.current[m] ?? -1;
                     let idx;
                     do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
                     lastMoodQuestIdx.current[m] = idx;
-                    setMoodQuest(pool[idx]);
+                    const quest = pool[idx];
+                    setMoodQuest(quest);
+                    setPetBubble(quest.task);
+                    bubblePauseUntil.current = Date.now() + 45000;
+                    counts[m] = (counts[m]||0) + 1;
                     localStorage.setItem(dateKey, today);
-                    localStorage.setItem(countKey, String(count + 1));
+                    localStorage.setItem(countsKey, JSON.stringify(counts));
                   } else {
                     setMoodQuest(null);
                   }
