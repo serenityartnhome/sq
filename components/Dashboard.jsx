@@ -133,20 +133,24 @@ const POWERUPS = [
   { id:"charm",   name:"Energy Charm",kind:"charm",   xp:12 },
 ];
 const BABY_BUBBLES = {
-  greeting:     ["hi!! ✨","you came back!","yay you're here!","oh! hello!","…heehee","i missed you!"],
-  streak_high:  ["every day!! ✨","we keep going!","look at us!!","we're doing it!","again again!!"],
-  missed_day:   ["you're back!!","i waited…","yay you came!","…you came!! ✨","don't go again ok?"],
-  task_1:       ["yay! we did a thing!","a little step!","…more?","✨ good job!","we started!"],
-  task_3:       ["we're doing it!!","so good!!","i feel it!","keep going!!","this is fun!!"],
-  task_all:     ["we did everything!! ✨","we're glowing!!","best day ever!!","we did it all!!"],
-  mood_happy:   ["happy!! ✨","me too!!","yay!","heehee ✨","same same!!"],
-  mood_sad:     ["…it's okay","i'm here","we okay?","…stay with me","i won't leave"],
-  mood_tired:   ["rest… it's okay","we can be slow","that's okay","shhh…"],
-  mood_anxious: ["…breathe","it's okay it's okay","we can slow down","…in and out"],
-  mood_frustrated: ["…one thing","we can do it slowly","it's okay","we'll try again"],
-  revive:       ["you came back!!","i knew it ✨","we're okay now!","yay yay yay!!","you stayed!!"],
-  night:        ["…goodnight ✨","rest now…","see you tomorrow!","shhh…","sleep well ✨"],
-  rare:         ["something feels special today ✨","…i really like you ✨","you're different today!"],
+  greeting:        ["hi!! ✨","you came back!","yay you're here!","oh! hello!","…heehee","i missed you!","we can do today!!"],
+  streak_high:     ["every day!! ✨","we keep going!","look at us!!","we're doing it!","again again!!","so proud!!"],
+  missed_day:      ["you're back!!","i waited…","yay you came!","…you came!! ✨","don't go again ok?","i'm so happy!!"],
+  task_1:          ["yay! we did a thing!","a little step!","…more?","✨ good job!","we started!","keep going!!"],
+  task_3:          ["we're doing it!!","so good!!","i feel it!","keep going!!","this is fun!!","we're amazing!!"],
+  task_all:        ["we did everything!! ✨","we're glowing!!","best day ever!!","we did it all!!","perfect day!! ✨"],
+  mood_happy:      ["happy!! ✨","me too!!","yay!","heehee ✨","same same!!","best feeling!!","let's keep this!!"],
+  mood_excited:    ["ahhhh!! ✨","let's go!!","so exciting!!","yay yay yay!!","i feel it too!!","GO GO GO!!"],
+  mood_calm:       ["so peaceful…","i like this","…quiet is nice","we can stay here","shhh… nice"],
+  mood_neutral:    ["we can do one thing","let's just start","even tiny counts!","just one step!","we can try"],
+  mood_sad:        ["…it's okay","i'm here","we okay?","…stay with me","i won't leave","…i love you"],
+  mood_tired:      ["rest… it's okay","we can be slow","that's okay","shhh…","today can be small"],
+  mood_anxious:    ["…breathe","it's okay it's okay","we can slow down","…in and out","stay here with me"],
+  mood_frustrated: ["…one thing","it's okay","we'll try again","start messy!!","just begin"],
+  revive:          ["you came back!!","i knew it ✨","we're okay now!","yay yay yay!!","you stayed!!","i waited for you!!"],
+  low_state:       ["i miss you…","…still here","come back soon?","…waiting","i'll stay"],
+  night:           ["…goodnight ✨","rest now…","see you tomorrow!","shhh…","sleep well ✨","sweet dreams ✨"],
+  rare:            ["something feels special today ✨","…i really like you ✨","you're different today!","i'm so glad you're here","…we're doing something ✨"],
 };
 
 const ADULT_BUBBLES = {
@@ -207,29 +211,75 @@ const ADULT_BUBBLES = {
     "Let's start again… together",
   ],
   mood_anxious: [
-    "Let's breathe… just a little",
-    "You don't have to solve everything right now",
-    "We can slow this down together",
+    "Breathe… I'm here with you",
+    "Let's slow this down together",
+    "You're safe right now… just breathe",
+    "One breath is enough",
+    "Loosen your shoulders… let it out",
+    "You don't have to solve this right now",
+    "Come back to this moment",
+    "Nothing else matters right now",
   ],
   mood_tired:   [
     "You can rest… I'll stay here",
-    "Today doesn't have to be big",
-    "Let's keep it gentle",
+    "Today can be smaller — that's allowed",
+    "Close your eyes for a moment…",
+    "You've done enough already",
+    "Let's go slow today",
+    "Just show up — that's it",
+    "Rest is part of the work",
+    "One small thing, nothing more",
   ],
   mood_happy:   [
     "I love this energy ✨",
     "You feel light today",
+    "Hold onto this feeling",
     "Let's stay in this a bit longer",
+    "You're glowing today ✨",
+    "Let it grow… savour it",
+    "This matters more than you know",
+  ],
+  mood_excited: [
+    "That energy? Let's use it ✨",
+    "You're in momentum — stay with it",
+    "Today feels alive. Good.",
+    "Ride this, don't rush it",
+    "Channel this somewhere real",
+    "Let the excitement focus, not scatter",
+  ],
+  mood_calm:    [
+    "You're in the quiet… stay here",
+    "Nothing to fix right now",
+    "Feel this stillness — it's yours",
+    "Breathe slowly… let it be",
+    "Stay grounded here",
+    "This is enough",
+  ],
+  mood_neutral: [
+    "No feeling has to be forced",
+    "Just show up — that's enough today",
+    "We'll take it as it comes",
+    "You don't need to feel inspired to begin",
+    "Even ordinary days build something",
+    "Let's just move forward a little",
   ],
   mood_frustrated: [
-    "Let's take one small step",
+    "Let it out… then begin again",
     "It doesn't have to be perfect",
+    "Start messy. Just start.",
+    "One imperfect step forward…",
+    "You're allowed to feel this",
     "We'll figure it out… slowly",
+    "Shake it off… then keep going",
   ],
   mood_sad:     [
     "I'm here… that's all",
-    "You don't have to feel better right now",
+    "You're allowed to feel this",
+    "You don't have to perform okay right now",
     "Let's just be here together",
+    "Be gentle with yourself today…",
+    "Sadness isn't weakness",
+    "Small things still count today",
   ],
   night:        [
     "Thank you for today…",
@@ -237,6 +287,7 @@ const ADULT_BUBBLES = {
     "I'll be here tomorrow",
     "Let's pause here…",
     "We can continue later",
+    "Rest well… you earned it",
   ],
   rare:         [
     "Something about you feels different today… ✨",
@@ -244,6 +295,9 @@ const ADULT_BUBBLES = {
     "This moment matters more than you think",
     "We're becoming something… slowly",
     "I feel really close to you right now",
+    "Something is shifting… ✨",
+    "I'm glad you're here",
+    "You came back… that matters",
   ],
 };
 
@@ -268,7 +322,10 @@ function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
   else if(daysInFlow >= 5)                             cat = "streak_high";
   else if(mood === "anxious")                          cat = "mood_anxious";
   else if(mood === "tired")                            cat = "mood_tired";
-  else if(mood === "happy" || mood === "excited")      cat = "mood_happy";
+  else if(mood === "happy")                            cat = "mood_happy";
+  else if(mood === "excited")                          cat = "mood_excited";
+  else if(mood === "calm")                             cat = "mood_calm";
+  else if(mood === "neutral")                          cat = "mood_neutral";
   else if(mood === "frustrated")                       cat = "mood_frustrated";
   else if(mood === "sad")                              cat = "mood_sad";
   else if(missedYesterday)                             cat = "missed_day";
