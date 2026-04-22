@@ -58,13 +58,151 @@ const POWERUPS = [
   { id:"clean",   name:"Clean",       kind:"clean",   xp:15 },
   { id:"charm",   name:"Energy Charm",kind:"charm",   xp:12 },
 ];
-const BUBBLES = [
-  "Let's align your energy today…",
-  "What will we build together?",
-  "I believe in you, tiny human ♡",
-  "Small steps, great magic ✦",
-  "The lanterns are lit for you tonight.",
-];
+const BABY_BUBBLES = {
+  greeting:     ["hi!! ✨","you came back!","yay you're here!","oh! hello!","…heehee","i missed you!"],
+  streak_high:  ["every day!! ✨","we keep going!","look at us!!","we're doing it!","again again!!"],
+  missed_day:   ["you're back!!","i waited…","yay you came!","…you came!! ✨","don't go again ok?"],
+  task_1:       ["yay! we did a thing!","a little step!","…more?","✨ good job!","we started!"],
+  task_3:       ["we're doing it!!","so good!!","i feel it!","keep going!!","this is fun!!"],
+  task_all:     ["we did everything!! ✨","we're glowing!!","best day ever!!","we did it all!!"],
+  mood_happy:   ["happy!! ✨","me too!!","yay!","heehee ✨","same same!!"],
+  mood_sad:     ["…it's okay","i'm here","we okay?","…stay with me","i won't leave"],
+  mood_tired:   ["rest… it's okay","we can be slow","that's okay","shhh…"],
+  mood_anxious: ["…breathe","it's okay it's okay","we can slow down","…in and out"],
+  mood_frustrated: ["…one thing","we can do it slowly","it's okay","we'll try again"],
+  revive:       ["you came back!!","i knew it ✨","we're okay now!","yay yay yay!!","you stayed!!"],
+  night:        ["…goodnight ✨","rest now…","see you tomorrow!","shhh…","sleep well ✨"],
+  rare:         ["something feels special today ✨","…i really like you ✨","you're different today!"],
+};
+
+const ADULT_BUBBLES = {
+  greeting:     [
+    "Hi… I've been waiting for you ✨",
+    "You're here… that's enough to start",
+    "A new day… we can take it slow",
+    "I'm glad you came back",
+    "Let's see what today feels like",
+    "We can try again today… together",
+    "You made it here… that matters",
+  ],
+  streak_high:  [
+    "We've been showing up… I feel stronger with you 🔥",
+    "You didn't give up… I can feel it",
+    "This rhythm we have… it's working",
+    "You're becoming consistent… I'm proud of us",
+    "We're in flow… let's keep going",
+    "Day by day… you're changing",
+  ],
+  missed_day:   [
+    "I missed you yesterday…",
+    "It felt a little quiet without you",
+    "You weren't here… but I waited",
+    "It's okay… we can start again today",
+    "I'm still here… no matter what",
+    "Let's just take one small step today",
+  ],
+  low_state:    [
+    "I feel a bit distant…",
+    "Things feel slower without you",
+    "I'll stay here… until you come back",
+    "It's been quiet lately…",
+    "I'm still here… just a little tired",
+  ],
+  task_1:       [
+    "That helped… even a little",
+    "A small step… I feel it",
+    "That's enough for now",
+  ],
+  task_3:       [
+    "I feel stronger already",
+    "You're really trying… I can tell",
+    "This feels different… in a good way",
+  ],
+  task_all:     [
+    "We did it… I'm glowing ✨",
+    "Everything feels aligned right now",
+    "You showed up fully… thank you",
+    "This energy… let's remember it",
+  ],
+  revive:       [
+    "You came back… I knew you would",
+    "I was waiting… thank you",
+    "It feels warm again…",
+    "We're okay now…",
+    "You didn't leave me…",
+    "Let's start again… together",
+  ],
+  mood_anxious: [
+    "Let's breathe… just a little",
+    "You don't have to solve everything right now",
+    "We can slow this down together",
+  ],
+  mood_tired:   [
+    "You can rest… I'll stay here",
+    "Today doesn't have to be big",
+    "Let's keep it gentle",
+  ],
+  mood_happy:   [
+    "I love this energy ✨",
+    "You feel light today",
+    "Let's stay in this a bit longer",
+  ],
+  mood_frustrated: [
+    "Let's take one small step",
+    "It doesn't have to be perfect",
+    "We'll figure it out… slowly",
+  ],
+  mood_sad:     [
+    "I'm here… that's all",
+    "You don't have to feel better right now",
+    "Let's just be here together",
+  ],
+  night:        [
+    "Thank you for today…",
+    "You did enough… rest now",
+    "I'll be here tomorrow",
+    "Let's pause here…",
+    "We can continue later",
+  ],
+  rare:         [
+    "Something about you feels different today… ✨",
+    "You're changing… I can feel it",
+    "This moment matters more than you think",
+    "We're becoming something… slowly",
+    "I feel really close to you right now",
+  ],
+};
+
+function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
+  const MSGS = stage === "baby" ? BABY_BUBBLES : ADULT_BUBBLES;
+  const hour = new Date().getHours();
+  const isNight = hour >= 21 || hour < 5;
+  let missedYesterday = false;
+  try {
+    const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+    const yd = new Date(); yd.setDate(yd.getDate()-1);
+    missedYesterday = !hist[yd.toISOString().slice(0,10)]?.done;
+  } catch{}
+
+  let cat = "greeting";
+  if(Math.random() < 0.025)                           cat = "rare";
+  else if(isNight)                                     cat = "night";
+  else if(missedYesterday && doneCount >= 1)           cat = "revive";
+  else if(totalSlots > 0 && doneCount >= totalSlots)  cat = "task_all";
+  else if(doneCount >= 3)                              cat = "task_3";
+  else if(doneCount >= 1)                              cat = "task_1";
+  else if(daysInFlow >= 5)                             cat = "streak_high";
+  else if(mood === "anxious")                          cat = "mood_anxious";
+  else if(mood === "tired")                            cat = "mood_tired";
+  else if(mood === "happy" || mood === "excited")      cat = "mood_happy";
+  else if(mood === "frustrated")                       cat = "mood_frustrated";
+  else if(mood === "sad")                              cat = "mood_sad";
+  else if(missedYesterday)                             cat = "missed_day";
+  else if(daysInFlow === 0)                            cat = "low_state";
+
+  const pool = MSGS[cat] || MSGS.greeting;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 function TopBarClock(){
   const fmt = () => {
@@ -186,7 +324,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [customEnergyEmoji, setCustomEnergyEmoji] = React.useState("sparkle");
   const [showCustomEnergy, setShowCustomEnergy] = React.useState(false);
   const [intentShake, setIntentShake] = React.useState(false);
-  const [bubbleIdx, setBubbleIdx] = React.useState(0);
+  const [petBubble, setPetBubble] = React.useState("Hi… I've been waiting for you ✨");
   const [celebrate, setCelebrate] = React.useState(false);
   const [isHatching, setIsHatching] = React.useState(false);
   const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
@@ -327,14 +465,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const petStage = testStage || (isAdmin || adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
 
-  const EGG_SOUNDS = [
-    "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
-    "krrk","mlem","weh.","prrt","squeak?","bonk","glorp","hmph","nyeh",
-    "*shuffles*","...tap tap","bibble","zzzt","moop","crkk","hewwo??",
-  ];
 
   React.useEffect(()=>{
-    const t = setInterval(()=>setBubbleIdx(i=>(i+1)%BUBBLES.length), 6500);
+    const pick = () => {
+      if(petStageRef.current === "egg") return;
+      setPetBubble(pickPetBubble(petStageRef.current, moodRef.current, doneCountRef.current, totalSlotsRef.current, daysInFlowRef.current));
+    };
+    pick();
+    const t = setInterval(pick, 6500);
     return ()=>clearInterval(t);
   },[]);
 
@@ -711,6 +849,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
   const doneCountRef = React.useRef(doneCount);
   doneCountRef.current = doneCount;
+  const moodRef = React.useRef(mood);
+  moodRef.current = mood;
+  const totalSlotsRef = React.useRef(totalSlots);
+  totalSlotsRef.current = totalSlots;
+  const daysInFlowRef = React.useRef(daysInFlow);
+  daysInFlowRef.current = daysInFlow;
+  const petStageRef = React.useRef(petStage);
+  petStageRef.current = petStage;
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
 
@@ -899,11 +1045,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </>
               )}
             </div>
-            <div className="bubble-wrap">
-              <div className="bubble" key={bubbleIdx}>
-                {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
+            {petStage !== "egg" && (
+              <div className="bubble-wrap">
+                <div className="bubble" key={petBubble}>
+                  {petBubble}
+                </div>
               </div>
-            </div>
+            )}
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
