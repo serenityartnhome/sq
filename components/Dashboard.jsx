@@ -1442,21 +1442,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Subscribe */}
             {!isGuest && (
               <div style={{marginBottom:14}}>
-                {!showOptIn ? (
-                  <button className="acct-btn" onClick={()=>setShowOptIn(true)}>
-                    {editEmailOptIn ? "✦ Subscribed to Updates" : "Email Preferences"}
-                  </button>
-                ) : (
-                  <label style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer",
-                                 padding:"8px",background:"rgba(201,127,165,.08)",border:"2px solid var(--rose)",boxShadow:"2px 2px 0 rgba(201,127,165,.25)"}}>
-                    <input type="checkbox" checked={editEmailOptIn} onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
-                      style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
-                    <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
-                      ✦ Send me wellness tips &amp; updates
-                      <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
-                    </span>
-                  </label>
-                )}
+                <button className="acct-btn" onClick={()=>setShowOptIn(true)}>
+                  Subscriptions
+                </button>
               </div>
             )}
 
@@ -1525,6 +1513,26 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </button>
               <button className="acct-btn" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); setShowOptIn(false); }}>Cancel</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Subscriptions popup ── */}
+      {showOptIn && (
+        <div className="coming-soon-overlay" onClick={()=>setShowOptIn(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%",textAlign:"center"}}>
+            <h3 className="coming-soon-title" style={{marginBottom:16}}>✦ Subscriptions ✦</h3>
+            <label style={{display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer",textAlign:"left",
+                           padding:"10px",background:"rgba(201,127,165,.08)",border:"2px solid var(--rose)",boxShadow:"2px 2px 0 rgba(201,127,165,.25)"}}>
+              <input type="checkbox" checked={editEmailOptIn}
+                onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
+                style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:15,height:15,flexShrink:0}}/>
+              <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.8}}>
+                Wellness tips &amp; updates
+                <br/><span style={{color:"var(--plum-soft)",fontSize:9,fontFamily:"Pixelify Sans,monospace"}}>No spam. Unsubscribe anytime.</span>
+              </span>
+            </label>
+            <button className="coming-soon-btn" style={{marginTop:14,width:"100%"}} onClick={()=>setShowOptIn(false)}>Done</button>
           </div>
         </div>
       )}
