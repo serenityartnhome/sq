@@ -45,6 +45,12 @@ function App(){
     return p.type === "signup" && !!p.access_token;
   });
   const [checkEmailMsg, setCheckEmailMsg] = React.useState(null); // email address awaiting confirmation
+  const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
+    const p = parseHashParams();
+    // Google OAuth returns access_token with no type (email confirm has type=signup)
+    const isGoogleOAuth = !!p.access_token && !p.type;
+    return isGoogleOAuth && !localStorage.getItem("sq_pwa_shown");
+  });
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
     petMood: window.__SQ_DEFAULTS.petMood,
@@ -296,7 +302,72 @@ function App(){
           </div>
         </div>
       )}
+      {showPwaPrompt && <PwaPrompt onDone={()=>{ localStorage.setItem("sq_pwa_shown","1"); setShowPwaPrompt(false); }}/>}
     </>
+  );
+}
+
+function PwaPrompt({ onDone }){
+  const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const [showSteps, setShowSteps] = React.useState(false);
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(26,14,46,.88)",zIndex:9999,
+                 display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{background:"#2a1a3e",border:"3px solid #e8c97a",borderRadius:0,
+                   boxShadow:"6px 6px 0 rgba(0,0,0,.4)",maxWidth:360,width:"100%",
+                   textAlign:"center",padding:"28px 20px"}}>
+        <div style={{fontSize:40,marginBottom:10}}>📱</div>
+        <div style={{fontFamily:"Silkscreen,monospace",fontSize:13,color:"#e8c97a",
+                     marginBottom:10,letterSpacing:".04em"}}>Best on Your Phone</div>
+        <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"rgba(255,255,255,.75)",
+                     lineHeight:1.7,marginBottom:20}}>
+          Serenity Quest works like a real app — no App Store needed. Add it to your home screen for the full experience.
+        </div>
+        {!showSteps ? (
+          <button onClick={()=>setShowSteps(true)}
+            style={{background:"#e8c97a",color:"#2a1a3e",border:"none",
+                    fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 24px",
+                    cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",
+                    boxShadow:"3px 3px 0 rgba(0,0,0,.3)",marginBottom:12,display:"block",width:"100%"}}>
+            ✦ Show Me How ✦
+          </button>
+        ) : (
+          <div style={{textAlign:"left",marginBottom:16,background:"rgba(255,255,255,.05)",
+                       borderRadius:6,padding:"12px 14px"}}>
+            {isIOS && (
+              <ol style={{fontSize:12,color:"rgba(255,255,255,.8)",fontFamily:"Pixelify Sans,monospace",
+                          lineHeight:2.2,paddingLeft:18,margin:0}}>
+                <li>Tap the <strong style={{color:"#e8c97a"}}>Share</strong> button at the bottom of Safari ⎙</li>
+                <li>Scroll and tap <strong style={{color:"#e8c97a"}}>"Add to Home Screen"</strong></li>
+                <li>Tap <strong style={{color:"#e8c97a"}}>Add</strong> in the top right</li>
+                <li>Open <strong style={{color:"#e8c97a"}}>Serenity Quest</strong> from your home screen ✦</li>
+              </ol>
+            )}
+            {isAndroid && (
+              <ol style={{fontSize:12,color:"rgba(255,255,255,.8)",fontFamily:"Pixelify Sans,monospace",
+                          lineHeight:2.2,paddingLeft:18,margin:0}}>
+                <li>Tap the <strong style={{color:"#e8c97a"}}>⋮ menu</strong> in Chrome (top right)</li>
+                <li>Tap <strong style={{color:"#e8c97a"}}>"Add to Home screen"</strong></li>
+                <li>Tap <strong style={{color:"#e8c97a"}}>Add</strong></li>
+                <li>Open <strong style={{color:"#e8c97a"}}>Serenity Quest</strong> from your home screen ✦</li>
+              </ol>
+            )}
+            {!isIOS && !isAndroid && (
+              <div style={{fontSize:12,color:"rgba(255,255,255,.75)",fontFamily:"Pixelify Sans,monospace",lineHeight:1.7}}>
+                On your phone, open this page in <strong style={{color:"#e8c97a"}}>Safari (iPhone)</strong> or <strong style={{color:"#e8c97a"}}>Chrome (Android)</strong> and use the browser menu to <strong style={{color:"#e8c97a"}}>"Add to Home Screen"</strong>.
+              </div>
+            )}
+          </div>
+        )}
+        <button onClick={onDone}
+          style={{background:"none",border:"2px solid rgba(255,255,255,.2)",color:"rgba(255,255,255,.5)",
+                  fontFamily:"Silkscreen,monospace",fontSize:10,padding:"8px 20px",
+                  cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",width:"100%"}}>
+          Maybe Later
+        </button>
+      </div>
+    </div>
   );
 }
 
