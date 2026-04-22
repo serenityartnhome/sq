@@ -180,8 +180,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   });
   const [showEnergyModal, setShowEnergyModal] = React.useState(false);
   const [pendingEnergy, setPendingEnergy] = React.useState(null);
+  const [savedCustomEnergy, setSavedCustomEnergy] = React.useState(()=>{ try{ return JSON.parse(localStorage.getItem("sq_custom_energy")||"null"); }catch{ return null; } });
   const [customEnergyName, setCustomEnergyName] = React.useState("");
   const [customEnergyTags, setCustomEnergyTags] = React.useState("");
+  const [customEnergyEmoji, setCustomEnergyEmoji] = React.useState("⭐");
   const [showCustomEnergy, setShowCustomEnergy] = React.useState(false);
   const [intentShake, setIntentShake] = React.useState(false);
   const [bubbleIdx, setBubbleIdx] = React.useState(0);
@@ -389,6 +391,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(profileFlags.diaryUnlocked)    { setDiaryUnlocked(true);    localStorage.setItem("sq_diary_unlocked","1"); }
     if(profileFlags.photoUnlocked)    { setPhotoUnlocked(true);    localStorage.setItem("sq_photo_unlocked","1"); }
     if(profileFlags.powerupsUnlocked) { setPowerupsUnlocked(true); localStorage.setItem("sq_powerups_unlocked","1"); }
+    if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
   }, [profileFlags]);
 
   const allHabits = React.useMemo(()=>{
@@ -499,6 +502,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             hatched, adult_unlocked: adultUnlocked,
             diary_unlocked: diaryUnlocked, photo_unlocked: photoUnlocked,
             powerups_unlocked: powerupsUnlocked,
+            custom_energy: savedCustomEnergy||null,
           },{onConflict:"id"}),
         ]);
         if(error) throw error;
@@ -736,7 +740,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const name = customEnergyName.trim();
     if(!name) return;
     const tags = customEnergyTags.split(",").map(s=>s.trim()).filter(Boolean);
-    selectEnergy({ id:"custom", emoji:"⭐", name, desc:"My custom energy", tags });
+    const mode = { id:"custom", emoji:customEnergyEmoji, name, desc:"My custom energy", tags };
+    setSavedCustomEnergy(mode);
+    localStorage.setItem("sq_custom_energy", JSON.stringify(mode));
+    if(userId && window.SB) window.SB.from("profiles").upsert({ id:userId, custom_energy: mode },{onConflict:"id"}).then(()=>{});
+    selectEnergy(mode);
   };
 
   return (
@@ -859,7 +867,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     {energyMode.emoji} {energyMode.name}
                   </div>
                   <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4}}>
-                    {energyMode.desc}
+                    {energyMode.tags?.join(" · ")||energyMode.desc}
                   </div>
                   {/* Mood suggestion */}
                   {mood && MOOD_ENERGY[mood] && (()=>{
@@ -1517,31 +1525,59 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               })}
 
               {/* Custom energy card */}
-              <div onClick={()=>setShowCustomEnergy(true)} style={{
-                flex:"1 1 140px",minWidth:130,cursor:"pointer",textAlign:"center",padding:"10px 8px",
-                background:"rgba(255,255,255,.4)",border:"2px dashed rgba(201,127,165,.35)",
-                display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:90
-              }}>
-                {showCustomEnergy ? (
-                  <div onClick={e=>e.stopPropagation()} style={{width:"100%"}}>
-                    <input autoFocus value={customEnergyName} onChange={e=>setCustomEnergyName(e.target.value)}
-                      placeholder="Energy name…" maxLength={24}
-                      style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--rose)",
-                              padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:11,outline:"none",marginBottom:5}}/>
-                    <input value={customEnergyTags} onChange={e=>setCustomEnergyTags(e.target.value)}
-                      placeholder="word1, word2, word3" maxLength={60}
-                      style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--gold-soft)",
-                              padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:10,outline:"none",marginBottom:6}}/>
-                    <button className="coming-soon-btn" style={{fontSize:10,padding:"5px 10px",width:"100%"}}
-                      onClick={confirmCustomEnergy}>Set ✦</button>
+              {showCustomEnergy ? (
+                <div onClick={e=>e.stopPropagation()} style={{
+                  flex:"1 1 140px",minWidth:130,textAlign:"center",padding:"10px 8px",
+                  background:"rgba(255,255,255,.7)",border:"2px solid var(--rose)",
+                  boxShadow:"2px 2px 0 rgba(201,127,165,.2)"
+                }}>
+                  {/* Emoji picker */}
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:7}}>
+                    {["⭐","🌸","💫","🔮","🌙","🌊","🌿","🦋","🌈","🎯","💎","🔥","✨","🌺","🍀","💪"].map(em=>(
+                      <span key={em} onClick={()=>setCustomEnergyEmoji(em)} style={{
+                        fontSize:16,cursor:"pointer",padding:"2px 3px",
+                        background: customEnergyEmoji===em ? "rgba(201,127,165,.25)" : "transparent",
+                        border: customEnergyEmoji===em ? "1px solid var(--rose)" : "1px solid transparent",
+                        lineHeight:1
+                      }}>{em}</span>
+                    ))}
                   </div>
-                ) : (
-                  <>
-                    <div style={{fontSize:20,marginBottom:4,color:"var(--plum-soft)"}}>＋</div>
-                    <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)"}}>Create your own</div>
-                  </>
-                )}
-              </div>
+                  <input autoFocus value={customEnergyName} onChange={e=>setCustomEnergyName(e.target.value)}
+                    placeholder="Energy name…" maxLength={24}
+                    style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--rose)",
+                            padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:11,outline:"none",marginBottom:5}}/>
+                  <input value={customEnergyTags} onChange={e=>setCustomEnergyTags(e.target.value)}
+                    placeholder="word1, word2, word3" maxLength={60}
+                    style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--gold-soft)",
+                            padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:10,outline:"none",marginBottom:6}}/>
+                  <button className="coming-soon-btn" style={{fontSize:10,padding:"5px 10px",width:"100%"}}
+                    onClick={confirmCustomEnergy}>Set ✦</button>
+                </div>
+              ) : savedCustomEnergy ? (
+                <div style={{
+                  flex:"1 1 140px",minWidth:130,cursor:"pointer",textAlign:"center",padding:"10px 8px",
+                  background: pendingEnergy?.id==="custom"?"rgba(201,127,165,.15)":"rgba(255,255,255,.7)",
+                  border: pendingEnergy?.id==="custom"?"3px solid var(--rose)":"2px solid var(--gold-soft)",
+                  boxShadow: pendingEnergy?.id==="custom"?"3px 3px 0 rgba(201,127,165,.4)":"2px 2px 0 rgba(201,127,165,.12)",
+                  transform: pendingEnergy?.id==="custom"?"scale(1.04)":"scale(1)", transition:"transform .1s",
+                  position:"relative"
+                }} onClick={()=>setPendingEnergy(savedCustomEnergy)}>
+                  <div style={{fontSize:26,marginBottom:4}}>{savedCustomEnergy.emoji}</div>
+                  <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",marginBottom:3}}>{savedCustomEnergy.name}</div>
+                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:9,color:"var(--rose)",lineHeight:1.5}}>{savedCustomEnergy.tags?.join(" • ")}</div>
+                  <button onClick={e=>{ e.stopPropagation(); setCustomEnergyName(savedCustomEnergy.name); setCustomEnergyTags(savedCustomEnergy.tags?.join(", ")||""); setCustomEnergyEmoji(savedCustomEnergy.emoji||"⭐"); setShowCustomEnergy(true); }}
+                    style={{position:"absolute",top:4,right:4,background:"none",border:"none",fontSize:11,cursor:"pointer",color:"var(--plum-soft)",padding:0}}>✏️</button>
+                </div>
+              ) : (
+                <div onClick={()=>setShowCustomEnergy(true)} style={{
+                  flex:"1 1 140px",minWidth:130,cursor:"pointer",textAlign:"center",padding:"10px 8px",
+                  background:"rgba(255,255,255,.4)",border:"2px dashed rgba(201,127,165,.35)",
+                  display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:90
+                }}>
+                  <div style={{fontSize:20,marginBottom:4,color:"var(--plum-soft)"}}>＋</div>
+                  <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)"}}>Create your own</div>
+                </div>
+              )}
             </div>
 
             {pendingEnergy && (

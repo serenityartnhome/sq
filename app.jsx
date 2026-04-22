@@ -109,6 +109,7 @@ function App(){
                 diaryUnlocked:    !!data.diary_unlocked,
                 photoUnlocked:    !!data.photo_unlocked,
                 powerupsUnlocked: !!data.powerups_unlocked,
+                customEnergy:     data.custom_energy || null,
               },
               todayData: dayData || null,
             };
