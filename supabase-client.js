@@ -148,6 +148,8 @@
     const q = {
       select(cols){ _sel=cols; return q; },
       eq(col,val){ _filters.push(col+"=eq."+encodeURIComponent(val)); return q; },
+      gte(col,val){ _filters.push(col+"=gte."+encodeURIComponent(val)); return q; },
+      lt(col,val){ _filters.push(col+"=lt."+encodeURIComponent(val)); return q; },
       match(obj){ Object.entries(obj).forEach(([k,v])=>_filters.push(k+"=eq."+encodeURIComponent(v))); return q; },
       order(col,{ascending=true}={}){ _order=col+"."+(ascending?"asc":"desc"); return q; },
       limit(n){ _lim=n; return q; },

@@ -80,17 +80,19 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
     setAdminLoading(true);
     try {
       const today = new Date().toISOString().split("T")[0];
-      const [{ data: modData }, { data: profileData }, { data: postsData }, { data: todayData }] = await Promise.all([
+      const [{ data: modData }, { data: profileData }, { data: postsData }, { data: activeData }, { data: newData }] = await Promise.all([
         window.SB.from("moderation_log").select("*").order("created_at", {ascending:false}),
         window.SB.from("profiles").select("id"),
         window.SB.from("gratitude_posts").select("id"),
         window.SB.from("daily_data").select("user_id").eq("date", today),
+        window.SB.from("profiles").select("id").gte("created_at", today+"T00:00:00").lt("created_at", today+"T23:59:59"),
       ]);
       setFlagged(modData || []);
       setAdminStats({
         users:   (profileData || []).length,
         posts:   (postsData   || []).length,
-        today:   (todayData   || []).length,
+        active:  (activeData  || []).length,
+        newToday:(newData     || []).length,
         reports: (modData     || []).length,
       });
     } catch {}
@@ -202,10 +204,11 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
           {adminStats && (
             <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap"}}>
               {[
-                { label:"Adventurers", value: adminStats.users   },
-                { label:"Active Today",value: adminStats.today   },
-                { label:"Wall Posts",  value: adminStats.posts   },
-                { label:"Reports",     value: adminStats.reports },
+                { label:"Adventurers", value: adminStats.users    },
+                { label:"New Today",   value: adminStats.newToday },
+                { label:"Active Today",value: adminStats.active   },
+                { label:"Wall Posts",  value: adminStats.posts    },
+                { label:"Reports",     value: adminStats.reports  },
               ].map(s => (
                 <div key={s.label} style={{
                   flex:"1 1 80px",

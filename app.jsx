@@ -89,7 +89,7 @@ function App(){
         const loadProfile = async (userId) => {
           const { data } = await window.SB.from("profiles").select("*").eq("id", userId).single();
           if(data && data.name){
-            const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[] };
+            const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[], seenTips: data.seen_tips ? JSON.parse(data.seen_tips) : [] };
             setSaved(p); save(p);
           }
         };
@@ -273,7 +273,12 @@ function App(){
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
                          onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}
-                         authUserMeta={authUser?.user_metadata||null}/>
+                         authUserMeta={authUser?.user_metadata||null}
+                         seenTips={saved.seenTips||[]}
+                         onTipSeen={userId ? (keys)=>{
+                           setSaved(prev=>({...prev, seenTips: keys}));
+                           window.SB.from("profiles").upsert({ id: userId, seen_tips: JSON.stringify(keys) }, { onConflict:"id" }).then(()=>{});
+                         } : null}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
       {checkEmailMsg && (

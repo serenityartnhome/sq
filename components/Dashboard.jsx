@@ -98,15 +98,16 @@ const TIPS = {
   },
 };
 
-function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta, seenTips, onTipSeen }){
   const today = new Date().toISOString().slice(0,10);
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
   const [activeTip, setActiveTip] = React.useState(null);
-  const [onTipDismiss, setOnTipDismiss] = React.useState(null);
-  const shownTips = React.useRef(new Set(
-    Object.keys(TIPS).filter(k=>localStorage.getItem("sq_tip_"+k))
-  ));
+  const afterDismissRef = React.useRef(null);
+  const shownTips = React.useRef(new Set([
+    ...Object.keys(TIPS).filter(k=>localStorage.getItem("sq_tip_"+k)),
+    ...(seenTips||[]),
+  ]));
   const showTip = (key, afterDismiss) => {
     if(shownTips.current.has(key)){
       if(afterDismiss) afterDismiss();
@@ -114,12 +115,15 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     }
     shownTips.current.add(key);
     localStorage.setItem("sq_tip_"+key,"1");
+    if(onTipSeen) onTipSeen([...shownTips.current]);
     setActiveTip(key);
-    setOnTipDismiss(afterDismiss ? ()=>afterDismiss : null);
+    afterDismissRef.current = afterDismiss||null;
   };
   const dismissTip = () => {
     setActiveTip(null);
-    setOnTipDismiss(prev => { if(prev) prev(); return null; });
+    const cb = afterDismissRef.current;
+    afterDismissRef.current = null;
+    if(cb) cb();
   };
 
   const [completed, setCompleted] = React.useState(()=>{
