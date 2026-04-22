@@ -116,7 +116,7 @@
 
   function from(table){
     let _sel="*", _filters=[], _order=null, _lim=null;
-    let _method="GET", _body=null, _prefer=null, _single=false;
+    let _method="GET", _body=null, _prefer=null, _single=false, _onConflict=null;
 
     const q = {
       select(cols){ _sel=cols; return q; },
@@ -126,7 +126,7 @@
       limit(n){ _lim=n; return q; },
       single(){ _single=true; return q; },
       insert(data){ _method="POST"; _body=JSON.stringify(Array.isArray(data)?data:[data]); _prefer="return=representation"; return q; },
-      upsert(data){ _method="POST"; _body=JSON.stringify(Array.isArray(data)?data:[data]); _prefer="return=representation,resolution=merge-duplicates"; return q; },
+      upsert(data,{onConflict}={}){ _method="POST"; _body=JSON.stringify(Array.isArray(data)?data:[data]); _prefer="return=representation,resolution=merge-duplicates"; if(onConflict) _onConflict=onConflict; return q; },
       delete(){ _method="DELETE"; return q; },
 
       then(resolve){
@@ -137,10 +137,9 @@
         if(_lim)   params.push("limit="+_lim);
         const url = URL+"/rest/v1/"+table+(params.length?"?"+params.join("&"):"");
         const hdrs = _hdrs(_prefer?{"Prefer":_prefer}:{});
-        // For POST/upsert with select, add select param
         let finalUrl = url;
         if((_method==="POST") && _prefer && _prefer.includes("return=representation")){
-          finalUrl = URL+"/rest/v1/"+table+"?select="+encodeURIComponent(_sel)+(_filters.length?"&"+_filters.join("&"):"");
+          finalUrl = URL+"/rest/v1/"+table+"?select="+encodeURIComponent(_sel)+(_onConflict?"&on_conflict="+encodeURIComponent(_onConflict):"")+(_filters.length?"&"+_filters.join("&"):"");
         }
         _fetch(finalUrl, { method:_method, headers:hdrs, body:_body||undefined })
           .then(async r=>{

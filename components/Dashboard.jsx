@@ -398,7 +398,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         user_id:userId, date:today, mood, energy,
         completed:[...completed], powerups:[...powerups],
         gratitude, diary:diaryEntry
-      }).then(()=>{});
+      },{onConflict:"user_id,date"}).then(()=>{});
     }, 3000);
     return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
   }, [completed, mood, gratitude, powerups, diaryEntry]);
@@ -414,7 +414,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           user_id:userId, date:today, mood, energy,
           completed:[...completed], powerups:[...powerups],
           gratitude, diary:diaryEntry
-        });
+        },{onConflict:"user_id,date"});
         if(error) throw error;
       }
       setSaveStatus("saved");
