@@ -1441,7 +1441,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Subscribe */}
             {!isGuest && (
               <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer",
-                             padding:"8px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+                             padding:"8px",background:"rgba(201,127,165,.08)",border:"2px solid var(--rose)",boxShadow:"2px 2px 0 rgba(201,127,165,.25)"}}>
                 <input type="checkbox" checked={editEmailOptIn} onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
                   style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
                 <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
@@ -1456,12 +1456,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div style={{marginBottom:14}}>
                 {resetPwStatus==="sent" ? (
                   <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#27ae60",padding:"6px 8px",
-                               background:"rgba(39,174,96,.1)",border:"1px solid rgba(39,174,96,.3)",borderRadius:4}}>
+                               background:"rgba(39,174,96,.1)",border:"2px solid rgba(39,174,96,.4)",boxShadow:"2px 2px 0 rgba(39,174,96,.15)"}}>
                     ✓ Reset link sent — check your email
                   </div>
                 ) : resetPwStatus==="error" ? (
                   <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#c0392b",padding:"6px 8px",
-                               background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>
+                               background:"rgba(192,57,43,.1)",border:"2px solid rgba(192,57,43,.4)",boxShadow:"2px 2px 0 rgba(192,57,43,.15)"}}>
                     ✗ Couldn't send reset email. Try again.
                   </div>
                 ) : (
@@ -1479,7 +1479,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
             {/* Admin: pet stage switcher */}
             {isAdmin && (
-              <div style={{marginBottom:14,padding:"10px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+              <div style={{marginBottom:14,padding:"10px",background:"rgba(201,127,165,.08)",border:"3px solid var(--rose)",boxShadow:"3px 3px 0 rgba(201,127,165,.3)"}}>
                 <div style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",marginBottom:8}}>✦ Pet Stage (admin)</div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                   {["egg","baby","adult"].map(s=>(

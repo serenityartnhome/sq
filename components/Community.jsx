@@ -192,7 +192,7 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
 
       {/* Admin panel */}
       {isAdmin && (
-        <div style={{marginBottom:16,background:"rgba(255,240,245,.9)",border:"2px solid rgba(201,127,165,.5)",borderRadius:6,boxShadow:"3px 3px 0 rgba(201,127,165,.25)",padding:"12px 14px"}}>
+        <div style={{marginBottom:16,background:"rgba(255,240,245,.9)",border:"3px solid rgba(201,127,165,.6)",boxShadow:"4px 4px 0 rgba(201,127,165,.35)",padding:"12px 14px"}}>
 
           {/* Stats row — always visible */}
           {adminStats && (
@@ -203,8 +203,8 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
               ].map(s => (
                 <div key={s.label} style={{
                   flex:"1 1 80px",
-                  background:"rgba(255,255,255,.7)", border:"1px solid rgba(201,127,165,.4)",
-                  borderRadius:6, padding:"8px 12px", textAlign:"center"
+                  background:"rgba(255,255,255,.7)", border:"2px solid rgba(201,127,165,.4)",
+                  boxShadow:"2px 2px 0 rgba(201,127,165,.2)", padding:"8px 12px", textAlign:"center"
                 }}>
                   <div style={{fontFamily:"Silkscreen,monospace",fontSize:20,color:"var(--rose)",lineHeight:1.2}}>{s.value}</div>
                   <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginTop:2}}>{s.label}</div>
@@ -218,7 +218,7 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
             <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",display:"flex",alignItems:"center",gap:8}}>
               Reports
               {flagged.length > 0 && (
-                <span style={{background:"var(--rose)",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10}}>
+                <span style={{background:"var(--rose)",color:"#fff",padding:"1px 7px",fontSize:10}}>
                   {flagged.length}
                 </span>
               )}
@@ -237,7 +237,7 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
             ) : (
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
                 {flagged.map(entry => (
-                  <div key={entry.post_id} style={{background:"#fff8ec",border:"1px solid #e9c98a",borderRadius:4,padding:"8px 10px"}}>
+                  <div key={entry.post_id} style={{background:"#fff8ec",border:"2px solid #e9c98a",boxShadow:"2px 2px 0 rgba(201,127,165,.2)",padding:"8px 10px"}}>
                     <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
                       <span>{entry.display_name}</span>
                       <span style={{color:"#8b1a1a",fontSize:9}}>{entry.reason}</span>
