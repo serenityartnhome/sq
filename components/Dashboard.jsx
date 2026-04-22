@@ -103,16 +103,24 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
   const [activeTip, setActiveTip] = React.useState(null);
+  const [onTipDismiss, setOnTipDismiss] = React.useState(null);
   const shownTips = React.useRef(new Set(
     Object.keys(TIPS).filter(k=>localStorage.getItem("sq_tip_"+k))
   ));
-  const showTip = (key) => {
-    if(shownTips.current.has(key)) return;
+  const showTip = (key, afterDismiss) => {
+    if(shownTips.current.has(key)){
+      if(afterDismiss) afterDismiss();
+      return;
+    }
     shownTips.current.add(key);
     localStorage.setItem("sq_tip_"+key,"1");
     setActiveTip(key);
+    setOnTipDismiss(afterDismiss ? ()=>afterDismiss : null);
   };
-  const dismissTip = () => setActiveTip(null);
+  const dismissTip = () => {
+    setActiveTip(null);
+    setOnTipDismiss(prev => { if(prev) prev(); return null; });
+  };
 
   const [completed, setCompleted] = React.useState(()=>{
     try {
@@ -772,7 +780,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage==="adult" ? BUBBLES[bubbleIdx] : EGG_SOUNDS[bubbleIdx % EGG_SOUNDS.length]}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>{ showTip("pet"); setShowPetMenu(true); }} style={{cursor:"pointer"}} title="My account">
+            <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
