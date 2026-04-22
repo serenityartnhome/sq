@@ -183,7 +183,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [savedCustomEnergy, setSavedCustomEnergy] = React.useState(()=>{ try{ return JSON.parse(localStorage.getItem("sq_custom_energy")||"null"); }catch{ return null; } });
   const [customEnergyName, setCustomEnergyName] = React.useState("");
   const [customEnergyTags, setCustomEnergyTags] = React.useState("");
-  const [customEnergyEmoji, setCustomEnergyEmoji] = React.useState("⭐");
+  const [customEnergyEmoji, setCustomEnergyEmoji] = React.useState("sparkle");
   const [showCustomEnergy, setShowCustomEnergy] = React.useState(false);
   const [intentShake, setIntentShake] = React.useState(false);
   const [bubbleIdx, setBubbleIdx] = React.useState(0);
@@ -740,7 +740,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const name = customEnergyName.trim();
     if(!name) return;
     const tags = customEnergyTags.split(",").map(s=>s.trim()).filter(Boolean);
-    const mode = { id:"custom", emoji:customEnergyEmoji, name, desc:"My custom energy", tags };
+    const mode = { id:"custom", icon:customEnergyEmoji, name, desc:"My custom energy", tags };
     setSavedCustomEnergy(mode);
     localStorage.setItem("sq_custom_energy", JSON.stringify(mode));
     if(userId && window.SB) window.SB.from("profiles").upsert({ id:userId, custom_energy: mode },{onConflict:"id"}).then(()=>{});
@@ -864,7 +864,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               {energyMode ? (
                 <>
                   <div className="intention-side-word" style={{fontSize:13}}>
-                    {energyMode.emoji} {energyMode.name}
+                    {energyMode.icon ? <img src={`assets/icon-${energyMode.icon}.png`} style={{width:14,height:14,imageRendering:"pixelated",verticalAlign:"middle",marginRight:3}}/> : energyMode.emoji+" "}{energyMode.name}
                   </div>
                   <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4}}>
                     {energyMode.tags?.join(" · ")||energyMode.desc}
@@ -1531,15 +1531,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   background:"rgba(255,255,255,.7)",border:"2px solid var(--rose)",
                   boxShadow:"2px 2px 0 rgba(201,127,165,.2)"
                 }}>
-                  {/* Emoji picker */}
-                  <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:7}}>
-                    {["⭐","🌸","💫","🔮","🌙","🌊","🌿","🦋","🌈","🎯","💎","🔥","✨","🌺","🍀","💪"].map(em=>(
-                      <span key={em} onClick={()=>setCustomEnergyEmoji(em)} style={{
-                        fontSize:16,cursor:"pointer",padding:"2px 3px",
-                        background: customEnergyEmoji===em ? "rgba(201,127,165,.25)" : "transparent",
-                        border: customEnergyEmoji===em ? "1px solid var(--rose)" : "1px solid transparent",
-                        lineHeight:1
-                      }}>{em}</span>
+                  {/* Icon picker */}
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginBottom:7,maxHeight:80,overflowY:"auto"}}>
+                    {ALL_ICONS.map(ic=>(
+                      <img key={ic} src={`assets/icon-${ic}.png`} onClick={()=>setCustomEnergyEmoji(ic)}
+                        style={{width:22,height:22,imageRendering:"pixelated",cursor:"pointer",
+                                padding:2,boxSizing:"border-box",
+                                background: customEnergyEmoji===ic ? "rgba(201,127,165,.3)" : "transparent",
+                                border: customEnergyEmoji===ic ? "2px solid var(--rose)" : "2px solid transparent"}}/>
                     ))}
                   </div>
                   <input autoFocus value={customEnergyName} onChange={e=>setCustomEnergyName(e.target.value)}
@@ -1562,7 +1561,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   transform: pendingEnergy?.id==="custom"?"scale(1.04)":"scale(1)", transition:"transform .1s",
                   position:"relative"
                 }} onClick={()=>setPendingEnergy(savedCustomEnergy)}>
-                  <div style={{fontSize:26,marginBottom:4}}>{savedCustomEnergy.emoji}</div>
+                  <div style={{fontSize:26,marginBottom:4}}>{savedCustomEnergy.icon ? <img src={`assets/icon-${savedCustomEnergy.icon}.png`} style={{width:28,height:28,imageRendering:"pixelated"}}/> : savedCustomEnergy.emoji}</div>
                   <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",marginBottom:3}}>{savedCustomEnergy.name}</div>
                   <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:9,color:"var(--rose)",lineHeight:1.5}}>{savedCustomEnergy.tags?.join(" • ")}</div>
                   <button onClick={e=>{ e.stopPropagation(); setCustomEnergyName(savedCustomEnergy.name); setCustomEnergyTags(savedCustomEnergy.tags?.join(", ")||""); setCustomEnergyEmoji(savedCustomEnergy.emoji||"⭐"); setShowCustomEnergy(true); }}
@@ -1583,7 +1582,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {pendingEnergy && (
               <div style={{borderTop:"2px solid var(--gold-soft)",paddingTop:12,textAlign:"center"}}>
                 <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"var(--plum)",marginBottom:10}}>
-                  You are in <strong>{pendingEnergy.name}</strong> {pendingEnergy.emoji} today
+                  You are in <strong>{pendingEnergy.name}</strong> {pendingEnergy.icon ? <img src={`assets/icon-${pendingEnergy.icon}.png`} style={{width:14,height:14,imageRendering:"pixelated",verticalAlign:"middle"}}/> : pendingEnergy.emoji} today
                 </div>
                 <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>selectEnergy(pendingEnergy)}>
                   Begin Day ✦
