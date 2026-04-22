@@ -1,4 +1,28 @@
-const INTENTIONS = ["Wealth","Peace","Confidence","Love","Health","Focus"];
+const ENERGY_MODES = [
+  { id:"soft",     emoji:"🌸", name:"Soft Energy",  desc:"Gentle, slow, healing",              tags:["Calm","Rest","Self-love","Acceptance"] },
+  { id:"boss",     emoji:"⚡", name:"Boss Energy",  desc:"Focused, getting things done",        tags:["Focus","Discipline","Confidence","Success"] },
+  { id:"peace",    emoji:"🌙", name:"Inner Peace",  desc:"Grounded and present",                tags:["Peace","Clarity","Balance","Gratitude"] },
+  { id:"love",     emoji:"💖", name:"Love Energy",  desc:"Open and connected",                  tags:["Love","Kindness","Compassion","Connection"] },
+  { id:"growth",   emoji:"🌱", name:"Growth Mode",  desc:"Becoming your next level",            tags:["Courage","Purpose","Transformation","Alignment"] },
+  { id:"momentum", emoji:"🔥", name:"Momentum",     desc:"Taking action, building flow",        tags:["Action","Drive","Progress","Consistency"] },
+  { id:"reset",    emoji:"🌊", name:"Reset Mode",   desc:"Releasing and starting fresh",        tags:["Let go","Heal","Breathe","Restart"] },
+  { id:"magic",    emoji:"✨", name:"Magic Mode",   desc:"Trusting and attracting",             tags:["Abundance","Trust","Flow","Luck"] },
+  { id:"focus",    emoji:"🧠", name:"Focus Mode",   desc:"Deep work, no distractions",          tags:["Focus","Clarity","Execution","Precision"] },
+];
+
+// Only these 6 shown in modal — others kept for future use
+const VISIBLE_ENERGY_IDS = ["soft","boss","peace","love","growth","reset"];
+
+const MOOD_ENERGY = {
+  happy:      ["love","soft"],
+  calm:       ["peace","soft"],
+  neutral:    ["peace"],
+  sad:        ["reset","soft"],
+  frustrated: ["reset","peace"],
+  anxious:    ["peace","soft"],
+  tired:      ["soft","reset"],
+  excited:    ["growth","love"],
+};
 
 const PRESET_HABITS = [
   { id:"water",    label:"Drink Water",      kind:"water",    preset:true },
@@ -73,8 +97,8 @@ const TIPS = {
     body: "A shared space where Serenity Quest adventurers post what they're grateful for each day. Spread positivity, be inspired by others, and know you're not on this journey alone. ✦"
   },
   intention: {
-    icon:"lotus", title:"Daily Intention ✦",
-    body: "Setting an intention focuses your mind on what matters most today. It's a micro-commitment to yourself — a single guiding word to carry through your day. Choose one and let it anchor you. ✦"
+    icon:"lotus", title:"Today's Energy ✦",
+    body: "Your energy mode is the vibe you're stepping into today — not a rule, just a gentle direction. Choose one that feels right and let it guide how you show up. You can always change it. ✦"
   },
   pet: {
     icon:"lotus-bud", title:"Your Zodiac Companion ✦",
@@ -151,10 +175,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const [gratitude, setGratitude] = React.useState(["","",""]);
   const [powerups, setPowerups]   = React.useState(()=>new Set());
-  const [intention, setIntention] = React.useState(null);
-  const [customIntent, setCustomIntent] = React.useState("");
-  const [showCustomI, setShowCustomI] = React.useState(false);
-  const [showIntentPicker, setShowIntentPicker] = React.useState(false);
+  const [energyMode, setEnergyMode] = React.useState(()=>{
+    try{ const s=JSON.parse(localStorage.getItem("sq_energy_today")||"{}"); return s.date===today?s.mode:null; }catch{ return null; }
+  });
+  const [showEnergyModal, setShowEnergyModal] = React.useState(false);
+  const [pendingEnergy, setPendingEnergy] = React.useState(null);
+  const [customEnergyName, setCustomEnergyName] = React.useState("");
+  const [customEnergyTags, setCustomEnergyTags] = React.useState("");
+  const [showCustomEnergy, setShowCustomEnergy] = React.useState(false);
   const [intentShake, setIntentShake] = React.useState(false);
   const [bubbleIdx, setBubbleIdx] = React.useState(0);
   const [celebrate, setCelebrate] = React.useState(false);
@@ -315,14 +343,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     });
   },[isAdmin]);
 
+  // Auto-show energy modal once per day if no energy selected
   React.useEffect(()=>{
-    if(intention) return;
+    if(energyMode) return;
+    const shown = localStorage.getItem("sq_energy_modal_date");
+    if(shown !== today) {
+      localStorage.setItem("sq_energy_modal_date", today);
+      setTimeout(()=>setShowEnergyModal(true), 800);
+    }
+  }, []);
+
+  // Shake reminder if no energy selected
+  React.useEffect(()=>{
+    if(energyMode) return;
     const t = setInterval(()=>{
       setIntentShake(true);
       setTimeout(()=>setIntentShake(false), 600);
     }, 12000);
     return ()=>clearInterval(t);
-  }, [intention]);
+  }, [energyMode]);
 
   const allHabits = React.useMemo(()=>{
     // Merge presets with any icon customizations from onboarding, then add custom habits
@@ -390,11 +429,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       const pDone = powerups.size > 0 ? 1 : 0;
       const dc = habitsDone + wDone + pDone;
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention, done: dc >= 3 };
+      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention: energyMode ? energyMode.name+" "+energyMode.emoji : null, done: dc >= 3 };
       localStorage.setItem("sq_history", JSON.stringify(hist));
       localStorage.setItem("sq_daily", JSON.stringify({date:today, completed:[...completed]}));
     } catch{}
-  }, [completed, mood, gratitude, powerups, diaryEntry, intention, diaryPhoto]);
+  }, [completed, mood, gratitude, powerups, diaryEntry, energyMode, diaryPhoto]);
 
   // Debounced Supabase push
   React.useEffect(()=>{
@@ -414,7 +453,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     setSaveStatus("saving");
     try {
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention, done: doneCount >= 3 };
+      hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention: energyMode ? energyMode.name+" "+energyMode.emoji : null, done: doneCount >= 3 };
       localStorage.setItem("sq_history", JSON.stringify(hist));
       if(userId && window.SB){
         const { error } = await window.SB.from("daily_data").upsert({
@@ -637,12 +676,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     }
   }, [doneCount]);
 
-  const addCustomIntent = () => {
-    const t = customIntent.trim();
-    if(!t) return;
-    setIntention(t); setCustomIntent(""); setShowCustomI(false); setShowIntentPicker(false);
+  const selectEnergy = (mode) => {
+    setEnergyMode(mode);
+    setPendingEnergy(null);
+    setShowEnergyModal(false);
+    setShowCustomEnergy(false);
+    setCustomEnergyName(""); setCustomEnergyTags("");
+    localStorage.setItem("sq_energy_today", JSON.stringify({ date: today, mode }));
   };
-  const selectIntention = (v) => { setIntention(v); setShowIntentPicker(false); setShowCustomI(false); };
+  const confirmCustomEnergy = () => {
+    const name = customEnergyName.trim();
+    if(!name) return;
+    const tags = customEnergyTags.split(",").map(s=>s.trim()).filter(Boolean);
+    selectEnergy({ id:"custom", emoji:"⭐", name, desc:"My custom energy", tags });
+  };
 
   return (
     <div className="app-shell">
@@ -755,31 +802,45 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <div className="zodiac-pet-col">
             {/* Top spacer — pushes intention + monkey down to center */}
             <div style={{flex:1}}/>
-            {/* Today's Intention sits above the monkey */}
-            <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>{ showTip("intention"); setShowIntentPicker(v=>!v); }}>
-              <div className="intention-side-label">Today's Intention</div>
-              <div className={"intention-side-word"+(intention?"":" unset")}>
-                {intention || "Set intention"}
-              </div>
-              {showIntentPicker && (
-                <div className="intention-picker-popup" onClick={e=>e.stopPropagation()}>
-                  {INTENTIONS.map(v=>(
-                    <button key={v} className={"chip "+(intention===v?"active":"")}
-                      onClick={()=>selectIntention(v)}>{v}</button>
-                  ))}
-                  {!showCustomI ? (
-                    <button className="chip" onClick={()=>setShowCustomI(true)}>+ Custom</button>
-                  ) : (
-                    <span style={{display:"inline-flex",gap:4,alignItems:"center",marginTop:4}}>
-                      <input autoFocus value={customIntent} onChange={e=>setCustomIntent(e.target.value)}
-                        onKeyDown={e=>{if(e.key==="Enter")addCustomIntent(); if(e.key==="Escape"){setShowCustomI(false);setCustomIntent("")}}}
-                        placeholder="My intention…" maxLength={40}
-                        style={{background:"var(--cream)",border:"2px solid var(--rose)",padding:"4px 8px",
-                                font:"inherit",fontFamily:"Pixelify Sans, monospace",fontSize:12,outline:"none",width:140}}/>
-                      <button className="chip active" onClick={addCustomIntent}>✓</button>
-                    </span>
-                  )}
-                </div>
+            {/* Today's Energy sits above the pet */}
+            <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>{ showTip("intention"); setShowEnergyModal(true); }}>
+              <div className="intention-side-label">Today's Energy</div>
+              {energyMode ? (
+                <>
+                  <div className="intention-side-word" style={{fontSize:13}}>
+                    {energyMode.emoji} {energyMode.name}
+                  </div>
+                  <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4}}>
+                    {energyMode.desc}
+                  </div>
+                  {/* Mood suggestion */}
+                  {mood && MOOD_ENERGY[mood] && (()=>{
+                    const suggested = ENERGY_MODES.find(m=>MOOD_ENERGY[mood].includes(m.id));
+                    if(!suggested || suggested.id === energyMode.id) return null;
+                    return (
+                      <div onClick={e=>{e.stopPropagation(); selectEnergy(suggested);}}
+                        style={{marginTop:5,fontSize:9,fontFamily:"Silkscreen,monospace",color:"var(--rose)",
+                                cursor:"pointer",textDecoration:"underline",lineHeight:1.4}}>
+                        try {suggested.name} {suggested.emoji}?
+                      </div>
+                    );
+                  })()}
+                </>
+              ) : (
+                <>
+                  <div className={"intention-side-word unset"}>Choose your energy</div>
+                  {mood && MOOD_ENERGY[mood] && (()=>{
+                    const suggested = ENERGY_MODES.find(m=>MOOD_ENERGY[mood].includes(m.id));
+                    if(!suggested) return null;
+                    return (
+                      <div onClick={e=>{e.stopPropagation(); selectEnergy(suggested);}}
+                        style={{marginTop:4,fontSize:9,fontFamily:"Silkscreen,monospace",color:"var(--rose)",
+                                cursor:"pointer",textDecoration:"underline",lineHeight:1.4}}>
+                        try {suggested.name} {suggested.emoji}?
+                      </div>
+                    );
+                  })()}
+                </>
               )}
             </div>
             <div className="bubble-wrap">
@@ -1374,6 +1435,77 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <h3 className="coming-soon-title">Coming Soon</h3>
             <p className="coming-soon-body">Zodiac features are on their way.<br/>Stay tuned, adventurer!</p>
             <button className="coming-soon-btn" onClick={()=>setShowComingSoon(false)}>Got it ✦</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Energy Mode modal ── */}
+      {showEnergyModal && (
+        <div className="coming-soon-overlay" onClick={()=>{ setShowEnergyModal(false); setPendingEnergy(null); setShowCustomEnergy(false); }}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
+            style={{maxWidth:380,width:"94%",maxHeight:"88vh",overflowY:"auto"}}>
+            <h3 className="coming-soon-title" style={{marginBottom:4}}>Who are you becoming today?</h3>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:14,textAlign:"center"}}>
+              Choose your energy mode
+            </div>
+
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:14}}>
+              {ENERGY_MODES.filter(m=>VISIBLE_ENERGY_IDS.includes(m.id)).map(mode=>{
+                const sel = pendingEnergy?.id===mode.id;
+                return (
+                  <div key={mode.id} onClick={()=>setPendingEnergy(mode)} style={{
+                    flex:"1 1 140px",minWidth:130,cursor:"pointer",textAlign:"center",padding:"10px 8px",
+                    background: sel?"rgba(201,127,165,.15)":"rgba(255,255,255,.7)",
+                    border: sel?"3px solid var(--rose)":"2px solid var(--gold-soft)",
+                    boxShadow: sel?"3px 3px 0 rgba(201,127,165,.4)":"2px 2px 0 rgba(201,127,165,.12)",
+                    transform: sel?"scale(1.04)":"scale(1)", transition:"transform .1s"
+                  }}>
+                    <div style={{fontSize:26,marginBottom:4}}>{mode.emoji}</div>
+                    <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",marginBottom:3}}>{mode.name}</div>
+                    <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)",marginBottom:5,lineHeight:1.4}}>{mode.desc}</div>
+                    <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:9,color:"var(--rose)",lineHeight:1.5}}>{mode.tags.join(" • ")}</div>
+                  </div>
+                );
+              })}
+
+              {/* Custom energy card */}
+              <div onClick={()=>setShowCustomEnergy(true)} style={{
+                flex:"1 1 140px",minWidth:130,cursor:"pointer",textAlign:"center",padding:"10px 8px",
+                background:"rgba(255,255,255,.4)",border:"2px dashed rgba(201,127,165,.35)",
+                display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:90
+              }}>
+                {showCustomEnergy ? (
+                  <div onClick={e=>e.stopPropagation()} style={{width:"100%"}}>
+                    <input autoFocus value={customEnergyName} onChange={e=>setCustomEnergyName(e.target.value)}
+                      placeholder="Energy name…" maxLength={24}
+                      style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--rose)",
+                              padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:11,outline:"none",marginBottom:5}}/>
+                    <input value={customEnergyTags} onChange={e=>setCustomEnergyTags(e.target.value)}
+                      placeholder="word1, word2, word3" maxLength={60}
+                      style={{width:"100%",boxSizing:"border-box",background:"var(--cream)",border:"2px solid var(--gold-soft)",
+                              padding:"4px 6px",fontFamily:"Pixelify Sans,monospace",fontSize:10,outline:"none",marginBottom:6}}/>
+                    <button className="coming-soon-btn" style={{fontSize:10,padding:"5px 10px",width:"100%"}}
+                      onClick={confirmCustomEnergy}>Set ✦</button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{fontSize:20,marginBottom:4,color:"var(--plum-soft)"}}>＋</div>
+                    <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)"}}>Create your own</div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {pendingEnergy && (
+              <div style={{borderTop:"2px solid var(--gold-soft)",paddingTop:12,textAlign:"center"}}>
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"var(--plum)",marginBottom:10}}>
+                  You are in <strong>{pendingEnergy.name}</strong> {pendingEnergy.emoji} today
+                </div>
+                <button className="coming-soon-btn" style={{width:"100%"}} onClick={()=>selectEnergy(pendingEnergy)}>
+                  Begin Day ✦
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
