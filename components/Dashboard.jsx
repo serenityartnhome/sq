@@ -814,6 +814,27 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                          fontFamily:"Silkscreen,monospace",marginTop:2,letterSpacing:".04em"}}>
               ✎ tap pet to edit profile
             </div>
+            {isAdmin && (
+              <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8}}>
+                {["egg","baby","adult"].map(s=>(
+                  <button key={s} onClick={()=>{ localStorage.setItem("sq_test_stage",s); window.location.reload(); }}
+                    style={{fontFamily:"Silkscreen,monospace",fontSize:9,padding:"3px 8px",cursor:"pointer",
+                            textTransform:"uppercase",letterSpacing:".04em",border:"1px solid rgba(255,255,255,.3)",
+                            background: petStage===s ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.3)",
+                            color: petStage===s ? "#fff" : "rgba(255,255,255,.5)"}}>
+                    {s}
+                  </button>
+                ))}
+                {testStage && (
+                  <button onClick={()=>{ localStorage.removeItem("sq_test_stage"); window.location.reload(); }}
+                    style={{fontFamily:"Silkscreen,monospace",fontSize:9,padding:"3px 8px",cursor:"pointer",
+                            textTransform:"uppercase",letterSpacing:".04em",border:"1px solid rgba(255,100,100,.4)",
+                            background:"rgba(139,26,26,.3)",color:"rgba(255,150,150,.8)"}}>
+                    reset
+                  </button>
+                )}
+              </div>
+            )}
             {/* Bottom spacer — equal to top spacer, keeps content centered */}
             <div style={{flex:1}}/>
             {/* Energy bar pinned to bottom */}
