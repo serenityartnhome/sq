@@ -192,41 +192,42 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
 
       {/* Admin panel */}
       {isAdmin && (
-        <div style={{marginBottom:16,background:"#fff0f0",border:"3px solid #c0392b",borderRadius:0,boxShadow:"4px 4px 0 rgba(139,26,26,.3), inset 0 0 0 2px #f5c9cc",padding:"10px 14px"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:showAdmin?10:0}}>
-            <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#8b1a1a",display:"flex",alignItems:"center",gap:8}}>
-              ⚑ Admin — Reports
+        <div style={{marginBottom:16,background:"rgba(255,240,245,.9)",border:"2px solid rgba(201,127,165,.5)",borderRadius:6,boxShadow:"3px 3px 0 rgba(201,127,165,.25)",padding:"12px 14px"}}>
+
+          {/* Stats row — always visible */}
+          {adminStats && (
+            <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+              {[
+                { label:"Adventurers", value: adminStats.users  },
+                { label:"Wall Posts",  value: adminStats.posts  },
+              ].map(s => (
+                <div key={s.label} style={{
+                  flex:"1 1 80px",
+                  background:"rgba(255,255,255,.7)", border:"1px solid rgba(201,127,165,.4)",
+                  borderRadius:6, padding:"8px 12px", textAlign:"center"
+                }}>
+                  <div style={{fontFamily:"Silkscreen,monospace",fontSize:20,color:"var(--rose)",lineHeight:1.2}}>{s.value}</div>
+                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginTop:2}}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Reports header */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",display:"flex",alignItems:"center",gap:8}}>
+              Reports
               {flagged.length > 0 && (
-                <span style={{background:"#c0392b",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10}}>
+                <span style={{background:"var(--rose)",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10}}>
                   {flagged.length}
                 </span>
               )}
             </div>
             <button onClick={()=>{ setShowAdmin(v=>!v); if(!showAdmin) loadFlagged(); }}
-              style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,color:"#8b1a1a",textDecoration:"underline"}}>
+              style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--rose)",textDecoration:"underline"}}>
               {showAdmin ? "Hide" : "Review"}
             </button>
           </div>
-
-          {showAdmin && adminStats && (
-            <div style={{display:"flex",gap:12,marginBottom:12,flexWrap:"wrap"}}>
-              {[
-                { label:"Adventurers", value: adminStats.users, icon:"👤" },
-                { label:"Wall Posts",  value: adminStats.posts, icon:"✦"  },
-                { label:"Flagged",     value: flagged.length,   icon:"⚑"  },
-              ].map(s => (
-                <div key={s.label} style={{
-                  flex:"1 1 70px", minWidth:70,
-                  background:"rgba(139,26,26,.07)", border:"1px solid rgba(139,26,26,.25)",
-                  borderRadius:4, padding:"6px 10px", textAlign:"center"
-                }}>
-                  <div style={{fontSize:16,lineHeight:1}}>{s.icon}</div>
-                  <div style={{fontFamily:"Silkscreen,monospace",fontSize:14,color:"#8b1a1a",lineHeight:1.3}}>{s.value}</div>
-                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>{s.label}</div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {showAdmin && (
             adminLoading ? (
