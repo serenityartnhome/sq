@@ -35,6 +35,15 @@
       if(ok){
         opts.headers = _hdrs(opts.prefer ? {"Prefer":opts.prefer} : {});
         r = await fetch(url, opts);
+      } else {
+        // Refresh token expired — clear session and retry as anon so public reads still work
+        _session = null;
+        localStorage.removeItem(SESS);
+        _notify("SIGNED_OUT", null);
+        const anonHdrs = { "apikey": KEY, "Content-Type": "application/json" };
+        if(opts.prefer) anonHdrs["Prefer"] = opts.prefer;
+        opts.headers = anonHdrs;
+        r = await fetch(url, opts);
       }
     }
     return r;
