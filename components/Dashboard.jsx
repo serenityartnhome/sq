@@ -122,7 +122,7 @@ const TIPS = {
   },
 };
 
-function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta, seenTips, onTipSeen }){
+function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta, seenTips, onTipSeen, todayData, profileFlags }){
   const today = new Date().toISOString().slice(0,10);
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
@@ -363,6 +363,34 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     return ()=>clearInterval(t);
   }, [energyMode]);
 
+  // Sync today's data from Supabase on login (once only)
+  const syncedCloud = React.useRef(false);
+  React.useEffect(()=>{
+    if(!todayData || syncedCloud.current) return;
+    syncedCloud.current = true;
+    if(todayData.completed?.length) setCompleted(new Set(todayData.completed));
+    if(todayData.mood) setMood(todayData.mood);
+    if(todayData.powerups?.length) setPowerups(new Set(todayData.powerups));
+    if(todayData.gratitude?.some(g=>g)) setGratitude(todayData.gratitude);
+    if(todayData.diary) setDiaryEntry(todayData.diary);
+    if(todayData.energy_mode){
+      setEnergyMode(todayData.energy_mode);
+      localStorage.setItem("sq_energy_today", JSON.stringify({date:today, mode:todayData.energy_mode}));
+    }
+  }, [todayData]);
+
+  // Sync profile flags (pet stage, unlocks) from Supabase on login (once only)
+  const syncedFlags = React.useRef(false);
+  React.useEffect(()=>{
+    if(!profileFlags || syncedFlags.current) return;
+    syncedFlags.current = true;
+    if(profileFlags.hatched)          { setHatched(true);          localStorage.setItem("sq_hatched","1"); }
+    if(profileFlags.adultUnlocked)    { setAdultUnlocked(true);    localStorage.setItem("sq_adult","1"); }
+    if(profileFlags.diaryUnlocked)    { setDiaryUnlocked(true);    localStorage.setItem("sq_diary_unlocked","1"); }
+    if(profileFlags.photoUnlocked)    { setPhotoUnlocked(true);    localStorage.setItem("sq_photo_unlocked","1"); }
+    if(profileFlags.powerupsUnlocked) { setPowerupsUnlocked(true); localStorage.setItem("sq_powerups_unlocked","1"); }
+  }, [profileFlags]);
+
   const allHabits = React.useMemo(()=>{
     // Merge presets with any icon customizations from onboarding, then add custom habits
     const onboardMap = Object.fromEntries(habits.map(h=>[h.id,h]));
@@ -443,11 +471,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       window.SB.from("daily_data").upsert({
         user_id:userId, date:today, mood, energy,
         completed:[...completed], powerups:[...powerups],
-        gratitude, diary:diaryEntry
+        gratitude, diary:diaryEntry,
+        energy_mode: energyMode||null,
+        intention: energyMode ? energyMode.name+" "+energyMode.emoji : null,
       },{onConflict:"user_id,date"}).then(()=>{});
     }, 3000);
     return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
-  }, [completed, mood, gratitude, powerups, diaryEntry]);
+  }, [completed, mood, gratitude, powerups, diaryEntry, energyMode]);
 
   const saveProgressNow = async () => {
     setSaveStatus("saving");
@@ -456,11 +486,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention: energyMode ? energyMode.name+" "+energyMode.emoji : null, done: doneCount >= 3 };
       localStorage.setItem("sq_history", JSON.stringify(hist));
       if(userId && window.SB){
-        const { error } = await window.SB.from("daily_data").upsert({
-          user_id:userId, date:today, mood, energy,
-          completed:[...completed], powerups:[...powerups],
-          gratitude, diary:diaryEntry
-        },{onConflict:"user_id,date"});
+        const [{ error }] = await Promise.all([
+          window.SB.from("daily_data").upsert({
+            user_id:userId, date:today, mood, energy,
+            completed:[...completed], powerups:[...powerups],
+            gratitude, diary:diaryEntry,
+            energy_mode: energyMode||null,
+            intention: energyMode ? energyMode.name+" "+energyMode.emoji : null,
+          },{onConflict:"user_id,date"}),
+          window.SB.from("profiles").upsert({
+            id: userId,
+            hatched, adult_unlocked: adultUnlocked,
+            diary_unlocked: diaryUnlocked, photo_unlocked: photoUnlocked,
+            powerups_unlocked: powerupsUnlocked,
+          },{onConflict:"id"}),
+        ]);
         if(error) throw error;
       }
       setSaveStatus("saved");
@@ -516,13 +556,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     run();
   }, []);
 
-  // Unlock checks when daysInFlow changes
+  // Unlock checks when daysInFlow changes — save flags to Supabase immediately
   React.useEffect(()=>{
-    if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
+    let changed = false;
+    if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); changed=true; }
     if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
-    if(daysInFlow >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); }
-    if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); }
-    if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); }
+    if(daysInFlow >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
+    if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
+    if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
+    if(changed && userId && window.SB){
+      window.SB.from("profiles").upsert({
+        id: userId,
+        powerups_unlocked: daysInFlow>=2, diary_unlocked: daysInFlow>=5,
+        adult_unlocked: daysInFlow>=7, photo_unlocked: daysInFlow>=7,
+      },{onConflict:"id"}).then(()=>{});
+    }
   }, [daysInFlow]);
 
   const [showGratShare, setShowGratShare] = React.useState(false);
@@ -866,7 +914,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   return <img src={eggSrc(mood||"neutral")} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
                     style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
-                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); } }}
+                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); } }}
                   />;
                 })()}
               </div>

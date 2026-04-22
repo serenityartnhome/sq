@@ -24,7 +24,13 @@ function applyCursor(name){
 }
 
 function load(){ try{ const s=localStorage.getItem(STORAGE); return s?JSON.parse(s):null; }catch{ return null; } }
-function save(s){ try{ localStorage.setItem(STORAGE,JSON.stringify(s)); }catch{} }
+function save(s){
+  try{
+    // Don't persist todayData/flags to localStorage — always reload fresh from Supabase
+    const { todayData, flags, ...rest } = s;
+    localStorage.setItem(STORAGE,JSON.stringify(rest));
+  }catch{}
+}
 
 function parseHashParams(){
   try {
@@ -87,9 +93,25 @@ function App(){
     (async()=>{
       try {
         const loadProfile = async (userId) => {
-          const { data } = await window.SB.from("profiles").select("*").eq("id", userId).single();
+          const today = new Date().toISOString().slice(0,10);
+          const [{ data }, { data: dayData }] = await Promise.all([
+            window.SB.from("profiles").select("*").eq("id", userId).single(),
+            window.SB.from("daily_data").select("*").eq("user_id", userId).eq("date", today).single(),
+          ]);
           if(data && data.name){
-            const p = { profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null }, habits:data.habits||[], seenTips: data.seen_tips ? JSON.parse(data.seen_tips) : [] };
+            const p = {
+              profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null },
+              habits: data.habits||[],
+              seenTips: data.seen_tips ? JSON.parse(data.seen_tips) : [],
+              flags: {
+                hatched:          !!data.hatched,
+                adultUnlocked:    !!data.adult_unlocked,
+                diaryUnlocked:    !!data.diary_unlocked,
+                photoUnlocked:    !!data.photo_unlocked,
+                powerupsUnlocked: !!data.powerups_unlocked,
+              },
+              todayData: dayData || null,
+            };
             setSaved(p); save(p);
           }
         };
@@ -275,6 +297,8 @@ function App(){
                          onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}
                          authUserMeta={authUser?.user_metadata||null}
                          seenTips={saved.seenTips||[]}
+                         todayData={saved.todayData||null}
+                         profileFlags={saved.flags||null}
                          onTipSeen={userId ? (keys)=>{
                            setSaved(prev=>({...prev, seenTips: keys}));
                            window.SB.from("profiles").upsert({ id: userId, seen_tips: JSON.stringify(keys) }, { onConflict:"id" }).then(()=>{});
