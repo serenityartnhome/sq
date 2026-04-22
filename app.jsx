@@ -48,8 +48,7 @@ function App(){
   const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
     const p = parseHashParams();
     const isGoogleOAuth = !!p.access_token && !p.type;
-    const isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
-    return isGoogleOAuth && isMobile && !localStorage.getItem("sq_pwa_shown");
+    return isGoogleOAuth && !localStorage.getItem("sq_pwa_shown");
   });
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
@@ -310,6 +309,7 @@ function App(){
 function PwaPrompt({ onDone }){
   const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isAndroid = /android/i.test(navigator.userAgent);
+  const isMobile  = isIOS || isAndroid;
   const [showSteps, setShowSteps] = React.useState(false);
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(26,14,46,.88)",zIndex:9999,
@@ -317,14 +317,19 @@ function PwaPrompt({ onDone }){
       <div style={{background:"#2a1a3e",border:"3px solid #e8c97a",borderRadius:0,
                    boxShadow:"6px 6px 0 rgba(0,0,0,.4)",maxWidth:360,width:"100%",
                    textAlign:"center",padding:"28px 20px"}}>
-        <div style={{fontSize:40,marginBottom:10}}>📱</div>
+        <div style={{fontSize:40,marginBottom:10}}>{isMobile ? "📱" : "🌸"}</div>
         <div style={{fontFamily:"Silkscreen,monospace",fontSize:13,color:"#e8c97a",
-                     marginBottom:10,letterSpacing:".04em"}}>Best on Your Phone</div>
+                     marginBottom:10,letterSpacing:".04em"}}>
+          {isMobile ? "Best on Your Phone" : "Save Serenity Quest"}
+        </div>
         <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"rgba(255,255,255,.75)",
                      lineHeight:1.7,marginBottom:20}}>
-          Serenity Quest works like a real app — no App Store needed. Add it to your home screen for the full experience.
+          {isMobile
+            ? "Serenity Quest works like a real app — no App Store needed. Add it to your home screen for the full experience."
+            : "Bookmark this page so you can come back to your quest any time — no app store, no downloads needed."}
         </div>
-        {!showSteps ? (
+
+        {isMobile && !showSteps && (
           <button onClick={()=>setShowSteps(true)}
             style={{background:"#e8c97a",color:"#2a1a3e",border:"none",
                     fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 24px",
@@ -332,7 +337,9 @@ function PwaPrompt({ onDone }){
                     boxShadow:"3px 3px 0 rgba(0,0,0,.3)",marginBottom:12,display:"block",width:"100%"}}>
             ✦ Show Me How ✦
           </button>
-        ) : (
+        )}
+
+        {isMobile && showSteps && (
           <div style={{textAlign:"left",marginBottom:16,background:"rgba(255,255,255,.05)",
                        borderRadius:6,padding:"12px 14px"}}>
             {isIOS && (
@@ -353,18 +360,25 @@ function PwaPrompt({ onDone }){
                 <li>Open <strong style={{color:"#e8c97a"}}>Serenity Quest</strong> from your home screen ✦</li>
               </ol>
             )}
-            {!isIOS && !isAndroid && (
-              <div style={{fontSize:12,color:"rgba(255,255,255,.75)",fontFamily:"Pixelify Sans,monospace",lineHeight:1.7}}>
-                On your phone, open this page in <strong style={{color:"#e8c97a"}}>Safari (iPhone)</strong> or <strong style={{color:"#e8c97a"}}>Chrome (Android)</strong> and use the browser menu to <strong style={{color:"#e8c97a"}}>"Add to Home Screen"</strong>.
-              </div>
-            )}
           </div>
         )}
+
+        {!isMobile && (
+          <div style={{marginBottom:16,background:"rgba(255,255,255,.05)",borderRadius:6,padding:"12px 14px",
+                       textAlign:"left"}}>
+            <div style={{fontSize:12,color:"rgba(255,255,255,.8)",fontFamily:"Pixelify Sans,monospace",lineHeight:2}}>
+              Press <strong style={{color:"#e8c97a"}}>
+                {/mac/i.test(navigator.platform) ? "⌘ Cmd + D" : "Ctrl + D"}
+              </strong> to bookmark this page, or click the <strong style={{color:"#e8c97a"}}>★ star</strong> in your browser's address bar.
+            </div>
+          </div>
+        )}
+
         <button onClick={onDone}
           style={{background:"none",border:"2px solid rgba(255,255,255,.2)",color:"rgba(255,255,255,.5)",
                   fontFamily:"Silkscreen,monospace",fontSize:10,padding:"8px 20px",
                   cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",width:"100%"}}>
-          Maybe Later
+          Got It ✦
         </button>
       </div>
     </div>
