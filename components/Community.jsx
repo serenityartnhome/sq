@@ -79,15 +79,19 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const loadFlagged = async () => {
     setAdminLoading(true);
     try {
-      const [{ data: modData }, { data: profileData }, { data: postsData }] = await Promise.all([
+      const today = new Date().toISOString().split("T")[0];
+      const [{ data: modData }, { data: profileData }, { data: postsData }, { data: todayData }] = await Promise.all([
         window.SB.from("moderation_log").select("*").order("created_at", {ascending:false}),
         window.SB.from("profiles").select("id"),
         window.SB.from("gratitude_posts").select("id"),
+        window.SB.from("daily_data").select("user_id").eq("date", today),
       ]);
       setFlagged(modData || []);
       setAdminStats({
-        users: (profileData || []).length,
-        posts: (postsData || []).length,
+        users:   (profileData || []).length,
+        posts:   (postsData   || []).length,
+        today:   (todayData   || []).length,
+        reports: (modData     || []).length,
       });
     } catch {}
     setAdminLoading(false);
@@ -198,8 +202,10 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
           {adminStats && (
             <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap"}}>
               {[
-                { label:"Adventurers", value: adminStats.users  },
-                { label:"Wall Posts",  value: adminStats.posts  },
+                { label:"Adventurers", value: adminStats.users   },
+                { label:"Active Today",value: adminStats.today   },
+                { label:"Wall Posts",  value: adminStats.posts   },
+                { label:"Reports",     value: adminStats.reports },
               ].map(s => (
                 <div key={s.label} style={{
                   flex:"1 1 80px",
