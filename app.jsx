@@ -47,9 +47,9 @@ function App(){
   const [checkEmailMsg, setCheckEmailMsg] = React.useState(null); // email address awaiting confirmation
   const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
     const p = parseHashParams();
-    // Google OAuth returns access_token with no type (email confirm has type=signup)
     const isGoogleOAuth = !!p.access_token && !p.type;
-    return isGoogleOAuth && !localStorage.getItem("sq_pwa_shown");
+    const isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+    return isGoogleOAuth && isMobile && !localStorage.getItem("sq_pwa_shown");
   });
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
