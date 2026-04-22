@@ -211,7 +211,7 @@ function App(){
   };
 
   const reset = async ()=>{
-    if(confirm("Start over? Your progress will be cleared.")){
+    {
       clearAllLocalData();
       if(authUser && window.SB){
         try {

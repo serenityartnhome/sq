@@ -158,5 +158,21 @@
     return q;
   }
 
-  window.SB = { auth, from };
+  function rpc(fn, params){
+    return {
+      then(resolve){
+        _fetch(URL+"/rest/v1/rpc/"+fn, {
+          method:"POST", headers:_hdrs(), body: JSON.stringify(params||{})
+        }).then(async r=>{
+          if(r.status===204) return resolve({ data:null, error:null });
+          const text = await r.text();
+          let data = null; try{ data=JSON.parse(text); }catch{}
+          if(!r.ok) return resolve({ data:null, error:{ message:(data&&(data.message||data.hint))||("HTTP "+r.status) }});
+          resolve({ data, error:null });
+        }).catch(e=>resolve({ data:null, error:{ message:e.message }}));
+      }
+    };
+  }
+
+  window.SB = { auth, from, rpc };
 })();

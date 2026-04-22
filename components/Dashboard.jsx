@@ -166,6 +166,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showPetMenu, setShowPetMenu] = React.useState(false);
   const [pendingReports, setPendingReports] = React.useState(0);
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState(null);
   const [celebrating, setCelebrating] = React.useState(false);
@@ -1423,23 +1424,45 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   Permanently delete all your data &amp; account. This cannot be undone.
                 </div>
                 <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
-                  onClick={async()=>{
-                    setShowResetConfirm(false);
-                    if(userId && window.SB){
-                      try {
-                        await window.SB.from("gratitude_posts").delete().eq("user_id",userId);
-                        await window.SB.from("daily_data").delete().eq("user_id",userId);
-                        await window.SB.from("profiles").delete().eq("id",userId);
-                      } catch{}
-                    }
-                    onSignOut();
-                  }}>
+                  onClick={()=>{ setShowResetConfirm(false); setShowDeleteConfirm(true); }}>
                   Delete My Account
                 </button>
               </div>
               <button className="coming-soon-btn"
                 style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
                 onClick={()=>setShowResetConfirm(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setShowDeleteConfirm(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%",textAlign:"center"}}>
+            <div style={{fontSize:32,marginBottom:8}}>⚠</div>
+            <h3 className="coming-soon-title" style={{color:"#c0392b",marginBottom:8}}>Delete Account?</h3>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
+              This will permanently delete your account and all your data. There is no going back.
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button className="coming-soon-btn" style={{background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
+                onClick={async()=>{
+                  setShowDeleteConfirm(false);
+                  if(userId && window.SB){
+                    try {
+                      await window.SB.from("gratitude_posts").delete().eq("user_id",userId);
+                      await window.SB.from("daily_data").delete().eq("user_id",userId);
+                      await window.SB.from("profiles").delete().eq("id",userId);
+                      await window.SB.rpc("delete_own_user");
+                    } catch{}
+                  }
+                  onSignOut();
+                }}>
+                Yes, Delete Everything
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
+                onClick={()=>setShowDeleteConfirm(false)}>Cancel</button>
             </div>
           </div>
         </div>
