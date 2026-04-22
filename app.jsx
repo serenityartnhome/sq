@@ -44,6 +44,7 @@ function App(){
     const p = parseHashParams();
     return p.type === "signup" && !!p.access_token;
   });
+  const [checkEmailMsg, setCheckEmailMsg] = React.useState(null); // email address awaiting confirmation
   const [tweaks, setTweaks]       = React.useState(()=>({
     palette: window.__SQ_DEFAULTS.palette,
     petMood: window.__SQ_DEFAULTS.petMood,
@@ -105,6 +106,18 @@ function App(){
               try{ localStorage.setItem("sq_sb_session", JSON.stringify(session)); }catch{}
               setAuthUser(user);
               await loadProfile(user.id);
+              // If no profile in DB yet (email/password signup before confirmation),
+              // sync whatever was saved locally so the user doesn't lose their data
+              const local = load();
+              if(local?.profile?.name){
+                try {
+                  await window.SB.from("profiles").upsert({
+                    id:user.id, name:local.profile.name, bday:local.profile.bday||"",
+                    loc:local.profile.loc||"", why:local.profile.why||"",
+                    cursor:local.profile.cursor||null, habits:local.habits||[]
+                  });
+                } catch{}
+              }
               return;
             }
           } catch{}
@@ -155,8 +168,16 @@ function App(){
     if(!credentials) return;
     try {
       let user = null;
-      const { data:signUpData, error:signUpErr } = await window.SB.auth.signUp({ email:credentials.email, password:credentials.password });
+      const { data:signUpData, error:signUpErr } = await window.SB.auth.signUp({
+        email: credentials.email, password: credentials.password,
+        options: { emailRedirectTo: "https://app.serenityartnhome.com", data: { email_opt_in: credentials.emailOptIn||false } }
+      });
       if(!signUpErr && signUpData?.user){
+        if(!signUpData.session){
+          // Email confirmation required — data saved locally, tell user to check email
+          setCheckEmailMsg(credentials.email);
+          return;
+        }
         user = signUpData.user;
       } else {
         // Email already registered — try signing in instead
@@ -250,6 +271,31 @@ function App(){
                          onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}/>
       }
       {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
+      {checkEmailMsg && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,14,46,.85)",zIndex:9999,
+                     display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div style={{background:"#2a1a3e",border:"3px solid #f5c9cc",borderRadius:0,
+                       boxShadow:"6px 6px 0 rgba(0,0,0,.4)",maxWidth:360,width:"100%",
+                       textAlign:"center",padding:"28px 24px"}}>
+            <div style={{fontSize:40,marginBottom:12}}>📧</div>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:13,color:"#f5c9cc",
+                         marginBottom:10,letterSpacing:".04em"}}>Check Your Email</div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"rgba(255,255,255,.75)",
+                         lineHeight:1.7,marginBottom:20}}>
+              We sent a confirmation link to<br/>
+              <strong style={{color:"#f5c9cc"}}>{checkEmailMsg}</strong><br/><br/>
+              Click the link to activate your account and save your progress permanently. Your data is safely stored on this device in the meantime.
+            </div>
+            <button onClick={()=>setCheckEmailMsg(null)}
+              style={{background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
+                      fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 24px",
+                      cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",
+                      boxShadow:"3px 3px 0 rgba(0,0,0,.3)"}}>
+              ✦ Got It ✦
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

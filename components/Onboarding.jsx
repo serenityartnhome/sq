@@ -139,6 +139,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
   const [password, setPassword] = React.useState("");
   const [confirmPw, setConfirmPw] = React.useState("");
   const [showPw, setShowPw]     = React.useState(false);
+  const [emailOptIn, setEmailOptIn] = React.useState(false);
   const [error, setError]       = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -149,7 +150,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
     if(pwErr){ setError(pwErr); return; }
     if(password !== confirmPw){ setError("Passwords do not match"); return; }
     setSubmitting(true);
-    await onComplete(profileData, { email:email.trim(), password });
+    await onComplete(profileData, { email:email.trim(), password, emailOptIn });
     setSubmitting(false);
   };
 
@@ -188,11 +189,21 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
             );
           })()}
         </div>
-        <div className="field" style={{marginBottom:14}}>
+        <div className="field" style={{marginBottom:10}}>
           <label>Confirm Password</label>
           <input type={showPw?"text":"password"} value={confirmPw} onChange={e=>setConfirmPw(e.target.value)}
             placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
         </div>
+
+        <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer",padding:"8px",
+                       background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+          <input type="checkbox" checked={emailOptIn} onChange={e=>setEmailOptIn(e.target.checked)}
+            style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+          <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
+            ✦ Yes, send me wellness tips &amp; updates
+            <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
+          </span>
+        </label>
 
         {error && <div style={{color:"#c0392b",fontSize:11,textAlign:"center",marginBottom:10,fontFamily:"Silkscreen,monospace",padding:"6px 8px",background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>{error}</div>}
 

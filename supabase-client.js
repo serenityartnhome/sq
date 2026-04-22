@@ -49,10 +49,13 @@
       return Promise.resolve({ data:{ session: _session } });
     },
 
-    async signUp({ email, password }){
-      const r = await fetch(URL+"/auth/v1/signup", {
+    async signUp({ email, password, options }){
+      const redirectTo = (options?.emailRedirectTo) || "https://app.serenityartnhome.com";
+      const body = { email, password };
+      if(options?.data) body.data = options.data;
+      const r = await fetch(URL+"/auth/v1/signup?redirect_to="+encodeURIComponent(redirectTo), {
         method:"POST", headers:_hdrs(),
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(body)
       });
       const d = await r.json();
       if(d.error||d.msg) return { data:null, error:{ message: d.error_description||d.msg||"Signup failed" }};
