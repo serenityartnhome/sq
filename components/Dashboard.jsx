@@ -173,6 +173,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [showPetMenu, setShowPetMenu] = React.useState(false);
   const [pendingReports, setPendingReports] = React.useState(0);
+  const [showMyAccount, setShowMyAccount] = React.useState(false);
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
@@ -237,9 +238,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       s.profile = { ...s.profile, ...updates };
       localStorage.setItem("serenity-quest:v1", JSON.stringify(s));
     } catch{}
-    if(!isGuest && window.SB){
-      window.SB.auth.updateUser({ data:{ email_opt_in: editEmailOptIn } }).catch(()=>{});
-    }
     if(userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId, name: updates.name, bday: updates.bday, loc: updates.loc,
@@ -1396,153 +1394,37 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
+      {/* ── Pet menu: 3 choices ── */}
       {showPetMenu && (
-        <div className="coming-soon-overlay" onClick={()=>{setShowPetMenu(false);setResetPwStatus(null);}}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%"}}>
+        <div className="coming-soon-overlay" onClick={()=>setShowPetMenu(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:280,width:"88%"}}>
             <h3 className="coming-soon-title" style={{fontSize:14}}>
-              <span style={{color:"var(--gold)"}}>✦</span> My Account <span style={{color:"var(--gold)"}}>✦</span>
+              <span style={{color:"var(--gold)"}}>✦</span> {profile.name||"Adventurer"} <span style={{color:"var(--gold)"}}>✦</span>
             </h3>
-            {resetPwStatus==="sent" ? (
-              <p style={{textAlign:"center",fontSize:12,color:"#27ae60",fontFamily:"Silkscreen,monospace",margin:"0 0 14px"}}>
-                Reset link sent! Check your email.
-              </p>
-            ) : resetPwStatus==="error" ? (
-              <p style={{textAlign:"center",fontSize:12,color:"#c0392b",fontFamily:"Silkscreen,monospace",margin:"0 0 14px"}}>
-                Couldn't send reset email. Try again.
-              </p>
-            ) : null}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {[
-                {label:"Edit Profile", onClick:()=>{ setEditName(profile.name||""); setEditLoc(profile.loc||""); const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y); setShowPetMenu(false); setShowProfileEdit(true); }},
-                {label:"Reset Password", onClick:async()=>{ setResetPwStatus(null); const sess=JSON.parse(localStorage.getItem("sq_sb_session")||"null"); const email=sess?.user?.email||null; if(!email){setResetPwStatus("error");return;} const{error}=await window.SB.auth.resetPasswordForEmail(email); setResetPwStatus(error?"error":"sent"); }},
-                {label:"Log Out", onClick:()=>{ setShowPetMenu(false); onSignOut(); }},
-                {label:"Cancel", onClick:()=>setShowPetMenu(false)},
-              ].map(({label,onClick})=>(
-                <button key={label} onClick={onClick} className="acct-btn">
-                  {label}
-                </button>
-              ))}
-              <button onClick={()=>{ setShowPetMenu(false); setShowResetConfirm(true); }}
-                style={{width:"100%",background:"#8b1a1a",color:"#fff",border:"2px solid #6b0e0e",
-                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
-                        textTransform:"uppercase",letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(0,0,0,.4)"}}>
-                Reset Everything
-              </button>
+              <button className="acct-btn" onClick={()=>{
+                setEditName(profile.name||""); setEditLoc(profile.loc||"");
+                const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
+                setShowPetMenu(false); setShowProfileEdit(true);
+              }}>Edit Profile</button>
+              <button className="acct-btn" onClick={()=>{ setShowPetMenu(false); setShowMyAccount(true); setResetPwStatus(null); }}>My Account</button>
+              <button className="acct-btn" onClick={()=>setShowPetMenu(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      {showResetConfirm && (
-        <div className="coming-soon-overlay" onClick={()=>setShowResetConfirm(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%"}}>
-            <h3 className="coming-soon-title" style={{color:"#c0392b"}}>⚠ What would you like to do?</h3>
-            <p className="coming-soon-body" style={{marginBottom:6}}>
-              Choose how you'd like to start fresh:
-            </p>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              <div style={{background:"rgba(192,57,43,.06)",border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"10px 12px"}}>
-                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"var(--plum)",marginBottom:4}}>Reset My Data</div>
-                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:8,lineHeight:1.5}}>
-                  Wipe habits, streaks, diary &amp; pet progress. Your account stays — you can log back in.
-                </div>
-                <button className="coming-soon-btn" style={{width:"100%",background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",boxShadow:"none"}}
-                  onClick={()=>{ setShowResetConfirm(false); onReset(); }}>
-                  Reset My Data
-                </button>
-              </div>
-              <div style={{background:"rgba(139,26,26,.06)",border:"1px solid rgba(139,26,26,.3)",borderRadius:6,padding:"10px 12px"}}>
-                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#8b1a1a",marginBottom:4}}>Delete Account</div>
-                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",marginBottom:8,lineHeight:1.5}}>
-                  Permanently delete all your data &amp; account. This cannot be undone.
-                </div>
-                <button className="coming-soon-btn" style={{width:"100%",background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
-                  onClick={()=>{ setShowResetConfirm(false); setShowDeleteConfirm(true); }}>
-                  Delete My Account
-                </button>
-              </div>
-              <button className="coming-soon-btn"
-                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
-                onClick={()=>setShowResetConfirm(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── My Account modal ── */}
+      {showMyAccount && (
+        <div className="coming-soon-overlay" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); setShowChangeEmail(false); setEmailMsg(null); }}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,width:"90%"}}>
+            <h3 className="coming-soon-title" style={{fontSize:14}}>✦ My Account ✦</h3>
 
-      {showDeleteConfirm && (
-        <div className="coming-soon-overlay" onClick={()=>setShowDeleteConfirm(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%",textAlign:"center"}}>
-            <div style={{fontSize:32,marginBottom:8}}>⚠</div>
-            <h3 className="coming-soon-title" style={{color:"#c0392b",marginBottom:8}}>Delete Account?</h3>
-            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
-              This will permanently delete your account and all your data. There is no going back.
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              <button className="coming-soon-btn" style={{background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
-                onClick={async()=>{
-                  setShowDeleteConfirm(false);
-                  if(userId && window.SB){
-                    try {
-                      await window.SB.from("gratitude_posts").delete().eq("user_id",userId);
-                      await window.SB.from("daily_data").delete().eq("user_id",userId);
-                      await window.SB.from("profiles").delete().eq("id",userId);
-                      await window.SB.rpc("delete_own_user");
-                    } catch{}
-                  }
-                  onSignOut();
-                }}>
-                Yes, Delete Everything
-              </button>
-              <button className="coming-soon-btn"
-                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
-                onClick={()=>setShowDeleteConfirm(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showProfileEdit && (
-        <div className="coming-soon-overlay" onClick={()=>setShowProfileEdit(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
-            style={{maxWidth:340,width:"90%"}}>
-            <h3 className="coming-soon-title">✦ Edit Profile ✦</h3>
-            <div className="field" style={{marginBottom:10}}>
-              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Name</label>
-              <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32}
-                placeholder="Your name…"/>
-            </div>
-            <div className="field" style={{marginBottom:10}}>
-              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday</label>
-              <div className="bday-row">
-                <select value={editBdayDay} onChange={e=>setEditBdayDay(e.target.value)} className="bday-select">
-                  <option value="">Day</option>
-                  {Array.from({length:31},(_,i)=>i+1).map(d=>(
-                    <option key={d} value={String(d)}>{d}</option>
-                  ))}
-                </select>
-                <select value={editBdayMonth} onChange={e=>setEditBdayMonth(e.target.value)} className="bday-select">
-                  <option value="">Month</option>
-                  {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m,i)=>(
-                    <option key={i} value={String(i+1)}>{m}</option>
-                  ))}
-                </select>
-                <select value={editBdayYear} onChange={e=>setEditBdayYear(e.target.value)} className="bday-select">
-                  <option value="">Year</option>
-                  {Array.from({length:100},(_,i)=>new Date().getFullYear()-i).map(y=>(
-                    <option key={y} value={String(y)}>{y}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="field" style={{marginBottom:16}}>
-              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Location</label>
-              <input value={editLoc} onChange={e=>setEditLoc(e.target.value)}
-                placeholder="City, Country…"/>
-            </div>
+            {/* Email */}
             {userEmail && !isGuest && (
               <div style={{marginBottom:14}}>
-                <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:6}}>Email</div>
-                <div style={{fontSize:13,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginBottom:8,wordBreak:"break-all"}}>{userEmail}</div>
+                <div style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:4}}>Email</div>
+                <div style={{fontSize:12,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginBottom:6,wordBreak:"break-all"}}>{userEmail}</div>
                 {!showChangeEmail ? (
                   <button onClick={()=>{ setShowChangeEmail(true); setEmailMsg(null); setNewEmail(""); }}
                     style={{background:"none",border:"none",color:"var(--rose)",cursor:"pointer",
@@ -1576,10 +1458,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 )}
               </div>
             )}
+
+            {/* Subscribe */}
             {!isGuest && (
               <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer",
                              padding:"8px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
-                <input type="checkbox" checked={editEmailOptIn} onChange={e=>setEditEmailOptIn(e.target.checked)}
+                <input type="checkbox" checked={editEmailOptIn} onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
                   style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
                 <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
                   ✦ Send me wellness tips &amp; updates
@@ -1587,6 +1471,140 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </span>
               </label>
             )}
+
+            {/* Reset Password */}
+            {!isGuest && (
+              <div style={{marginBottom:14}}>
+                {resetPwStatus==="sent" ? (
+                  <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#27ae60",padding:"6px 8px",
+                               background:"rgba(39,174,96,.1)",border:"1px solid rgba(39,174,96,.3)",borderRadius:4}}>
+                    ✓ Reset link sent — check your email
+                  </div>
+                ) : resetPwStatus==="error" ? (
+                  <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#c0392b",padding:"6px 8px",
+                               background:"rgba(192,57,43,.1)",border:"1px solid rgba(192,57,43,.3)",borderRadius:4}}>
+                    ✗ Couldn't send reset email. Try again.
+                  </div>
+                ) : (
+                  <button className="acct-btn" onClick={async()=>{
+                    setResetPwStatus(null);
+                    const sess=JSON.parse(localStorage.getItem("sq_sb_session")||"null");
+                    const email=sess?.user?.email||userEmail||null;
+                    if(!email){ setResetPwStatus("error"); return; }
+                    const{error}=await window.SB.auth.resetPasswordForEmail(email);
+                    setResetPwStatus(error?"error":"sent");
+                  }}>Reset Password</button>
+                )}
+              </div>
+            )}
+
+            <div style={{borderTop:"1px solid var(--gold-soft)",paddingTop:12,display:"flex",flexDirection:"column",gap:10}}>
+              <button className="acct-btn" onClick={()=>{ setShowMyAccount(false); onSignOut(); }}>Log Out</button>
+              <button className="acct-btn" style={{color:"#c0392b",borderColor:"rgba(192,57,43,.4)"}}
+                onClick={()=>{ setShowMyAccount(false); setShowResetConfirm(true); }}>
+                Reset My Data
+              </button>
+              <button className="acct-btn" style={{color:"#8b1a1a",borderColor:"rgba(139,26,26,.4)",background:"rgba(139,26,26,.06)"}}
+                onClick={()=>{ setShowMyAccount(false); setShowDeleteConfirm(true); }}>
+                Delete Account
+              </button>
+              <button className="acct-btn" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Reset My Data confirm ── */}
+      {showResetConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setShowResetConfirm(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%",textAlign:"center"}}>
+            <div style={{fontSize:32,marginBottom:8}}>🔄</div>
+            <h3 className="coming-soon-title" style={{marginBottom:8}}>Reset My Data?</h3>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
+              This will wipe your habits, streaks, diary and pet progress. Your account stays active and you can log back in to start fresh.
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button className="coming-soon-btn" style={{background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",boxShadow:"none"}}
+                onClick={()=>{ setShowResetConfirm(false); onReset(); }}>
+                Yes, Reset My Data
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
+                onClick={()=>setShowResetConfirm(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Account confirm ── */}
+      {showDeleteConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setShowDeleteConfirm(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,width:"90%",textAlign:"center"}}>
+            <div style={{fontSize:32,marginBottom:8}}>⚠</div>
+            <h3 className="coming-soon-title" style={{color:"#c0392b",marginBottom:8}}>Delete Account?</h3>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
+              This will permanently delete your account and all your data — habits, streaks, diary, pet, everything. There is no going back.
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button className="coming-soon-btn" style={{background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
+                onClick={async()=>{
+                  setShowDeleteConfirm(false);
+                  if(userId && window.SB){
+                    try {
+                      await window.SB.from("gratitude_posts").delete().eq("user_id",userId);
+                      await window.SB.from("daily_data").delete().eq("user_id",userId);
+                      await window.SB.from("profiles").delete().eq("id",userId);
+                      await window.SB.rpc("delete_own_user");
+                    } catch{}
+                  }
+                  onSignOut();
+                }}>
+                Yes, Delete Everything
+              </button>
+              <button className="coming-soon-btn"
+                style={{background:"var(--cream)",color:"var(--plum)",boxShadow:"none",border:"2px solid var(--gold)"}}
+                onClick={()=>setShowDeleteConfirm(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Profile (name, birthday, location only) ── */}
+      {showProfileEdit && (
+        <div className="coming-soon-overlay" onClick={()=>setShowProfileEdit(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,width:"90%"}}>
+            <h3 className="coming-soon-title">✦ Edit Profile ✦</h3>
+            <div className="field" style={{marginBottom:10}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Name</label>
+              <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32} placeholder="Your name…"/>
+            </div>
+            <div className="field" style={{marginBottom:10}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday</label>
+              <div className="bday-row">
+                <select value={editBdayDay} onChange={e=>setEditBdayDay(e.target.value)} className="bday-select">
+                  <option value="">Day</option>
+                  {Array.from({length:31},(_,i)=>i+1).map(d=>(
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+                <select value={editBdayMonth} onChange={e=>setEditBdayMonth(e.target.value)} className="bday-select">
+                  <option value="">Month</option>
+                  {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m,i)=>(
+                    <option key={i} value={String(i+1)}>{m}</option>
+                  ))}
+                </select>
+                <select value={editBdayYear} onChange={e=>setEditBdayYear(e.target.value)} className="bday-select">
+                  <option value="">Year</option>
+                  {Array.from({length:100},(_,i)=>new Date().getFullYear()-i).map(y=>(
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="field" style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Location</label>
+              <input value={editLoc} onChange={e=>setEditLoc(e.target.value)} placeholder="City, Country…"/>
+            </div>
             <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="coming-soon-btn" onClick={saveProfileEdit}>Save ✦</button>
               <button className="coming-soon-btn"
