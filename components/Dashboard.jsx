@@ -1432,7 +1432,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         await window.SB.from("profiles").delete().eq("id",userId);
                       } catch{}
                     }
-                    onReset();
+                    onSignOut();
                   }}>
                   Delete My Account
                 </button>

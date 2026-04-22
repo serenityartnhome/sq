@@ -174,12 +174,19 @@ function App(){
     } catch{}
   };
 
+  const clearAllLocalData = () => {
+    ["serenity-quest:v1","sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits",
+     "sq_notes","sq_week_mon","sq_hatched","sq_adult","sq_celebrated","sq_powerups_unlocked",
+     "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_wall_agreed",
+     "sq_wall_last_date","sq_wall_last_post_id","sq_share_loc","sq_sb_session",
+     "sq_tip_days_flow","sq_tip_calendar","sq_tip_community","sq_tip_intention",
+     "sq_tip_pet","sq_tip_energy","sq_tip_mood","sq_tip_gratitude","sq_tip_first_quest"]
+      .forEach(k=>localStorage.removeItem(k));
+  };
+
   const reset = async ()=>{
     if(confirm("Start over? Your progress will be cleared.")){
-      ["serenity-quest:v1","sq_streaks","sq_daily","sq_history","sq_custom_habits","sq_active_habits",
-       "sq_notes","sq_week_mon","sq_hatched","sq_adult","sq_celebrated","sq_powerups_unlocked",
-       "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_wall_agreed"]
-        .forEach(k=>localStorage.removeItem(k));
+      clearAllLocalData();
       if(authUser && window.SB){
         try {
           await window.SB.from("profiles").delete().eq("id",authUser.id);
@@ -222,6 +229,7 @@ function App(){
   };
 
   const signOut = async ()=>{
+    clearAllLocalData();
     if(window.SB) try{ await window.SB.auth.signOut(); }catch{}
     setAuthUser(null);
     setSaved(null);
