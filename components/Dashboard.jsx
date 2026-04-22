@@ -24,6 +24,80 @@ const MOOD_ENERGY = {
   excited:    ["growth","love"],
 };
 
+const MOOD_QUESTS = {
+  anxious: [
+    { text:"Your breath is here. Everything else can wait.",    task:"Take 3 slow breaths right now" },
+    { text:"One thing at a time — that's all.",                 task:"Write down the one thing bothering you most" },
+    { text:"You don't have to solve it right now.",             task:"Step outside for 2 minutes" },
+    { text:"Let the feeling pass through — don't hold it.",     task:"Shake out your hands, release the tension" },
+    { text:"Slow is enough. Slow is still forward.",            task:"Drink a glass of water, slowly" },
+    { text:"You've gotten through hard moments before.",        task:"Write: 'Right now I feel __ and that's okay'" },
+    { text:"The worry feels big. You are bigger.",              task:"Put your hands on your chest and breathe" },
+    { text:"It's okay not to be okay right now.",               task:"Name one thing you can see, one you can touch" },
+  ],
+  tired: [
+    { text:"You don't have to earn rest.",                      task:"Lie down for 10 minutes — no phone" },
+    { text:"Today can be smaller. That's allowed.",             task:"Do just one thing from your list" },
+    { text:"Your body is asking for something. Listen.",        task:"Stretch for 2 minutes" },
+    { text:"Rest is part of the work.",                         task:"Close your eyes for 5 minutes" },
+    { text:"You showed up. That's the whole thing today.",      task:"Make something warm to drink" },
+    { text:"Low energy doesn't mean low worth.",                task:"Take a slow walk outside" },
+    { text:"Even slow movement counts.",                        task:"Do your easiest habit first" },
+    { text:"Give yourself permission to take it easy.",         task:"Write one gentle thing to yourself" },
+  ],
+  frustrated: [
+    { text:"Something isn't working — and that's valid.",       task:"Write out exactly what's frustrating you" },
+    { text:"Let it out on paper, not on yourself.",             task:"Scribble how you feel — just get it out" },
+    { text:"Progress doesn't always look like progress.",       task:"Do one tiny thing you can finish completely" },
+    { text:"You're not stuck — you're processing.",             task:"Step away for 5 minutes" },
+    { text:"It's okay to be annoyed. It won't last.",           task:"Do something physical for 2 minutes" },
+    { text:"What's one piece of this you can control?",         task:"Focus on one small thing you can change" },
+    { text:"Hard days are part of it too.",                     task:"Breathe out longer than you breathe in" },
+  ],
+  happy: [
+    { text:"Today feels lighter. Hold onto this.",              task:"Share something you're grateful for" },
+    { text:"This energy is worth building on.",                 task:"Do your most important habit first" },
+    { text:"Let yourself feel good — fully.",                   task:"Write what made today feel good" },
+    { text:"Carry this feeling into something that matters.",   task:"Text someone you appreciate" },
+    { text:"You feel it. Let it fuel you.",                     task:"Tackle something you've been putting off" },
+    { text:"Good days are worth recording.",                    task:"Add a journal entry today" },
+    { text:"Something's working — notice it.",                  task:"Write down what's going right" },
+  ],
+  excited: [
+    { text:"That energy? Use it.",                              task:"Start your most ambitious habit right now" },
+    { text:"You're in momentum — stay with it.",                task:"Do three things before you stop" },
+    { text:"Today feels alive. Good.",                          task:"Write down what you're most excited about" },
+    { text:"Ride this feeling somewhere that matters.",         task:"Work on something you've been wanting to do" },
+    { text:"This is rare — savour it.",                         task:"Share something good on the gratitude wall" },
+    { text:"Let the excitement focus, not scatter.",            task:"Write your top priority for today" },
+  ],
+  calm: [
+    { text:"You're in the quiet. Stay here a while.",           task:"Breathe slowly and just be here" },
+    { text:"Clarity lives here. Use it.",                       task:"Write your intention for today" },
+    { text:"This is a good moment to go deeper.",               task:"Spend 5 minutes journaling" },
+    { text:"Calm is power too.",                                task:"Plan one thing you want to do well today" },
+    { text:"The stillness is working.",                         task:"Do a habit you usually rush through, slowly" },
+    { text:"Presence is its own kind of progress.",             task:"Put your phone down for 10 minutes" },
+  ],
+  neutral: [
+    { text:"Neither high nor low — a clean slate.",             task:"Pick one small habit to start with" },
+    { text:"No feeling has to be forced.",                      task:"Just move through your list today" },
+    { text:"Flat days are part of it.",                         task:"Do 3 things and call it enough" },
+    { text:"You don't need to feel inspired to begin.",         task:"Start your easiest habit right now" },
+    { text:"Some days just are. That's enough.",                task:"Write one line about where you're at" },
+    { text:"Neutral is still present. Still here.",             task:"Choose one thing that's been waiting" },
+  ],
+  sad: [
+    { text:"You're allowed to feel this.",                      task:"Write whatever comes — no filter" },
+    { text:"Sadness isn't weakness.",                           task:"Go outside for a few minutes" },
+    { text:"It's okay to have a quiet day.",                    task:"Do just one gentle thing for yourself" },
+    { text:"You don't have to perform okay right now.",         task:"Rest without guilt for 10 minutes" },
+    { text:"Be gentle with yourself today.",                    task:"Write one kind thing to yourself" },
+    { text:"Let the feeling be there — don't push it away.",   task:"Put on something comforting" },
+    { text:"Small things still count today.",                   task:"Do your easiest habit, nothing more" },
+  ],
+};
+
 const PRESET_HABITS = [
   { id:"water",    label:"Drink Water",      kind:"water",    preset:true },
   { id:"steps",    label:"10K Steps",        kind:"steps",    preset:true },
@@ -350,6 +424,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState(null);
+  const [moodQuest, setMoodQuest] = React.useState(null);
+  const lastMoodQuestIdx = React.useRef({});
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
   const isFlashing = React.useRef(false);
@@ -1405,7 +1481,31 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               {/* Top half: How are you feeling */}
               <div className="emotions-half">
                 <div className="div-sparkle emotions-heading" style={{marginTop:0}}>✦ How Are You Feeling Today? ✦</div>
-                <MoodPicker value={mood} onChange={m=>{ setMood(m); showTip("mood"); }}/>
+                <MoodPicker value={mood} onChange={m=>{
+                  setMood(m);
+                  showTip("mood");
+                  const pool = MOOD_QUESTS[m];
+                  if(pool?.length) {
+                    const last = lastMoodQuestIdx.current[m] ?? -1;
+                    let idx;
+                    do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
+                    lastMoodQuestIdx.current[m] = idx;
+                    setMoodQuest(pool[idx]);
+                  } else {
+                    setMoodQuest(null);
+                  }
+                }}/>
+                {moodQuest && (
+                  <div style={{marginTop:10,padding:"10px 14px",background:"rgba(255,255,255,.55)",
+                               boxShadow:"3px 3px 0 rgba(201,127,165,.2)",border:"2px solid var(--gold-soft)"}}>
+                    <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum)",lineHeight:1.6,marginBottom:6}}>
+                      {moodQuest.text}
+                    </div>
+                    <div style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)",letterSpacing:".03em"}}>
+                      ✦ {moodQuest.task}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Bottom half: Grateful (left) + Diary fills full height (right) */}
