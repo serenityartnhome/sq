@@ -1,6 +1,10 @@
 /* ============================================================
    SERENITY QUEST — pixel-art stylesheet
    ============================================================ */
+@keyframes slideUpFade {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 /* SAFE AREA FIX */
 html { overscroll-behavior-y: none; background-color: #2a0e1a; height:100%; overflow:hidden; }
 body { overscroll-behavior-y: none; background-color: #2a0e1a; height:100%; overflow:hidden; }

@@ -1552,17 +1552,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     setMoodQuest(null);
                   }
                 }}/>
-                {moodQuest && (
-                  <div style={{marginTop:10,padding:"10px 14px",background:"rgba(255,255,255,.55)",
-                               boxShadow:"3px 3px 0 rgba(201,127,165,.2)",border:"2px solid var(--gold-soft)"}}>
-                    <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum)",lineHeight:1.6,marginBottom:6}}>
-                      {moodQuest.text}
-                    </div>
-                    <div style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)",letterSpacing:".03em"}}>
-                      ✦ {moodQuest.task}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Bottom half: Grateful (left) + Diary fills full height (right) */}
@@ -1746,6 +1735,30 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               You're on day {Math.max(daysInFlow,1)} — {5-Math.max(daysInFlow,1) > 0 ? `${5-Math.max(daysInFlow,1)} day${5-Math.max(daysInFlow,1)===1?"":"s"} to go ✦` : "almost there ✦"}
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
+          </div>
+        </div>
+      )}
+
+      {moodQuest && (
+        <div onClick={()=>setMoodQuest(null)}
+          style={{position:"fixed",inset:0,zIndex:4000,display:"flex",alignItems:"flex-end",
+                  justifyContent:"center",padding:"0 16px 32px",pointerEvents:"none"}}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{pointerEvents:"all",background:"#2a1a3e",border:"3px solid var(--rose)",
+                    boxShadow:"5px 5px 0 rgba(0,0,0,.35)",padding:"18px 20px 16px",
+                    maxWidth:340,width:"100%",position:"relative",
+                    animation:"slideUpFade .28s ease"}}>
+            <button onClick={()=>setMoodQuest(null)}
+              style={{position:"absolute",top:8,right:10,background:"none",border:"none",
+                      color:"rgba(255,255,255,.35)",fontSize:14,cursor:"pointer",lineHeight:1,padding:0}}>✕</button>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"#f0e6f6",
+                         lineHeight:1.65,marginBottom:10,paddingRight:16}}>
+              {moodQuest.text}
+            </div>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)",
+                         letterSpacing:".04em",lineHeight:1.5}}>
+              ✦ {moodQuest.task}
+            </div>
           </div>
         </div>
       )}
