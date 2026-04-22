@@ -555,10 +555,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       ];
       let lastErr = null;
       for(const row of attempts){
-        const { error } = await window.SB.from("gratitude_posts").insert(row);
+        const { data: insertData, error } = await window.SB.from("gratitude_posts").insert(row);
         if(!error){
           localStorage.setItem("sq_wall_last_date", today);
-          if(Array.isArray(data) && data[0]?.id) localStorage.setItem("sq_wall_last_post_id", String(data[0].id));
+          if(Array.isArray(insertData) && insertData[0]?.id) localStorage.setItem("sq_wall_last_post_id", String(insertData[0].id));
           setShareStatus("done");
           setTimeout(()=>{ setShowGratShare(false); setShareStatus(null); setShareError(""); }, 1400);
           return;

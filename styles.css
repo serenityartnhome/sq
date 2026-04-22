@@ -1840,7 +1840,6 @@ body{
 }
 .diary-photo-img{
   display:block;max-width:100%;height:auto;
-  border:2px solid var(--gold);
   box-shadow:2px 2px 0 rgba(92,42,53,.2);
 }
 .diary-photo-remove{
