@@ -1579,7 +1579,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32} placeholder="Your name…"/>
             </div>
             <div className="field" style={{marginBottom:10}}>
-              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday</label>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday <span style={{fontSize:9,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",textTransform:"none",letterSpacing:0}}>— shapes your zodiac companion ✦</span></label>
               <div className="bday-row">
                 <select value={editBdayDay} onChange={e=>setEditBdayDay(e.target.value)} className="bday-select">
                   <option value="">Day</option>

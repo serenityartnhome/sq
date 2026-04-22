@@ -381,7 +381,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
           </div>
 
           <div className="field">
-            <label><Icon name="cake" size={18}/> Your Birthday</label>
+            <label><Icon name="cake" size={18}/> Your Birthday <span style={{fontSize:9,opacity:.7,fontWeight:"normal"}}>— shapes your zodiac companion ✦</span></label>
             <div className="bday-row">
               <select value={bdayDay} onChange={e=>setBdayDay(e.target.value)} className="bday-select">
                 <option value="">Day</option>

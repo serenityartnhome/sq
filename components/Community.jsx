@@ -10,6 +10,7 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const [flagged, setFlagged]       = React.useState([]);
   const [showAdmin, setShowAdmin]   = React.useState(()=> pendingReports > 0);
   const [adminLoading, setAdminLoading] = React.useState(false);
+  const [adminStats, setAdminStats] = React.useState(null);
 
   const hashAnimal = (str) => {
     const animals = ["rat","ox","tiger","rabbit","dragon","snake","horse","goat","monkey","rooster","dog","pig"];
@@ -78,8 +79,16 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const loadFlagged = async () => {
     setAdminLoading(true);
     try {
-      const { data } = await window.SB.from("moderation_log").select("*").order("created_at", {ascending:false});
-      setFlagged(data || []);
+      const [{ data: modData }, { data: profileData }, { data: postsData }] = await Promise.all([
+        window.SB.from("moderation_log").select("*").order("created_at", {ascending:false}),
+        window.SB.from("profiles").select("id"),
+        window.SB.from("gratitude_posts").select("id"),
+      ]);
+      setFlagged(modData || []);
+      setAdminStats({
+        users: (profileData || []).length,
+        posts: (postsData || []).length,
+      });
     } catch {}
     setAdminLoading(false);
   };
@@ -198,6 +207,26 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
               {showAdmin ? "Hide" : "Review"}
             </button>
           </div>
+
+          {showAdmin && adminStats && (
+            <div style={{display:"flex",gap:12,marginBottom:12,flexWrap:"wrap"}}>
+              {[
+                { label:"Adventurers", value: adminStats.users, icon:"👤" },
+                { label:"Wall Posts",  value: adminStats.posts, icon:"✦"  },
+                { label:"Flagged",     value: flagged.length,   icon:"⚑"  },
+              ].map(s => (
+                <div key={s.label} style={{
+                  flex:"1 1 70px", minWidth:70,
+                  background:"rgba(139,26,26,.07)", border:"1px solid rgba(139,26,26,.25)",
+                  borderRadius:4, padding:"6px 10px", textAlign:"center"
+                }}>
+                  <div style={{fontSize:16,lineHeight:1}}>{s.icon}</div>
+                  <div style={{fontFamily:"Silkscreen,monospace",fontSize:14,color:"#8b1a1a",lineHeight:1.3}}>{s.value}</div>
+                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {showAdmin && (
             adminLoading ? (
