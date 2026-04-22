@@ -210,6 +210,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [editBdayMonth, setEditBdayMonth] = React.useState(()=>parseBday(profile.bday).m);
   const [editBdayYear,  setEditBdayYear]  = React.useState(()=>parseBday(profile.bday).y);
   const [showChangeEmail, setShowChangeEmail] = React.useState(false);
+  const [showOptIn, setShowOptIn] = React.useState(false);
   const [newEmail, setNewEmail]   = React.useState("");
   const [emailMsg, setEmailMsg]   = React.useState(null);
   const [emailLoading, setEmailLoading] = React.useState(false);
@@ -1395,7 +1396,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
       {/* ── My Account modal ── */}
       {showMyAccount && (
-        <div className="coming-soon-overlay" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); setShowChangeEmail(false); setEmailMsg(null); }}>
+        <div className="coming-soon-overlay" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); setShowChangeEmail(false); setEmailMsg(null); setShowOptIn(false); }}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:340,width:"90%"}}>
             <h3 className="coming-soon-title" style={{fontSize:14}}>✦ My Account ✦</h3>
 
@@ -1440,15 +1441,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
             {/* Subscribe */}
             {!isGuest && (
-              <label style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:14,cursor:"pointer",
-                             padding:"8px",background:"rgba(201,127,165,.08)",border:"2px solid var(--rose)",boxShadow:"2px 2px 0 rgba(201,127,165,.25)"}}>
-                <input type="checkbox" checked={editEmailOptIn} onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
-                  style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
-                <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
-                  ✦ Send me wellness tips &amp; updates
-                  <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
-                </span>
-              </label>
+              <div style={{marginBottom:14}}>
+                {!showOptIn ? (
+                  <button className="acct-btn" onClick={()=>setShowOptIn(true)}>
+                    {editEmailOptIn ? "✦ Subscribed to Updates" : "Email Preferences"}
+                  </button>
+                ) : (
+                  <label style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer",
+                                 padding:"8px",background:"rgba(201,127,165,.08)",border:"2px solid var(--rose)",boxShadow:"2px 2px 0 rgba(201,127,165,.25)"}}>
+                    <input type="checkbox" checked={editEmailOptIn} onChange={e=>{ setEditEmailOptIn(e.target.checked); if(window.SB) window.SB.auth.updateUser({ data:{ email_opt_in: e.target.checked } }).catch(()=>{}); }}
+                      style={{marginTop:3,cursor:"pointer",accentColor:"var(--rose)",width:14,height:14,flexShrink:0}}/>
+                    <span style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",lineHeight:1.7}}>
+                      ✦ Send me wellness tips &amp; updates
+                      <br/><span style={{color:"var(--plum-soft)",fontSize:9}}>No spam. Unsubscribe anytime.</span>
+                    </span>
+                  </label>
+                )}
+              </div>
             )}
 
             {/* Reset Password */}
@@ -1514,7 +1523,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 onClick={()=>{ setShowMyAccount(false); setShowDeleteConfirm(true); }}>
                 Delete Account
               </button>
-              <button className="acct-btn" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); }}>Cancel</button>
+              <button className="acct-btn" onClick={()=>{ setShowMyAccount(false); setResetPwStatus(null); setShowOptIn(false); }}>Cancel</button>
             </div>
           </div>
         </div>
