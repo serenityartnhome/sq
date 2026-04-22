@@ -107,8 +107,7 @@ function App(){
             const user = await res.json();
             if(user.id){
               const session = { access_token: hash.access_token, refresh_token: hash.refresh_token||"", user };
-              window.SB.auth._session = session;
-              try{ localStorage.setItem("sq_sb_session", JSON.stringify(session)); }catch{}
+              window.SB.auth.setSession(session);
               setAuthUser(user);
               await loadProfile(user.id);
               // If no profile in DB yet (email/password signup before confirmation),
@@ -142,8 +141,7 @@ function App(){
             if(fetched.id){
               user = fetched;
               const fixed = { ...session, user };
-              window.SB.auth._session = fixed;
-              try{ localStorage.setItem("sq_sb_session", JSON.stringify(fixed)); }catch{}
+              window.SB.auth.setSession(fixed);
             }
           } catch{}
         }

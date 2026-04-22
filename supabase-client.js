@@ -49,6 +49,13 @@
       return Promise.resolve({ data:{ session: _session } });
     },
 
+    setSession(s){
+      if(s && s.access_token){
+        _session = s;
+        try{ localStorage.setItem(SESS, JSON.stringify(s)); }catch{}
+      }
+    },
+
     async signUp({ email, password, options }){
       const redirectTo = (options?.emailRedirectTo) || "https://app.serenityartnhome.com";
       const body = { email, password };
