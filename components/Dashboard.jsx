@@ -464,6 +464,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const testStage = localStorage.getItem("sq_test_stage");
   const petStage = testStage || (isAdmin || adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
+  const EGG_SOUNDS = [
+    "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
+    "krrk","mlem","weh.","prrt","squeak?","bonk","glorp","hmph","nyeh",
+    "*shuffles*","...tap tap","bibble","zzzt","moop","crkk","hewwo??",
+  ];
 
 
   React.useEffect(()=>{
@@ -1015,18 +1020,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4}}>
                     {energyMode.tags?.join(" · ")||energyMode.desc}
                   </div>
-                  {/* Mood suggestion */}
-                  {mood && MOOD_ENERGY[mood] && (()=>{
-                    const suggested = ENERGY_MODES.find(m=>MOOD_ENERGY[mood].includes(m.id));
-                    if(!suggested || suggested.id === energyMode.id) return null;
-                    return (
-                      <div onClick={e=>{e.stopPropagation(); selectEnergy(suggested);}}
-                        style={{marginTop:5,fontSize:9,fontFamily:"Silkscreen,monospace",color:"var(--rose)",
-                                cursor:"pointer",textDecoration:"underline",lineHeight:1.4}}>
-                        try {suggested.name} {suggested.emoji}?
-                      </div>
-                    );
-                  })()}
                 </>
               ) : (
                 <>
@@ -1045,13 +1038,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </>
               )}
             </div>
-            {petStage !== "egg" && (
-              <div className="bubble-wrap">
-                <div className="bubble" key={petBubble}>
-                  {petBubble}
-                </div>
+            <div className="bubble-wrap">
+              <div className="bubble" key={petBubble}>
+                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
               </div>
-            )}
+            </div>
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
