@@ -270,7 +270,7 @@ function App(){
         : showConfirmed
           ? <EmailConfirmed onContinue={()=>setShowConfirmed(false)}/>
           : !saved
-            ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser}/>
+            ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser} onSignOut={signOut}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
                          onUpdateProfile={handleUpdateProfile} userEmail={authUser?.email||null}/>

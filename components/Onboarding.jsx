@@ -239,7 +239,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
 }
 
 /* ── Main Onboarding ─────────────────────────────────────────── */
-function Onboarding({ onComplete, onLogin, authUser }){
+function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
   const [name, setName] = React.useState("");
   const [bdayDay, setBdayDay]     = React.useState("");
   const [bdayMonth, setBdayMonth] = React.useState("");
@@ -537,6 +537,15 @@ function Onboarding({ onComplete, onLogin, authUser }){
                   </button>
                 </div>
               </>
+            )}
+            {authUser && onSignOut && (
+              <div style={{width:"100%",borderTop:"1px solid var(--gold-soft)",paddingTop:10,textAlign:"center"}}>
+                <button onClick={onSignOut}
+                  style={{background:"none",border:"none",color:"var(--plum-soft)",cursor:"pointer",
+                          fontFamily:"Silkscreen,monospace",fontSize:10,textDecoration:"underline",padding:0}}>
+                  Log out ({authUser.email})
+                </button>
+              </div>
             )}
           </div>
         </div>
