@@ -816,27 +816,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                          fontFamily:"Silkscreen,monospace",marginTop:2,letterSpacing:".04em"}}>
               ✎ tap pet to edit profile
             </div>
-            {isAdmin && (
-              <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8}}>
-                {["egg","baby","adult"].map(s=>(
-                  <button key={s} onClick={()=>{ localStorage.setItem("sq_test_stage",s); window.location.reload(); }}
-                    style={{fontFamily:"Silkscreen,monospace",fontSize:9,padding:"3px 8px",cursor:"pointer",
-                            textTransform:"uppercase",letterSpacing:".04em",border:"1px solid rgba(255,255,255,.3)",
-                            background: petStage===s ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.3)",
-                            color: petStage===s ? "#fff" : "rgba(255,255,255,.5)"}}>
-                    {s}
-                  </button>
-                ))}
-                {testStage && (
-                  <button onClick={()=>{ localStorage.removeItem("sq_test_stage"); window.location.reload(); }}
-                    style={{fontFamily:"Silkscreen,monospace",fontSize:9,padding:"3px 8px",cursor:"pointer",
-                            textTransform:"uppercase",letterSpacing:".04em",border:"1px solid rgba(255,100,100,.4)",
-                            background:"rgba(139,26,26,.3)",color:"rgba(255,150,150,.8)"}}>
-                    reset
-                  </button>
-                )}
-              </div>
-            )}
             {/* Bottom spacer — equal to top spacer, keeps content centered */}
             <div style={{flex:1}}/>
             {/* Energy bar pinned to bottom */}
@@ -1495,6 +1474,33 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     setResetPwStatus(error?"error":"sent");
                   }}>Reset Password</button>
                 )}
+              </div>
+            )}
+
+            {/* Admin: pet stage switcher */}
+            {isAdmin && (
+              <div style={{marginBottom:14,padding:"10px",background:"rgba(201,127,165,.08)",border:"1px solid var(--rose)",borderRadius:4}}>
+                <div style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",marginBottom:8}}>✦ Pet Stage (admin)</div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  {["egg","baby","adult"].map(s=>(
+                    <button key={s} onClick={()=>{ localStorage.setItem("sq_test_stage",s); window.location.reload(); }}
+                      style={{fontFamily:"Silkscreen,monospace",fontSize:10,padding:"4px 10px",cursor:"pointer",
+                              textTransform:"uppercase",letterSpacing:".04em",
+                              border: petStage===s ? "2px solid var(--rose)" : "1px solid rgba(201,127,165,.4)",
+                              background: petStage===s ? "rgba(201,127,165,.2)" : "transparent",
+                              color: petStage===s ? "var(--rose)" : "var(--plum-soft)"}}>
+                      {s}
+                    </button>
+                  ))}
+                  {testStage && (
+                    <button onClick={()=>{ localStorage.removeItem("sq_test_stage"); window.location.reload(); }}
+                      style={{fontFamily:"Silkscreen,monospace",fontSize:10,padding:"4px 10px",cursor:"pointer",
+                              textTransform:"uppercase",border:"1px solid rgba(192,57,43,.4)",
+                              background:"rgba(192,57,43,.08)",color:"#c0392b"}}>
+                      reset
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
