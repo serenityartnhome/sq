@@ -508,6 +508,7 @@ body{
   margin-top:14px;
   margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
   margin-right:20px;
+  position:relative;
 }
 
 /* Right quest panel spans both rows, flex column so spacer + pinned footer work */

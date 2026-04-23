@@ -516,6 +516,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [saveStatus, setSaveStatus] = React.useState(null); // null | "saving" | "saved" | "error"
   const [isSleeping, setIsSleeping] = React.useState(()=> localStorage.getItem("sq_sleep_date") === appDay());
   const [showGoodnightPopup, setShowGoodnightPopup] = React.useState(false);
+  const [justWokeUp, setJustWokeUp] = React.useState(false);
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [feedbackMsg, setFeedbackMsg] = React.useState("");
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
@@ -851,6 +852,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     bubblePauseUntil.current = Date.now() + 9999999999;
     localStorage.setItem("sq_sleep_date", appDay());
     setIsSleeping(true);
+  };
+
+  const wakeUp = () => {
+    localStorage.removeItem("sq_sleep_date");
+    setIsSleeping(false);
+    setJustWokeUp(true);
+    const msgs = [
+      "Good morning! ✨ Ready for a new adventure?",
+      "Rise and shine! Your quest is waiting 🌸",
+      "You're back! Let's make today magical ✨",
+      "Good morning, adventurer! A fresh day begins 🌸",
+    ];
+    setPetBubble(msgs[Math.floor(Math.random()*msgs.length)]);
+    bubblePauseUntil.current = Date.now() + 30000;
+    setTimeout(()=>setJustWokeUp(false), 2500);
   };
 
   // Recalculate habit streaks once per day on app open; sync with Supabase
@@ -1248,12 +1264,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
                   if(petStage==="adult" && !isHatching)
-                    return <ZodiacPet animal={animal} mood={isSleeping?"tired":(celebrating?"happy":(mood||"neutral"))} happy={celebrating&&!isSleeping} size={sz}/>;
+                    return <ZodiacPet animal={animal} mood={isSleeping?"tired":justWokeUp?"happy":(celebrating?"happy":(mood||"neutral"))} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={(celebrating||justWokeUp)&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -1694,22 +1710,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </>
           )}
         </div>
+
+        {isSleeping && (
+          <div style={{position:"absolute",inset:0,background:"rgba(6,3,16,.72)",zIndex:50,
+                       display:"flex",flexDirection:"column",alignItems:"center",
+                       justifyContent:"flex-end",padding:"0 24px 32px",
+                       backdropFilter:"blur(1px)"}}>
+            <button className="btn-primary" onClick={wakeUp}
+              style={{width:"100%",maxWidth:400,fontSize:16,padding:"12px 16px",
+                      background:"rgba(40,15,80,.95)",borderColor:"rgba(140,80,210,.6)",
+                      color:"#c9a3e8",display:"flex",alignItems:"center",
+                      justifyContent:"center",gap:8}}>
+              🌙 Wake Up
+            </button>
+          </div>
+        )}
       </div>
 
-      {isSleeping && (
-        <div style={{position:"fixed",inset:0,background:"rgba(6,3,16,.72)",zIndex:400,
-                     display:"flex",flexDirection:"column",alignItems:"center",
-                     justifyContent:"flex-end",padding:"0 24px 48px",
-                     backdropFilter:"blur(1px)"}}>
-          <button className="btn-primary" onClick={()=>{ localStorage.removeItem("sq_sleep_date"); setIsSleeping(false); bubblePauseUntil.current=0; }}
-            style={{width:"100%",maxWidth:400,fontSize:16,padding:"12px 16px",
-                    background:"rgba(40,15,80,.95)",borderColor:"rgba(140,80,210,.6)",
-                    color:"#c9a3e8",display:"flex",alignItems:"center",
-                    justifyContent:"center",gap:8}}>
-            🌙 Wake Up
-          </button>
-        </div>
-      )}
 
       {showGoodnightPopup && (
         <div style={{position:"fixed",inset:0,background:"rgba(8,4,20,.92)",zIndex:9100,
