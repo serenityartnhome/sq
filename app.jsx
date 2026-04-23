@@ -93,7 +93,7 @@ function App(){
     (async()=>{
       try {
         const loadProfile = async (userId) => {
-          const today = new Date().toLocaleDateString("en-CA");
+          const today = new Date(Date.now() - 3*60*60*1000).toLocaleDateString("en-CA");
           const [{ data }, { data: dayData }] = await Promise.all([
             window.SB.from("profiles").select("*").eq("id", userId).single(),
             window.SB.from("daily_data").select("*").eq("user_id", userId).eq("date", today).single(),

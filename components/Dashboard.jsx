@@ -1,3 +1,8 @@
+function appDay(d){
+  const t = new Date((d||new Date()).getTime() - 3*60*60*1000);
+  return t.toLocaleDateString("en-CA");
+}
+
 const ENERGY_MODES = [
   { id:"soft",     emoji:"🌸", name:"Soft Energy",  desc:"Gentle, slow, healing",              tags:["Calm","Rest","Self-love","Acceptance"] },
   { id:"boss",     emoji:"⚡", name:"Boss Energy",  desc:"Focused, getting things done",        tags:["Focus","Discipline","Confidence","Success"] },
@@ -307,7 +312,7 @@ function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
   try {
     const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
     const yd = new Date(); yd.setDate(yd.getDate()-1);
-    missedYesterday = !hist[yd.toLocaleDateString("en-CA")]?.done;
+    missedYesterday = !hist[appDay(yd)]?.done;
   } catch{}
 
   let cat = "greeting";
@@ -390,7 +395,7 @@ const TIPS = {
 };
 
 function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta, seenTips, onTipSeen, todayData, profileFlags }){
-  const today = new Date().toLocaleDateString("en-CA");
+  const today = appDay();
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
   const [activeTip, setActiveTip] = React.useState(null);
@@ -583,7 +588,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
       let count = 0; const d = new Date();
       while(true){
-        const k = d.toLocaleDateString("en-CA");
+        const k = appDay(d);
         if(!hist[k] || !hist[k].done) break;
         count++; d.setDate(d.getDate()-1);
       }
@@ -808,14 +813,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
         const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
         const yd = new Date(); yd.setDate(yd.getDate()-1);
-        const yesterdayKey = yd.toLocaleDateString("en-CA");
+        const yesterdayKey = appDay(yd);
         const yesterdayData = hist[yesterdayKey];
         const newStreaks = {};
         [...PRESET_HABITS, ...customHabits].forEach(h=>{
           if((yesterdayData?.completed||[]).includes(h.id)){
             let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
             while(true){
-              const k = d.toLocaleDateString("en-CA");
+              const k = appDay(d);
               if(!(hist[k]?.completed||[]).includes(h.id)) break;
               count++; d.setDate(d.getDate()-1);
             }
@@ -924,7 +929,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         try {
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
           let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
-          while(true){ const k=d.toLocaleDateString("en-CA"); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
+          while(true){ const k=dappDay; if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
           return count;
         } catch{ return 0; }
       })();
@@ -1045,7 +1050,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             const d = new Date();
             d.setDate(d.getDate()-1);
             while(true){
-              const k = d.toLocaleDateString("en-CA");
+              const k = appDay(d);
               if(!hist[k]) break;
               count++;
               d.setDate(d.getDate()-1);
@@ -1187,7 +1192,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[yd.toLocaleDateString("en-CA")]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[ydappDay]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
