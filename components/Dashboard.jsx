@@ -26,126 +26,73 @@ const MOOD_ENERGY = {
 
 const MOOD_QUESTS = {
   anxious: [
-    { text:"Your breath is here. Everything else can wait.",     task:"Want to try 3 slow breaths with me? 🌸" },
-    { text:"You don't have to solve this right now.",            task:"Do you want to write what's on your mind in your journal?" },
-    { text:"Let's slow this down together…",                     task:"Can we sit quietly for just a moment?" },
-    { text:"You're safe right now.",                             task:"Want to feel your feet on the ground and just breathe?" },
-    { text:"One breath is enough.",                              task:"Breathe in slowly with me… then out" },
-    { text:"Let the feeling pass through — don't hold it.",      task:"Want to shake it out? Hands, shoulders, everything" },
-    { text:"Slow is still moving forward.",                      task:"Want to drink something warm and just breathe?" },
-    { text:"You've gotten through hard moments before.",         task:"Can we do one tiny thing together — just one?" },
-    { text:"The worry feels big. You are bigger.",               task:"Want to write it down so it can't follow you around?" },
-    { text:"Loosen your shoulders… you're okay.",                task:"Try letting your shoulders drop — want to try that with me?" },
-    { text:"Come back to this moment.",                          task:"Can you name one thing you can see and one you can feel?" },
-    { text:"Nothing else matters right now.",                    task:"Want to step outside for a few minutes together?" },
-    { text:"Stay here with me…",                                 task:"Let's just breathe for a second — in… and out" },
-    { text:"It's okay not to be okay right now.",                task:"Do you want to write about it? I'll be right here 💜" },
+    "let's breathe together… in and out 🌸",
+    "you're safe right here with me",
+    "one breath at a time… I've got you",
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "nothing to solve right now… just breathe",
+    "loosen your shoulders… we can slow this down",
+    "stay here with me for a moment…",
   ],
   tired: [
-    { text:"You don't have to earn rest.",                       task:"Want to close your eyes for a few minutes? I'll wait" },
-    { text:"Today can be smaller. That's allowed.",              task:"Want to pick just one thing together and leave the rest?" },
-    { text:"Rest is part of the work.",                          task:"Can we give you permission to slow down today?" },
-    { text:"You've done enough already.",                        task:"Want to make something warm and just sit for a bit?" },
-    { text:"Let's go slow today.",                               task:"Do you want to start with your easiest habit and see how you feel?" },
-    { text:"Just show up — that's it today.",                    task:"Want to write one small thing you did well today?" },
-    { text:"Small effort is still effort.",                      task:"Can we do just one gentle thing together?" },
-    { text:"Close your eyes for a moment…",                     task:"Even 5 minutes of rest counts — want to try?" },
-    { text:"Low energy doesn't mean low worth.",                 task:"Do you want to write how you're feeling in your journal?" },
-    { text:"We can go gentle today.",                            task:"Want to take a slow walk? Even a few minutes outside" },
-    { text:"One tiny step is still forward.",                    task:"What's the easiest thing on your list? Want to do that together?" },
-    { text:"Your body is asking for something.",                 task:"Do you want to stretch a little? Even just your arms?" },
-    { text:"It's okay to be tired.",                             task:"Want to rest without guilt for a little while?" },
-    { text:"Give yourself permission to take it easy.",          task:"Can we start small and see what happens?" },
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "today can be smaller… and that's okay",
+    "let's go slow together today 🌸",
+    "you showed up. that's everything ✨",
+    "rest is okay… I'll be right here",
+    "even one small thing counts today",
+    "you don't have to do everything",
   ],
   frustrated: [
-    { text:"Something isn't working — and that's valid.",        task:"Do you want to write exactly what's frustrating you?" },
-    { text:"Let it out… then begin again.",                      task:"Want to write it all out — no filter needed?" },
-    { text:"It doesn't have to be perfect.",                     task:"Can we try starting messy and see what happens together?" },
-    { text:"Start messy. Just start.",                           task:"Want to do one imperfect step with me — just begin?" },
-    { text:"You're allowed to feel this.",                       task:"Do you want to write it out and then let it go?" },
-    { text:"Progress doesn't always look like progress.",        task:"Do you want to write about what's blocking you?" },
-    { text:"We'll figure it out… slowly.",                       task:"Can we step away for 5 minutes and come back fresh?" },
-    { text:"Shake it off… then keep going.",                     task:"Want to move a little? Even 2 minutes helps" },
-    { text:"You're not stuck — you're processing.",              task:"Do you want to step outside for a few minutes with me?" },
-    { text:"Hard days are part of it too.",                      task:"Want to do your easiest habit first and build from there?" },
-    { text:"What's one piece of this you can actually control?", task:"Want to write that one thing down and focus on it together?" },
-    { text:"Let's reset together.",                              task:"Can we breathe out longer than we breathe in — want to try?" },
-    { text:"One imperfect step is still a step.",                task:"Want to pick one small thing we can finish together?" },
-    { text:"Take a breath… then go.",                            task:"Do you want to write what's next, just to clear your head?" },
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "let it out… then let's begin again",
+    "it doesn't have to be perfect… just start",
+    "you're not stuck — you're processing",
+    "one small step… want to do it together?",
+    "hard days are part of it too",
+    "we'll figure it out slowly… together",
   ],
   happy: [
-    { text:"Today feels lighter. Hold onto this.",               task:"Do you want to write what made today feel good?" },
-    { text:"I love this energy ✨",                              task:"Want to share something on the gratitude wall today?" },
-    { text:"Let yourself feel good — fully.",                    task:"Want to do your most important habit right now while you're in it?" },
-    { text:"Carry this feeling somewhere that matters.",         task:"Is there something you've been wanting to do? Want to work on it together?" },
-    { text:"You're glowing today ✨",                            task:"Do you want to write what's making you feel this way?" },
-    { text:"Good days are worth recording.",                     task:"Want to add a journal entry today — capture this?" },
-    { text:"Something's working — notice it.",                   task:"Can we write down what's going right, together?" },
-    { text:"Hold onto this feeling.",                            task:"Do you want to write it down so you can come back to it?" },
-    { text:"This matters more than you know.",                   task:"Want to share this feeling with someone you care about?" },
-    { text:"Let it grow.",                                       task:"Do you want to work on something you've been wanting to start?" },
-    { text:"Stay in this feeling.",                              task:"Want to tackle something you've been putting off — you've got the energy" },
-    { text:"This is rare — savour it.",                          task:"Can we write it in your journal so you can remember this feeling?" },
-    { text:"You feel light today.",                              task:"Want to share something good on the wall today?" },
-    { text:"Keep this with you.",                                task:"Do you want to work on something that's been on your mind?" },
+    "I love this energy ✨ let's hold onto it",
+    "you feel so light today… savour it",
+    "wanna work on something together? ✨",
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "you're glowing today ✨",
+    "this is worth remembering… write it down?",
+    "let's use this feeling for something real",
   ],
   excited: [
-    { text:"That energy? Let's use it ✨",                       task:"Want to start your most important thing right now while you're in it?" },
-    { text:"You're in momentum — stay with it.",                 task:"Can we do three things together before stopping?" },
-    { text:"Today feels alive. Good.",                           task:"Do you want to write down what you're most excited about?" },
-    { text:"Ride this, don't rush it.",                          task:"Want to work on something you've been wanting to do together?" },
-    { text:"Channel this somewhere real.",                       task:"Do you want to tackle something you've been putting off?" },
-    { text:"Let the excitement focus, not scatter.",             task:"Can we write your top priority for today and start there?" },
-    { text:"This is rare — savour it.",                          task:"Want to share something good on the gratitude wall?" },
-    { text:"Something is happening today.",                      task:"Do you want to write about what's driving this feeling?" },
-    { text:"Don't let this go to waste.",                        task:"Can we use this energy on something you've been wanting to create?" },
-    { text:"Move with it.",                                      task:"Want to do your most ambitious habit first?" },
-    { text:"Stay in this flow.",                                 task:"Do you want to write down everything you want to do today?" },
-    { text:"You feel alive right now.",                          task:"Want to work on something that truly matters to you?" },
+    "that energy?! let's use it!! ✨",
+    "you're in momentum — let's go!",
+    "wanna write down what's driving this? ✨",
+    "let's channel this somewhere real together",
+    "ride it, don't rush it 🌸",
+    "something is happening today… I feel it ✨",
   ],
   calm: [
-    { text:"You're in the quiet. Stay here.",                    task:"Want to just breathe slowly and be here with me?" },
-    { text:"Clarity lives here.",                                task:"Do you want to write your intention for today in your journal?" },
-    { text:"Nothing to fix right now.",                          task:"Want to sit still for a moment? Nothing to do" },
-    { text:"Feel this stillness — it's yours.",                  task:"Can we use this moment to plan one thing you want to do well?" },
-    { text:"Breathe slowly… let it be.",                         task:"Do you want to spend a few minutes journaling while you're in this space?" },
-    { text:"Stay grounded here.",                                task:"Want to do a habit you usually rush through, slowly?" },
-    { text:"This is enough.",                                    task:"Can we just be here for a second together?" },
-    { text:"Presence is its own kind of progress.",              task:"Want to put everything down for 10 minutes and just exist?" },
-    { text:"The stillness is working.",                          task:"Do you want to write what you're noticing right now?" },
-    { text:"Calm is power too.",                                 task:"Want to use this to do something you usually feel too rushed for?" },
-    { text:"Quiet moments matter.",                              task:"Can we do one meaningful thing slowly together?" },
-    { text:"Let's stay here a little longer.",                   task:"Do you want to write one thing you're grateful for right now?" },
+    "this stillness is yours… stay here",
+    "breathe slowly with me… nothing to fix",
+    "wanna write your intention for today in your journal?",
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "you're so grounded right now ✨",
+    "clarity lives here… let's use it",
   ],
   neutral: [
-    { text:"Neither high nor low — a clean slate.",              task:"Want to pick one small habit to start with together?" },
-    { text:"No feeling has to be forced.",                       task:"Can we just move through your list today, one thing at a time?" },
-    { text:"Flat days are part of it.",                          task:"Do you want to try 3 things and call it enough?" },
-    { text:"You don't need to feel inspired to begin.",          task:"Want to start with your easiest habit and see what happens?" },
-    { text:"Some days just are. That's enough.",                 task:"Do you want to write one line about where you're at today?" },
-    { text:"Neutral is still present.",                          task:"Can we pick one thing that's been waiting and do it together?" },
-    { text:"Just show up — that counts.",                        task:"Want to do one small thing you can finish fully?" },
-    { text:"Even ordinary days build something.",                task:"Do you want to work on something you've been wanting to start?" },
-    { text:"You don't need momentum to move.",                   task:"Can we just begin somewhere — anywhere — together?" },
-    { text:"We'll take it as it comes.",                         task:"Want to write what you'd like today to feel like?" },
-    { text:"This is still a day worth showing up for.",          task:"Want to do one thing you'll be glad you did later?" },
-    { text:"Start small. Build slowly.",                         task:"Do you want to pick your easiest habit and just begin with me?" },
+    "let's just begin somewhere… together",
+    "no feeling has to be forced today",
+    "even ordinary days build something ✨",
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "want to pick one small thing together?",
+    "we'll take it as it comes",
   ],
   sad: [
-    { text:"You're allowed to feel this.",                       task:"Do you want to write whatever comes — no filter needed?" },
-    { text:"I'm here… that's all.",                              task:"Can we just sit together for a moment? No pressure" },
-    { text:"You don't have to feel better right now.",           task:"Want to rest without guilt for a little while?" },
-    { text:"Be gentle with yourself today.",                     task:"Do you want to write one kind thing to yourself in your journal?" },
-    { text:"Let's just be here together.",                       task:"Want to go outside for a few minutes — fresh air might help?" },
-    { text:"Sadness isn't weakness.",                            task:"Can we do just one gentle thing for yourself today?" },
-    { text:"Small things still count today.",                    task:"Want to do your easiest habit — nothing more needed" },
-    { text:"You don't have to perform okay.",                    task:"Do you want to put on something comforting and just rest?" },
-    { text:"Let the feeling be there.",                          task:"Want to write about what's making you feel this way?" },
-    { text:"You're not alone in this.",                          task:"Can we just talk about it in your journal together?" },
-    { text:"It's okay to have a quiet day.",                     task:"Want to do one small thing and then let yourself rest?" },
-    { text:"You came here. That takes something.",               task:"Want to write one thing — anything — just to begin?" },
-    { text:"Heavy feelings don't last forever.",                 task:"Do you want to step outside, even for a minute?" },
-    { text:"There's no right way to feel today.",                task:"Can we do something gentle together — you choose" },
+    "I'm here for you, wanna tell me about it in your journal?…",
+    "you're allowed to feel this… I'm not going anywhere",
+    "let's just be here together for a moment",
+    "small things still count today… I believe in you",
+    "you don't have to be okay right now",
+    "be gentle with yourself… I'm here 💜",
+    "you came here. that takes something",
   ],
 };
 
@@ -532,7 +479,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState(null);
-  const [moodQuest, setMoodQuest] = React.useState(null);
   const lastMoodQuestIdx = React.useRef({});
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
@@ -1599,22 +1545,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   const countsKey = "sq_mq_counts";
                   const storedDate = localStorage.getItem(dateKey);
                   const counts = storedDate === today ? JSON.parse(localStorage.getItem(countsKey)||"{}") : {};
-                  if((counts[m]||0) >= 2){ setMoodQuest(null); return; }
+                  if((counts[m]||0) >= 1) return;
                   const pool = MOOD_QUESTS[m];
                   if(pool?.length) {
                     const last = lastMoodQuestIdx.current[m] ?? -1;
                     let idx;
                     do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
                     lastMoodQuestIdx.current[m] = idx;
-                    const quest = pool[idx];
-                    setMoodQuest(quest);
-                    setPetBubble(quest.task);
+                    const msg = pool[idx];
+                    setPetBubble(msg);
                     bubblePauseUntil.current = Date.now() + 45000;
-                    counts[m] = (counts[m]||0) + 1;
+                    counts[m] = 1;
                     localStorage.setItem(dateKey, today);
                     localStorage.setItem(countsKey, JSON.stringify(counts));
                   } else {
-                    setMoodQuest(null);
                   }
                 }}/>
               </div>
@@ -1804,29 +1748,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
-      {moodQuest && (
-        <div onClick={()=>setMoodQuest(null)}
-          style={{position:"fixed",inset:0,zIndex:4000,display:"flex",alignItems:"flex-end",
-                  justifyContent:"center",padding:"0 16px 32px",pointerEvents:"none"}}>
-          <div onClick={e=>e.stopPropagation()}
-            style={{pointerEvents:"all",background:"#2a1a3e",border:"3px solid var(--rose)",
-                    boxShadow:"5px 5px 0 rgba(0,0,0,.35)",padding:"18px 20px 16px",
-                    maxWidth:340,width:"100%",position:"relative",
-                    animation:"slideUpFade .28s ease"}}>
-            <button onClick={()=>setMoodQuest(null)}
-              style={{position:"absolute",top:8,right:10,background:"none",border:"none",
-                      color:"rgba(255,255,255,.35)",fontSize:14,cursor:"pointer",lineHeight:1,padding:0}}>✕</button>
-            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"#f0e6f6",
-                         lineHeight:1.65,marginBottom:10,paddingRight:16}}>
-              {moodQuest.text}
-            </div>
-            <div style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)",
-                         letterSpacing:".04em",lineHeight:1.5}}>
-              ✦ {moodQuest.task}
-            </div>
-          </div>
-        </div>
-      )}
 
       {showFriendsSoon && (
         <div className="coming-soon-overlay" onClick={()=>setShowFriendsSoon(false)}>
