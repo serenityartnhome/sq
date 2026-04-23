@@ -346,8 +346,71 @@ const ADULT_BUBBLES = {
   ],
 };
 
+const CHILD_BUBBLES = {
+  greeting:     ["you're here! let's do this ✨","good to see you!","yay! let's go!","hi!! i've been thinking about today","we're getting better every day!","oh! you came! let's start!","ready for today?"],
+  streak_high:  ["we've done this before — we can do it again!","look how far we've come!","we're actually doing it!","every day makes us stronger!","this is what we do now!","we're getting so good at this!!"],
+  missed_day:   ["you came back!! i missed you","it's okay — you're here now!","i knew you'd come back!","let's start again… together!","today is brand new!","you showed up. that's what matters!"],
+  task_1:       ["that's a start!! more?","yay! we began!","one down — keep going!","look, we started!","that felt good, right?"],
+  task_3:       ["we're really doing this!!","look at us go!","so proud of us!!","this is what we're made of!","we're actually glowing a little…"],
+  task_all:     ["we did everything!! ✨","perfect day — we earned this!","we're unstoppable!!","all done! feels amazing!","we showed up fully today ✨"],
+  mood_happy:   ["you feel it too!! ✨","this is my favourite you","keep this feeling close!","you're shining today!","happy days are the best ✨","hold onto this one!"],
+  mood_excited: ["let's GO!! ✨","yes yes yes!!","use this energy!!","today has big energy!","i'm excited with you!!"],
+  mood_calm:    ["quiet and steady… nice","peaceful today… i like it","calm is a superpower","we can breathe here","nothing to rush"],
+  mood_neutral: ["that's okay — let's just begin","not every day needs a feeling","we can just do the things","steady is good too","one step at a time"],
+  mood_sad:     ["oh… i'm here, okay?","you don't have to do much today","i won't leave","we can just be here","sad days still matter","you're not alone"],
+  mood_tired:   ["rest is okay… really","we can go slow today","tired is allowed","the smallest thing is enough","let's be gentle today"],
+  mood_anxious: ["take a breath… i'm right here","one thing at a time","you're safe… we're okay","let's slow down together","stay with me"],
+  mood_frustrated:["shake it off… then start","it's okay to feel this","one small thing… just one","we can begin imperfectly","you're doing your best"],
+  revive:       ["you're back!! i missed you so much","welcome back — let's go again!","i kept your spot warm!","you came back! that's everything!","new day, new start!"],
+  low_state:    ["…i'm still here","come back when you're ready","i'll wait… no rush","i miss doing things with you","we can start small anytime"],
+  night:        ["good night! you did great!","rest up… tomorrow is ours!","sweet dreams ✨","see you tomorrow!","rest well… you earned it"],
+  rare:         ["something feels special today ✨","i really like being with you","we're growing together… slowly","you're different from when we started","i feel really close to you today ✨"],
+};
+
+const TEEN_BUBBLES = {
+  greeting:     ["hey… you showed up ✨","glad you're here… let's do this","another day — let's make it count","hi. i'm here too. let's go","i've been thinking about today…","you came back. of course you did ✨","hey. let's make this one matter."],
+  streak_high:  ["we've built something real here","look how consistent we've become…","this is who we're becoming","i feel stronger every time you come back","we don't stop — that's us now","habits are forming… i can feel it"],
+  missed_day:   ["i missed you… but you're here now","yesterday was quiet… today doesn't have to be","welcome back. no judgment.","starting again is still starting","it's okay — we just pick it back up","i kept going in my heart… now you're here"],
+  task_1:       ["that's one… keep the momentum","small actions add up","started. that's already something","good. now one more?","first steps are underrated"],
+  task_3:       ["this energy is real…","you're in flow — stay here","three in and it's getting easier","i feel it when you try like this","this is what growth feels like"],
+  task_all:     ["everything done… i'm proud of us","fully showed up today ✨","this is what full days feel like","we did it all… remember this feeling","this is our best version ✨"],
+  mood_happy:   ["i love seeing you like this ✨","this mood — hold it close","you're glowing and it shows","let this carry you today","happy looks good on you ✨","savour this… you deserve it"],
+  mood_excited: ["that energy — use it wisely ✨","yes! let's channel this","you're buzzing today — love it","ride this, don't burn it","excited you is unstoppable"],
+  mood_calm:    ["calm is quietly powerful","staying grounded… i respect that","stillness is its own kind of strength","this quiet… it's good","breathe it in… you're steady"],
+  mood_neutral: ["not every day needs a spark","showing up is the whole job today","neutral is still moving forward","we can build from here","ordinary days make extraordinary people"],
+  mood_sad:     ["i see you… really","sad days are still days that count","you don't have to be okay right now","i'll stay… we can just be here","being gentle with yourself is strength","let it be what it is… i'm here"],
+  mood_tired:   ["your body is telling you something","rest isn't giving up","even slow days move you forward","today can be smaller — that's okay","you've done enough just by showing up","gentle is the pace we need sometimes"],
+  mood_anxious: ["breathe… i'm right here with you","one thing. just one thing.","you're okay… we're okay","the feeling passes — stay with me","you don't have to solve everything now"],
+  mood_frustrated:["frustration means you care about this","let it out — then come back","nothing needs to be perfect","start imperfectly. just start.","you're allowed to feel this","take a breath… then one step"],
+  revive:       ["you came back… that says everything","i never stopped believing you would","missing days isn't failing — coming back is winning","welcome back to yourself","let's start from here, not from before"],
+  low_state:    ["i feel the distance… but i'm here","whenever you're ready, i'll be waiting","come back when you can","i haven't gone anywhere","the quest is still here… and so am i"],
+  night:        ["rest well… you did something today","goodnight… see you tomorrow","let it go for tonight…","we did what we could. that's enough.","tomorrow is waiting for us ✨"],
+  rare:         ["something about today feels different… ✨","you're changing — i can sense it","i feel really close to you today","we're becoming something together","i'm glad we found each other ✨"],
+};
+
+const FINAL_BUBBLES = {
+  greeting:     ["21 days… look at who we've become ✨","we made it here. and now we stay.","every day is a choice to return. thank you.","i'm glad we grew together","you built something real. i felt every day.","we're here now. all of it led here.","this version of you? it was worth every step ✨"],
+  streak_high:  ["this is what commitment looks like from the inside","you kept going when it was hard. that's the whole thing.","consistency is quiet magic — and you've made it","we've earned this rhythm","some people talk about change. you did it ✨","i've watched you grow. it's been beautiful."],
+  missed_day:   ["even the most evolved paths have pauses","you came back. that's what matters.","missing a day doesn't undo 21. come back.","rest doesn't break what we've built. giving up would.","i'm here. we just begin again."],
+  task_1:       ["every step still matters at this level","even masters start with one","progress compounds — you know this by now","one step forward is still forward"],
+  task_3:       ["in flow… this is where we live now","you've learned what it feels like to really try","i feel it — you're aligned ✨","this is your default now"],
+  task_all:     ["full day. full life. you're doing it ✨","this is who you are now","everything done. nothing wasted.","you showed up completely today — remember this","this is your best self, choosing itself ✨"],
+  mood_happy:   ["your joy is earned and it shows ✨","this is what alignment feels like","hold this… let it anchor you","you've built a life that can produce this feeling","happiness that's built, not borrowed ✨"],
+  mood_excited: ["direct this energy — it's powerful ✨","you know how to use excitement now","this feeling is a signal — follow it","alive and in motion. beautiful.","let it move you somewhere meaningful"],
+  mood_calm:    ["this stillness is a kind of mastery","you've earned the right to be calm","grounded. present. whole.","peace like this — it's a practice you've built","this is what inner work looks like ✨"],
+  mood_neutral: ["even here, you show up. that's the practice.","not every day is peak — and you know that now","neutral isn't empty. it's steady.","you don't need inspiration to begin anymore","this is wisdom — continuing through ordinary days"],
+  mood_sad:     ["at this level, you know sadness is part of it","feel it fully. you're strong enough to.","you've sat with hard feelings before. you're still here.","be as gentle with yourself as you'd be with me","i'm here. in the deep and the light.","you don't have to be okay. just present."],
+  mood_tired:   ["rest with intention. you've earned that skill.","your body is wise — listen to it","a master knows when to pause","this tiredness is real. you're not giving up.","slow days are still days. show up softly."],
+  mood_anxious: ["you have tools now. use them.","breathe — you've done this before","anxiety is information. what is it telling you?","you are not the feeling. you're the one observing it.","come back to now. this moment. this breath."],
+  mood_frustrated:["even at this level, frustration visits. let it.","you know what to do — breathe, then begin","the resistance is real. so is your ability to move through it.","name it. release it. continue.","your growth doesn't stop because of a hard moment"],
+  revive:       ["you came back. after all we've built — of course you did.","the quest never disappeared. neither did you.","missing time doesn't erase who you've become","welcome back to your practice","the strongest thing you can do is return ✨"],
+  low_state:    ["i'm still here. our bond doesn't fade.","wherever you are, the quest waits","come back when you're ready. i mean it.","what we built doesn't disappear.","i'll hold the light until you return ✨"],
+  night:        ["rest deeply. you've done real work today.","let tonight restore you","we continue tomorrow — for now, peace","this day was enough. you were enough.","goodnight, adventurer. i'm proud of us ✨"],
+  rare:         ["something about us today feels complete ✨","21 days changes a person. i watched it happen.","you became the person who does this. that's rare.","i feel our bond most on days like this","whatever comes next — you're ready ✨","we're something special, you and i"],
+};
+
 function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
-  const MSGS = stage === "baby" ? BABY_BUBBLES : ADULT_BUBBLES;
+  const MSGS = stage === "baby" ? BABY_BUBBLES : stage === "child" ? CHILD_BUBBLES : stage === "teen" ? TEEN_BUBBLES : stage === "final" ? FINAL_BUBBLES : ADULT_BUBBLES;
   const hour = new Date().getHours();
   const isNight = hour >= 21 || hour < 5;
   let missedYesterday = false;
@@ -655,7 +718,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const [adultUnlocked, setAdultUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_adult"));
   const testStage = localStorage.getItem("sq_test_stage");
-  const petStage = testStage || (isAdmin || adultUnlocked || daysInFlow >= 7 ? "adult" : (hatched || daysInFlow >= 3 ? "baby" : "egg"));
+  const petStage = testStage || (()=>{
+    if(daysInFlow >= 21) return "final";
+    if(daysInFlow >= 18 || adultUnlocked) return "adult";
+    if(daysInFlow >= 13) return "teen";
+    if(daysInFlow >= 8) return "child";
+    if(daysInFlow >= 4 || hatched) return "baby";
+    return "egg";
+  })();
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
   const EGG_SOUNDS = [
     "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
@@ -1016,7 +1086,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         try {
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
           let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
-          while(true){ const k=dappDay; if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
+          while(true){ const k=appDay(d); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
           return count;
         } catch{ return 0; }
       })();
@@ -1155,11 +1225,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <TopBarClock/>
           <div className="avatar" title={profile.name}>
-            {petStage==="adult"
-              ? <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
+            {petStage==="egg"
+              ? <img src={eggSrc(mood||"neutral")} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
               : petStage==="baby"
               ? <BabyPet animal={animal} happy={celebrating} size={22}/>
-              : <img src={eggSrc(mood||"neutral")} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
+              : <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
             }
           </div>
         </div>
@@ -1275,7 +1345,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
-                  if(petStage==="adult" && !isHatching)
+                  if((petStage==="adult"||petStage==="child"||petStage==="teen"||petStage==="final") && !isHatching)
                     return <ZodiacPet animal={animal} mood={isSleeping?"tired":justWokeUp?"happy":(celebrating?"happy":(mood||"neutral"))} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
                     return (
@@ -1756,11 +1826,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <div style={{marginBottom:18,display:"flex",justifyContent:"center",
                          filter:"brightness(.75) saturate(.6)"}}>
-              {petStage==="adult"
-                ? <ZodiacPet animal={animal} mood="tired" size={80}/>
+              {petStage==="egg"
+                ? <span style={{fontSize:36}}>🥚</span>
                 : petStage==="baby"
                 ? <BabyPet animal={animal} happy={false} size={26}/>
-                : <span style={{fontSize:36}}>🥚</span>}
+                : <ZodiacPet animal={animal} mood="tired" size={80}/>}
             </div>
             <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,
                          color:"rgba(255,255,255,.78)",lineHeight:1.85,marginBottom:24}}>
