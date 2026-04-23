@@ -1244,7 +1244,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
             </div>
             <div className="pet-cloud-stage" onClick={()=>{ if(isSleeping){ localStorage.removeItem("sq_sleep_date"); setIsSleeping(false); bubblePauseUntil.current=0; return; } showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title={isSleeping?"Tap to wake up":"My account"}>
-              <div className="pet-on-cloud" style={{position:"relative"}}>
+              <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
                   if(petStage==="adult" && !isHatching)
@@ -1264,14 +1264,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); } }}
                   />;
                 })()}
-                {isSleeping && (
-                  <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",
-                               justifyContent:"center",background:"rgba(10,5,30,.5)",
-                               borderRadius:"50%",pointerEvents:"none"}}>
-                    <span style={{fontSize:28,filter:"drop-shadow(0 0 6px #a78bfa)"}}>💤</span>
-                  </div>
-                )}
               </div>
+              {isSleeping && (
+                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",
+                             justifyContent:"center",pointerEvents:"none",zIndex:3}}>
+                  <span style={{fontSize:28,filter:"drop-shadow(0 0 6px #a78bfa)"}}>💤</span>
+                </div>
+              )}
               <img src="assets/cloud.png" alt="" className="pet-cloud"
                    style={{width:"min(360px,100%)",opacity:isSleeping?.6:1,transition:"opacity .5s"}} aria-hidden="true"/>
             </div>
