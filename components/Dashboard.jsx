@@ -1243,17 +1243,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>{ if(isSleeping){ localStorage.removeItem("sq_sleep_date"); setIsSleeping(false); bubblePauseUntil.current=0; return; } showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title={isSleeping?"Tap to wake up":"My account"}>
+            <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
                   if(petStage==="adult" && !isHatching)
-                    return <ZodiacPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} happy={celebrating} size={sz}/>;
+                    return <ZodiacPet animal={animal} mood={isSleeping?"tired":(celebrating?"happy":(mood||"neutral"))} happy={celebrating&&!isSleeping} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={celebrating&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -1265,14 +1265,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   />;
                 })()}
               </div>
-              {isSleeping && (
-                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",
-                             justifyContent:"center",pointerEvents:"none",zIndex:3}}>
-                  <span style={{fontSize:28,filter:"drop-shadow(0 0 6px #a78bfa)"}}>💤</span>
-                </div>
-              )}
               <img src="assets/cloud.png" alt="" className="pet-cloud"
-                   style={{width:"min(360px,100%)",opacity:isSleeping?.6:1,transition:"opacity .5s"}} aria-hidden="true"/>
+                   style={{width:"min(360px,100%)"}} aria-hidden="true"/>
             </div>
             <div style={{textAlign:"center",fontFamily:"Silkscreen, monospace",
                          color:"#fff",fontSize:14,marginTop:5,textTransform:"uppercase",letterSpacing:".05em",
@@ -1548,23 +1542,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </>
           )}
 
-          <button className="btn-primary btn-pink" onClick={saveProgressNow}
-            disabled={saveStatus==="saving"}
-            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
-                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
-                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
-            <Icon name="sparkle" size={16}/>
-            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
-            <Icon name="sparkle" size={16}/>
-          </button>
-          <button className="btn-primary" onClick={goodnightFn}
-            disabled={saveStatus==="saving"}
-            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
-                    background:"rgba(40,15,80,.85)",borderColor:"rgba(140,80,210,.5)",
-                    color:"#c9a3e8",display:"flex",alignItems:"center",
-                    justifyContent:"center",gap:8}}>
-            🌙 End My Adventure Today
-          </button>
+          {!isSleeping && (<>
+            <button className="btn-primary btn-pink" onClick={saveProgressNow}
+              disabled={saveStatus==="saving"}
+              style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
+                      background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
+                      borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
+              <Icon name="sparkle" size={16}/>
+              {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
+              <Icon name="sparkle" size={16}/>
+            </button>
+            <button className="btn-primary" onClick={goodnightFn}
+              disabled={saveStatus==="saving"}
+              style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
+                      background:"rgba(40,15,80,.85)",borderColor:"rgba(140,80,210,.5)",
+                      color:"#c9a3e8",display:"flex",alignItems:"center",
+                      justifyContent:"center",gap:8}}>
+              🌙 End My Adventure Today
+            </button>
+          </>)}
 
         </div>
 
@@ -1699,6 +1695,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           )}
         </div>
       </div>
+
+      {isSleeping && (
+        <div style={{position:"fixed",inset:0,background:"rgba(6,3,16,.72)",zIndex:400,
+                     display:"flex",flexDirection:"column",alignItems:"center",
+                     justifyContent:"flex-end",padding:"0 24px 48px",
+                     backdropFilter:"blur(1px)"}}>
+          <button className="btn-primary" onClick={()=>{ localStorage.removeItem("sq_sleep_date"); setIsSleeping(false); bubblePauseUntil.current=0; }}
+            style={{width:"100%",maxWidth:400,fontSize:16,padding:"12px 16px",
+                    background:"rgba(40,15,80,.95)",borderColor:"rgba(140,80,210,.6)",
+                    color:"#c9a3e8",display:"flex",alignItems:"center",
+                    justifyContent:"center",gap:8}}>
+            🌙 Wake Up
+          </button>
+        </div>
+      )}
 
       {showGoodnightPopup && (
         <div style={{position:"fixed",inset:0,background:"rgba(8,4,20,.92)",zIndex:9100,
