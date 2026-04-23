@@ -29,6 +29,48 @@ const MOOD_ENERGY = {
   excited:    ["growth","love"],
 };
 
+const GOODNIGHT_MSGS = {
+  done_all: {
+    happy:      "You crushed today and you're glowing — rest now, you've earned it ✨",
+    excited:    "What a day! All that energy was magic — sleep well, little adventurer 🌙",
+    calm:       "You moved through today so gently and still got it all done. Beautiful. Rest now ✨",
+    anxious:    "Even through the worry, you showed up fully. That takes courage. Sleep well 🌙",
+    tired:      "You did all of it even when you were tired. That's real strength. Rest now ✨",
+    frustrated: "You pushed through the hard feelings and still completed your quest. Be proud. Goodnight 🌙",
+    sad:        "Even on a heavy day you completed your quest. That matters so much. Rest gently ✨",
+    neutral:    "Steady and done — a quiet kind of victory. Sleep well, adventurer 🌙",
+    _default:   "Quest complete. Rest well — you showed up fully today ✨",
+  },
+  done_some: {
+    happy:      "You brought your joy today and that counts for everything. Rest now 🌙",
+    excited:    "Your energy lit up the day — progress is still progress. Sweet dreams ✨",
+    calm:       "A calm and gentle day. You did what you could — that's enough. Goodnight 🌙",
+    anxious:    "Even anxious, you still showed up. That's brave. Rest now ✨",
+    tired:      "Some days are heavy — you still did something. That matters. Sleep well 🌙",
+    frustrated: "Frustration is hard to carry. You still showed up. Rest now ✨",
+    sad:        "On sad days, doing anything at all is a win. Be gentle with yourself tonight 🌙",
+    neutral:    "A quiet day — and that's okay. Tomorrow is fresh. Goodnight ✨",
+    _default:   "Every step counts. Rest now and let tomorrow be new 🌙",
+  },
+  done_none: {
+    happy:      "Your happiness today was its own gift. Tomorrow you can add some quests to it 🌙",
+    excited:    "That spark is always there — let it rest tonight and carry you tomorrow ✨",
+    calm:       "A peaceful day of rest — sometimes that's exactly what's needed. Goodnight 🌙",
+    anxious:    "Some days just need to be survived. You made it. That's enough. Sleep now ✨",
+    tired:      "You needed rest today and you took it — that's wisdom, not failure. Goodnight 🌙",
+    frustrated: "Hard day. Let it go with the night — tomorrow is a fresh page ✨",
+    sad:        "I see you. Some days are just heavy. You don't have to earn your rest. Sleep now 🌙",
+    neutral:    "A quiet day — tomorrow brings a new chance. Goodnight, adventurer ✨",
+    _default:   "Rest now. Tomorrow your quest begins again ✨",
+  },
+};
+
+function pickGoodnightMsg(doneCount, totalSlots, mood){
+  const tier = doneCount >= Math.max(totalSlots, 3) ? "done_all" : doneCount >= 1 ? "done_some" : "done_none";
+  const pool = GOODNIGHT_MSGS[tier];
+  return pool[mood] || pool._default;
+}
+
 const MOOD_QUESTS = {
   anxious: [
     "let's breathe together… in and out 🌸",
@@ -472,6 +514,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [saveStatus, setSaveStatus] = React.useState(null); // null | "saving" | "saved" | "error"
+  const [isSleeping, setIsSleeping] = React.useState(()=> localStorage.getItem("sq_sleep_date") === appDay());
+  const [showGoodnightPopup, setShowGoodnightPopup] = React.useState(false);
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [feedbackMsg, setFeedbackMsg] = React.useState("");
   const [feedbackStatus, setFeedbackStatus] = React.useState(null);
@@ -609,9 +653,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const bubblePauseUntil = React.useRef(0);
 
+  const SLEEP_BUBBLES = ["zzz…","sweet dreams ✨","resting now… 🌙","shhh… sleeping…","see you tomorrow 🌸","zzz… zzz…"];
   React.useEffect(()=>{
     const pick = () => {
       if(petStageRef.current === "egg") return;
+      if(isSleepingRef.current){
+        setPetBubble(SLEEP_BUBBLES[Math.floor(Math.random()*SLEEP_BUBBLES.length)]);
+        return;
+      }
       if(Date.now() < bubblePauseUntil.current) return;
       setPetBubble(pickPetBubble(petStageRef.current, moodRef.current, doneCountRef.current, totalSlotsRef.current, daysInFlowRef.current));
     };
@@ -792,6 +841,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       setSaveStatus("saved");
     } catch{ setSaveStatus("error"); }
     setTimeout(()=>setSaveStatus(null), 2500);
+  };
+
+  const goodnightFn = () => setShowGoodnightPopup(true);
+
+  const confirmGoodnight = async () => {
+    setShowGoodnightPopup(false);
+    await saveProgressNow();
+    bubblePauseUntil.current = Date.now() + 9999999999;
+    localStorage.setItem("sq_sleep_date", appDay());
+    setIsSleeping(true);
   };
 
   // Recalculate habit streaks once per day on app open; sync with Supabase
@@ -1001,6 +1060,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   daysInFlowRef.current = daysInFlow;
   const petStageRef = React.useRef(petStage);
   petStageRef.current = petStage;
+  const isSleepingRef = React.useRef(isSleeping);
+  isSleepingRef.current = isSleeping;
   const canComplete = doneCount >= 3;
   const energy = Math.min(100, doneCount * Math.ceil(100 / Math.max(totalSlots, 1)));
 
@@ -1182,8 +1243,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
               </div>
             </div>
-            <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title="My account">
-              <div className="pet-on-cloud">
+            <div className="pet-cloud-stage" onClick={()=>{ if(isSleeping){ localStorage.removeItem("sq_sleep_date"); setIsSleeping(false); bubblePauseUntil.current=0; return; } showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer"}} title={isSleeping?"Tap to wake up":"My account"}>
+              <div className="pet-on-cloud" style={{position:"relative"}}>
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
                   if(petStage==="adult" && !isHatching)
@@ -1192,7 +1253,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[ydappDay]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -1203,9 +1264,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); } }}
                   />;
                 })()}
+                {isSleeping && (
+                  <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",
+                               justifyContent:"center",background:"rgba(10,5,30,.5)",
+                               borderRadius:"50%",pointerEvents:"none"}}>
+                    <span style={{fontSize:28,filter:"drop-shadow(0 0 6px #a78bfa)"}}>💤</span>
+                  </div>
+                )}
               </div>
               <img src="assets/cloud.png" alt="" className="pet-cloud"
-                   style={{width:"min(360px,100%)"}} aria-hidden="true"/>
+                   style={{width:"min(360px,100%)",opacity:isSleeping?.6:1,transition:"opacity .5s"}} aria-hidden="true"/>
             </div>
             <div style={{textAlign:"center",fontFamily:"Silkscreen, monospace",
                          color:"#fff",fontSize:14,marginTop:5,textTransform:"uppercase",letterSpacing:".05em",
@@ -1481,15 +1549,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </>
           )}
 
-          <button className="btn-primary btn-pink" onClick={saveProgressNow}
-            disabled={saveStatus==="saving"}
-            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
-                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
-                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
-            <Icon name="sparkle" size={16}/>
-            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
-            <Icon name="sparkle" size={16}/>
-          </button>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button className="btn-primary btn-pink" onClick={saveProgressNow}
+              disabled={saveStatus==="saving"}
+              style={{flex:1,fontSize:16,padding:"12px 16px",
+                      background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
+                      borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
+              <Icon name="sparkle" size={16}/>
+              {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
+              <Icon name="sparkle" size={16}/>
+            </button>
+            <button onClick={goodnightFn} title="End My Adventure Today"
+              disabled={saveStatus==="saving"}
+              style={{padding:"12px 14px",background:"rgba(60,30,100,.6)",
+                      border:"2px solid rgba(160,100,220,.4)",cursor:"pointer",
+                      fontSize:20,lineHeight:1,boxShadow:"3px 3px 0 rgba(0,0,0,.3)",
+                      flexShrink:0}}>
+              🌙
+            </button>
+          </div>
 
         </div>
 
@@ -1624,6 +1702,50 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           )}
         </div>
       </div>
+
+      {showGoodnightPopup && (
+        <div style={{position:"fixed",inset:0,background:"rgba(8,4,20,.92)",zIndex:9100,
+                     display:"flex",alignItems:"center",justifyContent:"center",padding:20}}
+             onClick={()=>setShowGoodnightPopup(false)}>
+          <div style={{background:"#150c28",border:"3px solid rgba(160,100,220,.45)",
+                       maxWidth:300,width:"100%",textAlign:"center",padding:"28px 22px",
+                       boxShadow:"6px 6px 0 rgba(0,0,0,.5)"}}
+               onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:30,marginBottom:10}}>🌙</div>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:12,color:"rgba(200,160,255,.9)",
+                         marginBottom:18,letterSpacing:".04em",textTransform:"uppercase"}}>
+              End My Adventure Today
+            </div>
+            <div style={{marginBottom:18,display:"flex",justifyContent:"center",
+                         filter:"brightness(.75) saturate(.6)"}}>
+              {petStage==="adult"
+                ? <ZodiacPet animal={animal} mood="tired" size={80}/>
+                : petStage==="baby"
+                ? <BabyPet animal={animal} happy={false} size={26}/>
+                : <span style={{fontSize:36}}>🥚</span>}
+            </div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,
+                         color:"rgba(255,255,255,.78)",lineHeight:1.85,marginBottom:24}}>
+              {pickGoodnightMsg(doneCount, totalSlots, mood)}
+            </div>
+            <button onClick={confirmGoodnight}
+              style={{width:"100%",background:"rgba(50,20,90,.9)",
+                      border:"2px solid rgba(160,100,220,.5)",fontFamily:"Silkscreen,monospace",
+                      fontSize:11,color:"#c9a3e8",padding:"12px 16px",cursor:"pointer",
+                      textTransform:"uppercase",letterSpacing:".05em",
+                      boxShadow:"3px 3px 0 rgba(0,0,0,.4)",marginBottom:8}}>
+              🌙 End My Adventure
+            </button>
+            <button onClick={()=>setShowGoodnightPopup(false)}
+              style={{width:"100%",background:"none",border:"1px solid rgba(255,255,255,.12)",
+                      fontFamily:"Silkscreen,monospace",fontSize:10,color:"rgba(255,255,255,.35)",
+                      padding:"8px 16px",cursor:"pointer",textTransform:"uppercase",
+                      letterSpacing:".05em"}}>
+              Not Yet
+            </button>
+          </div>
+        </div>
+      )}
 
       {showShopPrompt && (
         <div className="coming-soon-overlay" onClick={()=>setShowShopPrompt(false)}>
