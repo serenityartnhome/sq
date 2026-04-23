@@ -307,7 +307,7 @@ function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
   try {
     const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
     const yd = new Date(); yd.setDate(yd.getDate()-1);
-    missedYesterday = !hist[yd.toISOString().slice(0,10)]?.done;
+    missedYesterday = !hist[yd.toLocaleDateString("en-CA")]?.done;
   } catch{}
 
   let cat = "greeting";
@@ -390,7 +390,7 @@ const TIPS = {
 };
 
 function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpdateProfile, userEmail, authUserMeta, seenTips, onTipSeen, todayData, profileFlags }){
-  const today = new Date().toISOString().slice(0,10);
+  const today = new Date().toLocaleDateString("en-CA");
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
   const [activeTip, setActiveTip] = React.useState(null);
@@ -480,6 +480,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
   const [mood, setMood] = React.useState(null);
   const lastMoodQuestIdx = React.useRef({});
+  const shownMoodMsg = React.useRef({});
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
   const isFlashing = React.useRef(false);
@@ -582,7 +583,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
       let count = 0; const d = new Date();
       while(true){
-        const k = d.toISOString().slice(0,10);
+        const k = d.toLocaleDateString("en-CA");
         if(!hist[k] || !hist[k].done) break;
         count++; d.setDate(d.getDate()-1);
       }
@@ -610,7 +611,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       setPetBubble(pickPetBubble(petStageRef.current, moodRef.current, doneCountRef.current, totalSlotsRef.current, daysInFlowRef.current));
     };
     pick();
-    const t = setInterval(pick, 6500);
+    const t = setInterval(pick, 15000);
     return ()=>clearInterval(t);
   },[]);
 
@@ -807,14 +808,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
         const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
         const yd = new Date(); yd.setDate(yd.getDate()-1);
-        const yesterdayKey = yd.toISOString().slice(0,10);
+        const yesterdayKey = yd.toLocaleDateString("en-CA");
         const yesterdayData = hist[yesterdayKey];
         const newStreaks = {};
         [...PRESET_HABITS, ...customHabits].forEach(h=>{
           if((yesterdayData?.completed||[]).includes(h.id)){
             let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
             while(true){
-              const k = d.toISOString().slice(0,10);
+              const k = d.toLocaleDateString("en-CA");
               if(!(hist[k]?.completed||[]).includes(h.id)) break;
               count++; d.setDate(d.getDate()-1);
             }
@@ -923,7 +924,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         try {
           const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
           let count = 0; const d = new Date(); d.setDate(d.getDate()-1);
-          while(true){ const k=d.toISOString().slice(0,10); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
+          while(true){ const k=d.toLocaleDateString("en-CA"); if(!hist[k]) break; count++; d.setDate(d.getDate()-1); }
           return count;
         } catch{ return 0; }
       })();
@@ -1044,7 +1045,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             const d = new Date();
             d.setDate(d.getDate()-1);
             while(true){
-              const k = d.toISOString().slice(0,10);
+              const k = d.toLocaleDateString("en-CA");
               if(!hist[k]) break;
               count++;
               d.setDate(d.getDate()-1);
@@ -1186,7 +1187,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[yd.toISOString().slice(0,10)]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} happy={celebrating} neglected={(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[yd.toLocaleDateString("en-CA")]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -1545,7 +1546,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   const countsKey = "sq_mq_counts";
                   const storedDate = localStorage.getItem(dateKey);
                   const counts = storedDate === today ? JSON.parse(localStorage.getItem(countsKey)||"{}") : {};
-                  if((counts[m]||0) >= 1) return;
+                  if((counts[m]||0) >= 1){
+                    const prev = shownMoodMsg.current[m];
+                    if(prev){ setPetBubble(prev); bubblePauseUntil.current = Date.now() + 45000; }
+                    return;
+                  }
                   const pool = MOOD_QUESTS[m];
                   if(pool?.length) {
                     const last = lastMoodQuestIdx.current[m] ?? -1;
@@ -1553,6 +1558,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
                     lastMoodQuestIdx.current[m] = idx;
                     const msg = pool[idx];
+                    shownMoodMsg.current[m] = msg;
                     setPetBubble(msg);
                     bubblePauseUntil.current = Date.now() + 45000;
                     counts[m] = 1;

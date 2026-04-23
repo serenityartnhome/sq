@@ -46,7 +46,7 @@ function CalendarView({ habits, powerups, todayLive }){
   const rawDow      = new Date(year, month, 1).getDay(); // 0=Sun
   const firstDow    = weekStartsMon ? (rawDow === 0 ? 6 : rawDow - 1) : rawDow;
   const daysInMonth = new Date(year, month+1, 0).getDate();
-  const todayStr    = new Date().toISOString().slice(0,10);
+  const todayStr    = new Date().toLocaleDateString("en-CA");
   const DAY_NAMES   = weekStartsMon ? DAY_NAMES_MON : DAY_NAMES_SUN;
 
   const dateKey = (d) =>
