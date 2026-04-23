@@ -1548,25 +1548,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </>
           )}
 
-          <div style={{display:"flex",gap:8,marginTop:8}}>
-            <button className="btn-primary btn-pink" onClick={saveProgressNow}
-              disabled={saveStatus==="saving"}
-              style={{flex:1,fontSize:16,padding:"12px 16px",
-                      background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
-                      borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
-              <Icon name="sparkle" size={16}/>
-              {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
-              <Icon name="sparkle" size={16}/>
-            </button>
-            <button onClick={goodnightFn} title="End My Adventure Today"
-              disabled={saveStatus==="saving"}
-              style={{padding:"12px 14px",background:"rgba(60,30,100,.6)",
-                      border:"2px solid rgba(160,100,220,.4)",cursor:"pointer",
-                      fontSize:20,lineHeight:1,boxShadow:"3px 3px 0 rgba(0,0,0,.3)",
-                      flexShrink:0}}>
-              🌙
-            </button>
-          </div>
+          <button className="btn-primary btn-pink" onClick={saveProgressNow}
+            disabled={saveStatus==="saving"}
+            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
+                    background: saveStatus==="saved" ? "#27ae60" : saveStatus==="error" ? "#c0392b" : undefined,
+                    borderColor: saveStatus==="saved" ? "#1e8449" : saveStatus==="error" ? "#922b21" : undefined}}>
+            <Icon name="sparkle" size={16}/>
+            {saveStatus==="saving" ? "Saving…" : saveStatus==="saved" ? "✓ Progress Saved" : saveStatus==="error" ? "✗ Save Failed" : "Save My Progress"}
+            <Icon name="sparkle" size={16}/>
+          </button>
+          <button className="btn-primary" onClick={goodnightFn}
+            disabled={saveStatus==="saving"}
+            style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
+                    background:"rgba(40,15,80,.85)",borderColor:"rgba(140,80,210,.5)",
+                    color:"#c9a3e8",display:"flex",alignItems:"center",
+                    justifyContent:"center",gap:8}}>
+            🌙 End My Adventure Today
+          </button>
 
         </div>
 
