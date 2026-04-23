@@ -1650,26 +1650,27 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   const countsKey = "sq_mq_counts";
                   const storedDate = localStorage.getItem(dateKey);
                   const counts = storedDate === today ? JSON.parse(localStorage.getItem(countsKey)||"{}") : {};
+                  const pool = MOOD_QUESTS[m];
+                  if(!pool?.length) return;
                   if((counts[m]||0) >= 1){
                     const prev = shownMoodMsg.current[m];
-                    if(prev){ setPetBubble(prev); bubblePauseUntil.current = Date.now() + 45000; }
-                    return;
-                  }
-                  const pool = MOOD_QUESTS[m];
-                  if(pool?.length) {
-                    const last = lastMoodQuestIdx.current[m] ?? -1;
-                    let idx;
-                    do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
-                    lastMoodQuestIdx.current[m] = idx;
-                    const msg = pool[idx];
+                    const msg = prev || pool[Math.floor(Math.random()*pool.length)];
                     shownMoodMsg.current[m] = msg;
                     setPetBubble(msg);
-                    bubblePauseUntil.current = Date.now() + 45000;
-                    counts[m] = 1;
-                    localStorage.setItem(dateKey, today);
-                    localStorage.setItem(countsKey, JSON.stringify(counts));
-                  } else {
+                    bubblePauseUntil.current = Date.now() + 20000;
+                    return;
                   }
+                  const last = lastMoodQuestIdx.current[m] ?? -1;
+                  let idx;
+                  do { idx = Math.floor(Math.random() * pool.length); } while(pool.length > 1 && idx === last);
+                  lastMoodQuestIdx.current[m] = idx;
+                  const msg = pool[idx];
+                  shownMoodMsg.current[m] = msg;
+                  setPetBubble(msg);
+                  bubblePauseUntil.current = Date.now() + 20000;
+                  counts[m] = 1;
+                  localStorage.setItem(dateKey, today);
+                  localStorage.setItem(countsKey, JSON.stringify(counts));
                 }}/>
               </div>
 
