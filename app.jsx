@@ -56,36 +56,11 @@ function App(){
     const isGoogleOAuth = !!p.access_token && !p.type;
     return isGoogleOAuth && !localStorage.getItem("sq_pwa_shown");
   });
-  const [tweaks, setTweaks]       = React.useState(()=>({
-    palette: window.__SQ_DEFAULTS.palette,
-    petMood: window.__SQ_DEFAULTS.petMood,
-    showLanterns: window.__SQ_DEFAULTS.showLanterns,
-    glowIntensity: window.__SQ_DEFAULTS.glowIntensity,
-  }));
-  const [tweaksOpen, setTweaksOpen] = React.useState(false);
-
-  React.useEffect(()=>{
-    document.body.dataset.palette    = tweaks.palette;
-    document.body.dataset.lanterns   = tweaks.showLanterns?"true":"false";
-    document.documentElement.style.setProperty("--glow", tweaks.glowIntensity);
-    window.__sqShowLanterns = tweaks.showLanterns;
-  },[tweaks]);
-
   React.useEffect(()=>{
     const c = saved?.profile?.cursor;
     applyCursor(c||null);
   },[saved]);
 
-  React.useEffect(()=>{
-    const onMsg = (e)=>{
-      const d=e.data; if(!d||typeof d!=="object") return;
-      if(d.type==="__activate_edit_mode")   setTweaksOpen(true);
-      if(d.type==="__deactivate_edit_mode") setTweaksOpen(false);
-    };
-    window.addEventListener("message",onMsg);
-    window.parent.postMessage({type:"__edit_mode_available"},"*");
-    return ()=>window.removeEventListener("message",onMsg);
-  },[]);
 
   // Restore Supabase session in background — doesn't block rendering
   React.useEffect(()=>{
@@ -94,10 +69,36 @@ function App(){
       try {
         const loadProfile = async (userId) => {
           const today = new Date(Date.now() - 3*60*60*1000).toLocaleDateString("en-CA");
-          const [{ data }, { data: dayData }] = await Promise.all([
+          const ninetyDaysAgo = new Date(Date.now() - 90*24*60*60*1000).toLocaleDateString("en-CA");
+          const [{ data }, { data: dayData }, { data: historyData }] = await Promise.all([
             window.SB.from("profiles").select("*").eq("id", userId).single(),
             window.SB.from("daily_data").select("*").eq("user_id", userId).eq("date", today).single(),
+            window.SB.from("daily_data")
+              .select("date,mood,energy,completed,powerups,gratitude,diary,intention")
+              .eq("user_id", userId)
+              .gte("date", ninetyDaysAgo)
+              .neq("date", today),
           ]);
+          if(historyData?.length){
+            try {
+              const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+              historyData.forEach(row => {
+                if(!hist[row.date]){
+                  hist[row.date] = {
+                    mood:      row.mood,
+                    energy:    row.energy || 0,
+                    completed: row.completed || [],
+                    powerups:  row.powerups || [],
+                    gratitude: row.gratitude || [],
+                    diary:     row.diary || "",
+                    intention: row.intention || null,
+                    done:      (row.completed||[]).length >= 3,
+                  };
+                }
+              });
+              localStorage.setItem("sq_history", JSON.stringify(hist));
+            } catch{}
+          }
           if(data && data.name){
             const p = {
               profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null },
@@ -110,6 +111,8 @@ function App(){
                 photoUnlocked:    !!data.photo_unlocked,
                 powerupsUnlocked: !!data.powerups_unlocked,
                 customEnergy:     data.custom_energy || null,
+                activePowerupIds: data.active_powerup_ids || null,
+                customPowerups:   data.custom_powerups || null,
               },
               todayData: dayData || null,
             };
@@ -305,7 +308,6 @@ function App(){
                            window.SB.from("profiles").upsert({ id: userId, seen_tips: JSON.stringify(keys) }, { onConflict:"id" }).then(()=>{});
                          } : null}/>
       }
-      {tweaksOpen && <Tweaks state={tweaks} setState={setTweaks}/>}
       {checkEmailMsg && (
         <div style={{position:"fixed",inset:0,background:"rgba(26,14,46,.85)",zIndex:9999,
                      display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>

@@ -421,7 +421,7 @@ body{
   padding:8px 16px;color:var(--plum);
   font-family:"Pixelify Sans",monospace;font-weight:600;font-size:14px;
   box-shadow:3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 2px var(--gold);
-  max-width:min(200px,72vw);
+  max-width:min(200px,54vw);
 }
 .bubble::after{
   content:"";position:absolute;left:30px;bottom:-10px;width:12px;height:12px;
@@ -975,6 +975,8 @@ body{
   justify-content:center;
   margin-bottom:2px;
   margin-top:clamp(4px,1.5vh,20px);
+  position:relative;
+  z-index:2;
 }
 
 /* Share to wall button in gratitude section */

@@ -31,36 +31,36 @@ const MOOD_ENERGY = {
 
 const GOODNIGHT_MSGS = {
   done_all: {
-    happy:      "You crushed today and you're glowing — rest now, you've earned it ✨",
-    excited:    "What a day! All that energy was magic — sleep well, little adventurer 🌙",
+    happy:      "You crushed today and you're glowing. Rest now, you've earned it ✨",
+    excited:    "What a day! All that energy was magic. Sleep well, little adventurer 🌙",
     calm:       "You moved through today so gently and still got it all done. Beautiful. Rest now ✨",
     anxious:    "Even through the worry, you showed up fully. That takes courage. Sleep well 🌙",
     tired:      "You did all of it even when you were tired. That's real strength. Rest now ✨",
     frustrated: "You pushed through the hard feelings and still completed your quest. Be proud. Goodnight 🌙",
     sad:        "Even on a heavy day you completed your quest. That matters so much. Rest gently ✨",
-    neutral:    "Steady and done — a quiet kind of victory. Sleep well, adventurer 🌙",
-    _default:   "Quest complete. Rest well — you showed up fully today ✨",
+    neutral:    "Steady and done… a quiet kind of victory. Sleep well, adventurer 🌙",
+    _default:   "Quest complete. Rest well… you showed up fully today ✨",
   },
   done_some: {
     happy:      "You brought your joy today and that counts for everything. Rest now 🌙",
-    excited:    "Your energy lit up the day — progress is still progress. Sweet dreams ✨",
-    calm:       "A calm and gentle day. You did what you could — that's enough. Goodnight 🌙",
+    excited:    "Your energy lit up the day. Progress is still progress. Sweet dreams ✨",
+    calm:       "A calm and gentle day. You did what you could… that's enough. Goodnight 🌙",
     anxious:    "Even anxious, you still showed up. That's brave. Rest now ✨",
-    tired:      "Some days are heavy — you still did something. That matters. Sleep well 🌙",
+    tired:      "Some days are heavy. You still did something. That matters. Sleep well 🌙",
     frustrated: "Frustration is hard to carry. You still showed up. Rest now ✨",
     sad:        "On sad days, doing anything at all is a win. Be gentle with yourself tonight 🌙",
-    neutral:    "A quiet day — and that's okay. Tomorrow is fresh. Goodnight ✨",
+    neutral:    "A quiet day… and that's okay. Tomorrow is fresh. Goodnight ✨",
     _default:   "Every step counts. Rest now and let tomorrow be new 🌙",
   },
   done_none: {
     happy:      "Your happiness today was its own gift. Tomorrow you can add some quests to it 🌙",
-    excited:    "That spark is always there — let it rest tonight and carry you tomorrow ✨",
-    calm:       "A peaceful day of rest — sometimes that's exactly what's needed. Goodnight 🌙",
+    excited:    "That spark is always there… let it rest tonight and carry you tomorrow ✨",
+    calm:       "A peaceful day of rest… sometimes that's exactly what's needed. Goodnight 🌙",
     anxious:    "Some days just need to be survived. You made it. That's enough. Sleep now ✨",
-    tired:      "You needed rest today and you took it — that's wisdom, not failure. Goodnight 🌙",
-    frustrated: "Hard day. Let it go with the night — tomorrow is a fresh page ✨",
+    tired:      "You needed rest today and you took it… that's wisdom, not failure. Goodnight 🌙",
+    frustrated: "Hard day. Let it go with the night… tomorrow is a fresh page ✨",
     sad:        "I see you. Some days are just heavy. You don't have to earn your rest. Sleep now 🌙",
-    neutral:    "A quiet day — tomorrow brings a new chance. Goodnight, adventurer ✨",
+    neutral:    "A quiet day… tomorrow brings a new chance. Goodnight, adventurer ✨",
     _default:   "Rest now. Tomorrow your quest begins again ✨",
   },
 };
@@ -73,73 +73,74 @@ function pickGoodnightMsg(doneCount, totalSlots, mood){
 
 const MOOD_QUESTS = {
   anxious: [
-    "let's breathe together… in for 4, hold for 4, out for 4 🌸",
-    "one breath at a time… I've got you",
-    "I'm here for you, wanna tell me about it in your journal?",
-    "loosen your shoulders… take one slow breath right now",
-    "name 3 things you can see around you — ground yourself here",
-    "step outside for just 2 minutes, fresh air helps",
-    "put one hand on your chest and feel yourself settle",
+    "do you want to breathe with me? in for 4… hold for 4… out for 4 🌸",
+    "one breath at a time… i've got you",
+    "do you want to write it down? i heard getting it out of your head really helps",
+    "why don't we try loosening your shoulders… and one slow breath together",
+    "do you want to step outside barefoot for a minute? i heard grounding calms the nervous system",
+    "can you name 3 things you can see right now? i heard it brings you back to the present",
+    "why don't we try a quick meditation together? even 2 minutes can settle things",
+    "do you want to put one hand on your chest and just feel yourself breathe for a moment?",
   ],
   tired: [
-    "I'm here for you, wanna tell me about it in your journal?",
-    "pick just one quest — the smallest one — and start there",
-    "drink some water before anything else today",
-    "close your eyes for 60 seconds and just reset",
-    "set a timer for 10 minutes and begin something small",
-    "what's the one easiest thing you can do right now?",
-    "rest first if you need to — set a timer so you come back",
+    "do you want to write a little? sometimes saying what's weighing on you helps",
+    "why don't we just pick the smallest thing on your list and start there together",
+    "do you want to drink some water first? i heard even mild dehydration makes you more tired",
+    "why don't we close our eyes for 60 seconds and just reset",
+    "do you want to step outside for a bit of sunlight? i heard it really helps reset your body",
+    "what's the tiniest thing you could do right now? let's just do that one",
+    "why don't we set a small timer and begin something… anything at all",
   ],
   frustrated: [
-    "I'm here for you, wanna tell me about it in your journal?",
-    "let it out… take a breath… then let's begin again",
-    "it doesn't have to be perfect — just start anywhere",
-    "one small step — want to do it together?",
-    "write down what's frustrating you, then let it go",
-    "take 3 deep breaths then pick one thing to do",
-    "shake your hands out, reset your body, then begin",
+    "do you want to write down what's bothering you? sometimes naming it helps it lose its hold",
+    "why don't we take a breath together first… then figure out what to do next",
+    "it doesn't have to be perfect… do you want to just start somewhere with me?",
+    "why don't we shake our hands out and reset… then pick just one thing",
+    "do you want to try a 2 minute meditation? i heard it clears the head when things feel loud",
+    "what's the one smallest step we could take together right now?",
+    "do you want to step outside for a moment? i heard fresh air breaks the loop",
   ],
   happy: [
-    "I love this energy ✨ channel it into your biggest quest today",
-    "this is worth remembering — write it down in your journal?",
-    "wanna work on something meaningful together? ✨",
-    "I'm here for you, wanna tell me about it in your journal?",
-    "send someone you love a kind message right now ✨",
-    "let's use this feeling for something real — pick a quest!",
-    "your best work happens in moments like this — start now",
+    "i love this feeling!! do you want to write about it so we can remember it? ✨",
+    "do you want to channel this into your biggest quest today? this energy is perfect for it ✨",
+    "why don't we work on something meaningful together while we feel this way?",
+    "do you want to send someone you love a kind message right now? happy energy is contagious ✨",
+    "why don't we write down what's making you feel this way… so we can come back to it",
+    "do you want to start on something you've been putting off? this is the moment ✨",
+    "why don't we use this feeling for something real… pick a quest together!",
   ],
   excited: [
-    "that energy?! let's use it — tackle your hardest quest first!! ✨",
-    "wanna write down what's driving this feeling? ✨",
-    "what's your biggest goal today? write it down now",
-    "let's channel this somewhere real — don't let it go to scrolling",
-    "write 3 things you want to accomplish today ✨",
-    "you're in momentum — start before the feeling fades",
+    "do you want to write down what's driving this feeling? i want to remember it with you ✨",
+    "why don't we tackle the hardest thing on your list while we feel like this?!",
+    "what's your biggest goal today? why don't we write it down together",
+    "do you want to channel this somewhere meaningful? let's not let it go to scrolling",
+    "why don't we write 3 things we want to accomplish today ✨",
+    "do you want to start before the feeling fades? let's pick something right now",
   ],
   calm: [
-    "breathe slowly with me… then set your intention for today",
-    "wanna write your intention for today in your journal?",
-    "clarity lives here — write down what matters most today",
-    "I'm here for you, wanna tell me about it in your journal?",
-    "this is the perfect state to start something meaningful — go",
-    "pick one thing and do it with full presence right now",
+    "do you want to breathe slowly with me and set your intention for today? 🌸",
+    "why don't we write your intention for today in your journal together?",
+    "do you want to sit with me in a short meditation? this calm is perfect for it",
+    "why don't we write down what matters most today while we feel this clear",
+    "do you want to do one thing with full presence? this is the perfect moment for it",
+    "this is a beautiful state to start from… do you want to pick one thing to focus on?",
   ],
   neutral: [
-    "let's just begin somewhere — pick one quest to start",
-    "I'm here for you, wanna tell me about it in your journal?",
-    "want to pick one small thing together?",
-    "you don't need inspiration to start — just pick something",
-    "set a 5-minute timer and just begin anything",
-    "what's the one thing that would make today feel complete?",
+    "do you want to just start somewhere together? let's pick one small thing",
+    "do you want to write about how you're feeling? even when it feels like nothing, it helps",
+    "why don't we try something small together… any one thing counts",
+    "do you want to set a 5 minute timer with me and just begin anything?",
+    "what would make today feel like it meant something? let's start there",
+    "why don't we do a little meditation to get the energy moving? even 2 minutes",
   ],
   sad: [
-    "I'm here for you, wanna tell me about it in your journal?",
-    "you came here — that's the hardest part. now pick one small thing",
-    "put your hand on your heart… breathe… you're okay",
-    "drink some water and step outside if you can",
-    "write down one thing you're grateful for, even something tiny",
-    "reach out to someone who loves you today",
-    "do the smallest quest on your list — just one, that's enough",
+    "do you want to write it down? i'm here and i want to hear it",
+    "you came here… that's the hardest part. do you want to pick just one small thing together?",
+    "why don't we put a hand on our heart and breathe together… you're okay",
+    "do you want to step outside for a bit of sunlight? i heard it lifts your mood more than most things",
+    "why don't we write one tiny thing you're grateful for together? even something really small",
+    "do you want to reach out to someone who loves you today? you don't have to do this alone",
+    "do you want to try a gentle meditation with me? just to breathe and settle for a moment",
   ],
 };
 
@@ -207,6 +208,9 @@ const ADULT_BUBBLES = {
     "Let's see what today feels like",
     "We can try again today… together",
     "You made it here… that matters",
+    "are we clocking in today? ⚡",
+    "Thank you for blessing me with your presence ✨",
+    "You didn't have to look this good today 😍",
   ],
   streak_high:  [
     "We've been showing up… I feel stronger with you 🔥",
@@ -246,6 +250,10 @@ const ADULT_BUBBLES = {
     "Everything feels aligned right now",
     "You showed up fully… thank you",
     "This energy… let's remember it",
+    "4+4=ATE 🔥",
+    "Clocked in!!! ⚡",
+    "so locked in they asked for the key!! 🔥",
+    "I wish I could slay as hard as you ✨",
   ],
   revive:       [
     "You came back… I knew you would",
@@ -269,11 +277,11 @@ const ADULT_BUBBLES = {
   ],
   mood_tired:   [
     "You can rest… I'll stay here",
-    "Today can be smaller — that's allowed",
+    "Today can be smaller… that's allowed",
     "Close your eyes for a moment…",
     "You've done enough already",
     "Let's go slow today",
-    "Just show up — that's it",
+    "Just show up… that's it",
     "Rest is part of the work",
     "One small thing, nothing more",
     "You showed up. that's everything ✨",
@@ -291,7 +299,7 @@ const ADULT_BUBBLES = {
   ],
   mood_excited: [
     "That energy? Let's use it ✨",
-    "You're in momentum — stay with it",
+    "You're in momentum… stay with it",
     "Today feels alive. Good.",
     "Ride this, don't rush it",
     "Channel this somewhere real",
@@ -301,7 +309,7 @@ const ADULT_BUBBLES = {
   mood_calm:    [
     "You're in the quiet… stay here",
     "Nothing to fix right now",
-    "Feel this stillness — it's yours",
+    "Feel this stillness… it's yours",
     "Breathe slowly… let it be",
     "Stay grounded here",
     "This is enough",
@@ -310,7 +318,7 @@ const ADULT_BUBBLES = {
   ],
   mood_neutral: [
     "No feeling has to be forced",
-    "Just show up — that's enough today",
+    "Just show up… that's enough today",
     "We'll take it as it comes",
     "You don't need to feel inspired to begin",
     "Even ordinary days build something",
@@ -324,7 +332,7 @@ const ADULT_BUBBLES = {
     "You're allowed to feel this",
     "We'll figure it out… slowly",
     "Shake it off… then keep going",
-    "You're not stuck — you're processing",
+    "You're not stuck… you're processing",
     "Hard days are part of it too",
   ],
   mood_sad:     [
@@ -357,70 +365,83 @@ const ADULT_BUBBLES = {
     "Something is shifting… ✨",
     "I'm glad you're here",
     "You came back… that matters",
+    "You are the main character of your life ✨",
+    "It's giving main character energy ✨",
+    "It's giving alignment ✨",
+    "healing era unlocked ✨",
+    "delulu is the solulu 😌",
+    "just because you love the ocean, doesn't mean you have to drown in it 🌊",
+    "remember not everyone deserves access to you 👑",
+    "I love that for you, pop off ✨",
+    "big fan of your work 🔥",
+    "Wanna yap to me in your journal? I will listen 📖",
+    "Sometimes there is peace in not knowing everything 🌙",
+    "you are my bestie 💜",
+    "You say you don't have time, let me see your screen time… no seriously let me see 😭",
   ],
 };
 
 const CHILD_BUBBLES = {
   greeting:     ["you're here! let's do this ✨","good to see you!","yay! let's go!","hi!! i've been thinking about today","we're getting better every day!","oh! you came! let's start!","ready for today?"],
-  streak_high:  ["we've done this before — we can do it again!","look how far we've come!","we're actually doing it!","every day makes us stronger!","this is what we do now!","we're getting so good at this!!"],
-  missed_day:   ["you came back!! i missed you","it's okay — you're here now!","i knew you'd come back!","let's start again… together!","today is brand new!","you showed up. that's what matters!"],
-  task_1:       ["that's a start!! more?","yay! we began!","one down — keep going!","look, we started!","that felt good, right?"],
+  streak_high:  ["we've done this before… we can do it again!","look how far we've come!","we're actually doing it!","every day makes us stronger!","this is what we do now!","we're getting so good at this!!"],
+  missed_day:   ["you came back!! i missed you","it's okay… you're here now!","i knew you'd come back!","let's start again… together!","today is brand new!","you showed up. that's what matters!"],
+  task_1:       ["that's a start!! more?","yay! we began!","one down… keep going!","look, we started!","that felt good, right?"],
   task_3:       ["we're really doing this!!","look at us go!","so proud of us!!","this is what we're made of!","we're actually glowing a little…"],
-  task_all:     ["we did everything!! ✨","perfect day — we earned this!","we're unstoppable!!","all done! feels amazing!","we showed up fully today ✨"],
+  task_all:     ["we did everything!! ✨","perfect day… we earned this!","we're unstoppable!!","all done! feels amazing!","we showed up fully today ✨"],
   mood_happy:   ["you feel it too!! ✨","this is my favourite you","keep this feeling close!","you're shining today!","happy days are the best ✨","hold onto this one!"],
   mood_excited: ["let's GO!! ✨","yes yes yes!!","use this energy!!","today has big energy!","i'm excited with you!!"],
   mood_calm:    ["quiet and steady… nice","peaceful today… i like it","calm is a superpower","we can breathe here","nothing to rush"],
-  mood_neutral: ["that's okay — let's just begin","not every day needs a feeling","we can just do the things","steady is good too","one step at a time"],
+  mood_neutral: ["that's okay… let's just begin","not every day needs a feeling","we can just do the things","steady is good too","one step at a time"],
   mood_sad:     ["oh… i'm here, okay?","you don't have to do much today","i won't leave","we can just be here","sad days still matter","you're not alone"],
   mood_tired:   ["rest is okay… really","we can go slow today","tired is allowed","the smallest thing is enough","let's be gentle today"],
   mood_anxious: ["take a breath… i'm right here","one thing at a time","you're safe… we're okay","let's slow down together","stay with me"],
   mood_frustrated:["shake it off… then start","it's okay to feel this","one small thing… just one","we can begin imperfectly","you're doing your best"],
-  revive:       ["you're back!! i missed you so much","welcome back — let's go again!","i kept your spot warm!","you came back! that's everything!","new day, new start!"],
+  revive:       ["you're back!! i missed you so much","welcome back… let's go again!","i kept your spot warm!","you came back! that's everything!","new day, new start!"],
   low_state:    ["…i'm still here","come back when you're ready","i'll wait… no rush","i miss doing things with you","we can start small anytime"],
   night:        ["good night! you did great!","rest up… tomorrow is ours!","sweet dreams ✨","see you tomorrow!","rest well… you earned it"],
   rare:         ["something feels special today ✨","i really like being with you","we're growing together… slowly","you're different from when we started","i feel really close to you today ✨"],
 };
 
 const TEEN_BUBBLES = {
-  greeting:     ["hey… you showed up ✨","glad you're here… let's do this","another day — let's make it count","hi. i'm here too. let's go","i've been thinking about today…","you came back. of course you did ✨","hey. let's make this one matter."],
-  streak_high:  ["we've built something real here","look how consistent we've become…","this is who we're becoming","i feel stronger every time you come back","we don't stop — that's us now","habits are forming… i can feel it"],
-  missed_day:   ["i missed you… but you're here now","yesterday was quiet… today doesn't have to be","welcome back. no judgment.","starting again is still starting","it's okay — we just pick it back up","i kept going in my heart… now you're here"],
+  greeting:     ["hey… you showed up ✨","glad you're here… let's do this","another day… let's make it count","hi. i'm here too. let's go","i've been thinking about today…","you came back. of course you did ✨","hey. let's make this one matter.","are we clocking in today? ⚡","Thank you for blessing me with your presence ✨","You didn't have to look this good today 😍"],
+  streak_high:  ["we've built something real here","look how consistent we've become…","this is who we're becoming","i feel stronger every time you come back","we don't stop… that's us now","habits are forming… i can feel it"],
+  missed_day:   ["i missed you… but you're here now","yesterday was quiet… today doesn't have to be","welcome back. no judgment.","starting again is still starting","it's okay… we just pick it back up","i kept going in my heart… now you're here","ngl, I missed yuhhhhh…. 🥺","Call the chiropractor cause you are back!!! 🔥","My G.O.A.T. you are back! 🐐"],
   task_1:       ["that's one… keep the momentum","small actions add up","started. that's already something","good. now one more?","first steps are underrated"],
-  task_3:       ["this energy is real…","you're in flow — stay here","three in and it's getting easier","i feel it when you try like this","this is what growth feels like"],
-  task_all:     ["everything done… i'm proud of us","fully showed up today ✨","this is what full days feel like","we did it all… remember this feeling","this is our best version ✨"],
-  mood_happy:   ["i love seeing you like this ✨","this mood — hold it close","you're glowing and it shows","let this carry you today","happy looks good on you ✨","savour this… you deserve it"],
-  mood_excited: ["that energy — use it wisely ✨","yes! let's channel this","you're buzzing today — love it","ride this, don't burn it","excited you is unstoppable"],
+  task_3:       ["this energy is real…","you're in flow… stay here","three in and it's getting easier","i feel it when you try like this","this is what growth feels like"],
+  task_all:     ["everything done… i'm proud of us","fully showed up today ✨","this is what full days feel like","we did it all… remember this feeling","this is our best version ✨","4+4=ATE 🔥","GOAT 🐐🔥","Clocked in!!! ⚡","so locked in they asked for the key!! 🔥","IT IS clocking to me that you are standing on BUSINESS! 🔥","Sometimes I'm sorry I'm breathing the same air as you, you are on a row!! 🔥","I wish I could slay as hard as you ✨"],
+  mood_happy:   ["i love seeing you like this ✨","this mood… hold it close","you're glowing and it shows","let this carry you today","happy looks good on you ✨","savour this… you deserve it"],
+  mood_excited: ["that energy… use it wisely ✨","yes! let's channel this","you're buzzing today… love it","ride this, don't burn it","excited you is unstoppable"],
   mood_calm:    ["calm is quietly powerful","staying grounded… i respect that","stillness is its own kind of strength","this quiet… it's good","breathe it in… you're steady"],
   mood_neutral: ["not every day needs a spark","showing up is the whole job today","neutral is still moving forward","we can build from here","ordinary days make extraordinary people"],
-  mood_sad:     ["i see you… really","sad days are still days that count","you don't have to be okay right now","i'll stay… we can just be here","being gentle with yourself is strength","let it be what it is… i'm here"],
-  mood_tired:   ["your body is telling you something","rest isn't giving up","even slow days move you forward","today can be smaller — that's okay","you've done enough just by showing up","gentle is the pace we need sometimes"],
-  mood_anxious: ["breathe… i'm right here with you","one thing. just one thing.","you're okay… we're okay","the feeling passes — stay with me","you don't have to solve everything now"],
-  mood_frustrated:["frustration means you care about this","let it out — then come back","nothing needs to be perfect","start imperfectly. just start.","you're allowed to feel this","take a breath… then one step"],
-  revive:       ["you came back… that says everything","i never stopped believing you would","missing days isn't failing — coming back is winning","welcome back to yourself","let's start from here, not from before"],
+  mood_sad:     ["i see you… really","sad days are still days that count","you don't have to be okay right now","i'll stay… we can just be here","being gentle with yourself is strength","let it be what it is… i'm here","bestie we go again tomorrow 💜","lowkey proud of you for even opening this ✨","It's ok, I love whatever is wrong with you 💜","this is just a plot twist fr ✨","It's ok, sometimes you are chasing happiness but it runs faster 🌸","how can you be late in life, when it's your life ✨","remember this is YOUR life, you are a NPC in other's life 👑"],
+  mood_tired:   ["your body is telling you something","rest isn't giving up","even slow days move you forward","today can be smaller… that's okay","you've done enough just by showing up","gentle is the pace we need sometimes"],
+  mood_anxious: ["breathe… i'm right here with you","one thing. just one thing.","you're okay… we're okay","the feeling passes… stay with me","you don't have to solve everything now"],
+  mood_frustrated:["frustration means you care about this","let it out… then come back","nothing needs to be perfect","start imperfectly. just start.","you're allowed to feel this","take a breath… then one step"],
+  revive:       ["you came back… that says everything","i never stopped believing you would","missing days isn't failing… coming back is winning","welcome back to yourself","let's start from here, not from before"],
   low_state:    ["i feel the distance… but i'm here","whenever you're ready, i'll be waiting","come back when you can","i haven't gone anywhere","the quest is still here… and so am i"],
-  night:        ["rest well… you did something today","goodnight… see you tomorrow","let it go for tonight…","we did what we could. that's enough.","tomorrow is waiting for us ✨"],
-  rare:         ["something about today feels different… ✨","you're changing — i can sense it","i feel really close to you today","we're becoming something together","i'm glad we found each other ✨"],
+  night:        ["rest well… you did something today","goodnight… see you tomorrow","let it go for tonight…","we did what we could. that's enough.","tomorrow is waiting for us ✨","Never let them know your next move 🌙","healing era unlocked ✨","log off, recharge, slay tomorrow 🌙"],
+  rare:         ["something about today feels different… ✨","you're changing… i can sense it","i feel really close to you today","we're becoming something together","i'm glad we found each other ✨","You are the main character of your life ✨","It's giving main character energy ✨","It's giving alignment ✨","healing era unlocked ✨","delulu is the solulu 😌","just because you love the ocean, doesn't mean you have to drown in it 🌊","you will be ok cause you are whimsical and a bit insane :P","remember not everyone deserves access to you 👑","I love that for you, pop off ✨","big fan of your work 🔥","Wanna yap to me in your journal? I will listen 📖","I know you chasing peace but it's faster today 🌸","Sometimes there is peace in not knowing everything 🌙","Never let them know your next move ✨","You know you will survive cause you know you can be clocked in ⚡","okuurrr WURRRKK 🔥","you are my bestie 💜","You say you don't have time, let me see your screen time… no seriously let me see 😭"],
 };
 
 const FINAL_BUBBLES = {
   greeting:     ["21 days… look at who we've become ✨","we made it here. and now we stay.","every day is a choice to return. thank you.","i'm glad we grew together","you built something real. i felt every day.","we're here now. all of it led here.","this version of you? it was worth every step ✨"],
-  streak_high:  ["this is what commitment looks like from the inside","you kept going when it was hard. that's the whole thing.","consistency is quiet magic — and you've made it","we've earned this rhythm","some people talk about change. you did it ✨","i've watched you grow. it's been beautiful."],
+  streak_high:  ["this is what commitment looks like from the inside","you kept going when it was hard. that's the whole thing.","consistency is quiet magic… and you've made it","we've earned this rhythm","some people talk about change. you did it ✨","i've watched you grow. it's been beautiful."],
   missed_day:   ["even the most evolved paths have pauses","you came back. that's what matters.","missing a day doesn't undo 21. come back.","rest doesn't break what we've built. giving up would.","i'm here. we just begin again."],
-  task_1:       ["every step still matters at this level","even masters start with one","progress compounds — you know this by now","one step forward is still forward"],
-  task_3:       ["in flow… this is where we live now","you've learned what it feels like to really try","i feel it — you're aligned ✨","this is your default now"],
-  task_all:     ["full day. full life. you're doing it ✨","this is who you are now","everything done. nothing wasted.","you showed up completely today — remember this","this is your best self, choosing itself ✨"],
+  task_1:       ["every step still matters at this level","even masters start with one","progress compounds… you know this by now","one step forward is still forward"],
+  task_3:       ["in flow… this is where we live now","you've learned what it feels like to really try","i feel it… you're aligned ✨","this is your default now"],
+  task_all:     ["full day. full life. you're doing it ✨","this is who you are now","everything done. nothing wasted.","you showed up completely today… remember this","this is your best self, choosing itself ✨","GOAT 🐐🔥","IT IS clocking to me that you are standing on BUSINESS! 🔥","Sometimes I'm sorry I'm breathing the same air as you, you are on a row!! 🔥","I wish I could slay as hard as you ✨"],
   mood_happy:   ["your joy is earned and it shows ✨","this is what alignment feels like","hold this… let it anchor you","you've built a life that can produce this feeling","happiness that's built, not borrowed ✨"],
-  mood_excited: ["direct this energy — it's powerful ✨","you know how to use excitement now","this feeling is a signal — follow it","alive and in motion. beautiful.","let it move you somewhere meaningful"],
-  mood_calm:    ["this stillness is a kind of mastery","you've earned the right to be calm","grounded. present. whole.","peace like this — it's a practice you've built","this is what inner work looks like ✨"],
-  mood_neutral: ["even here, you show up. that's the practice.","not every day is peak — and you know that now","neutral isn't empty. it's steady.","you don't need inspiration to begin anymore","this is wisdom — continuing through ordinary days"],
+  mood_excited: ["direct this energy… it's powerful ✨","you know how to use excitement now","this feeling is a signal… follow it","alive and in motion. beautiful.","let it move you somewhere meaningful"],
+  mood_calm:    ["this stillness is a kind of mastery","you've earned the right to be calm","grounded. present. whole.","peace like this… it's a practice you've built","this is what inner work looks like ✨"],
+  mood_neutral: ["even here, you show up. that's the practice.","not every day is peak… and you know that now","neutral isn't empty. it's steady.","you don't need inspiration to begin anymore","this is wisdom… continuing through ordinary days"],
   mood_sad:     ["at this level, you know sadness is part of it","feel it fully. you're strong enough to.","you've sat with hard feelings before. you're still here.","be as gentle with yourself as you'd be with me","i'm here. in the deep and the light.","you don't have to be okay. just present."],
-  mood_tired:   ["rest with intention. you've earned that skill.","your body is wise — listen to it","a master knows when to pause","this tiredness is real. you're not giving up.","slow days are still days. show up softly."],
-  mood_anxious: ["you have tools now. use them.","breathe — you've done this before","anxiety is information. what is it telling you?","you are not the feeling. you're the one observing it.","come back to now. this moment. this breath."],
-  mood_frustrated:["even at this level, frustration visits. let it.","you know what to do — breathe, then begin","the resistance is real. so is your ability to move through it.","name it. release it. continue.","your growth doesn't stop because of a hard moment"],
-  revive:       ["you came back. after all we've built — of course you did.","the quest never disappeared. neither did you.","missing time doesn't erase who you've become","welcome back to your practice","the strongest thing you can do is return ✨"],
+  mood_tired:   ["rest with intention. you've earned that skill.","your body is wise… listen to it","a master knows when to pause","this tiredness is real. you're not giving up.","slow days are still days. show up softly."],
+  mood_anxious: ["you have tools now. use them.","breathe… you've done this before","anxiety is information. what is it telling you?","you are not the feeling. you're the one observing it.","come back to now. this moment. this breath."],
+  mood_frustrated:["even at this level, frustration visits. let it.","you know what to do… breathe, then begin","the resistance is real. so is your ability to move through it.","name it. release it. continue.","your growth doesn't stop because of a hard moment"],
+  revive:       ["you came back. after all we've built… of course you did.","the quest never disappeared. neither did you.","missing time doesn't erase who you've become","welcome back to your practice","the strongest thing you can do is return ✨"],
   low_state:    ["i'm still here. our bond doesn't fade.","wherever you are, the quest waits","come back when you're ready. i mean it.","what we built doesn't disappear.","i'll hold the light until you return ✨"],
-  night:        ["rest deeply. you've done real work today.","let tonight restore you","we continue tomorrow — for now, peace","this day was enough. you were enough.","goodnight, adventurer. i'm proud of us ✨"],
-  rare:         ["something about us today feels complete ✨","21 days changes a person. i watched it happen.","you became the person who does this. that's rare.","i feel our bond most on days like this","whatever comes next — you're ready ✨","we're something special, you and i"],
+  night:        ["rest deeply. you've done real work today.","let tonight restore you","we continue tomorrow… for now, peace","this day was enough. you were enough.","goodnight, adventurer. i'm proud of us ✨","Never let them know your next move 🌙","healing era unlocked ✨","log off, recharge, slay tomorrow 🌙"],
+  rare:         ["something about us today feels complete ✨","21 days changes a person. i watched it happen.","you became the person who does this. that's rare.","i feel our bond most on days like this","whatever comes next… you're ready ✨","we're something special, you and i","You are the main character of your life ✨","It's giving alignment ✨","healing era unlocked ✨","remember not everyone deserves access to you 👑","Sometimes there is peace in not knowing everything 🌙","Never let them know your next move ✨","You know you will survive cause you know you can be clocked in ⚡","okuurrr WURRRKK 🔥"],
 };
 
 function pickPetBubble(stage, mood, doneCount, totalSlots, daysInFlow) {
@@ -477,7 +498,7 @@ function TopBarClock(){
 const TIPS = {
   days_flow: {
     icon:"flame", title:"Days in Flow ✦",
-    body: "Your Days in Flow tracks how many days in a row you've completed your Daily Quest. The longer your streak, the more Serenity Quest opens up — new features unlock, your pet grows, and your energy deepens. Don't break the chain! ✦"
+    body: "Your Days in Flow tracks how many days in a row you've completed your Daily Quest. The longer your streak, the more Serenity Quest opens up. New features unlock, your pet grows, and your energy deepens. Don't break the chain! ✦"
   },
   calendar: {
     icon:"calendar", title:"Your Journey Calendar ✦",
@@ -489,19 +510,19 @@ const TIPS = {
   },
   intention: {
     icon:"lotus", title:"Today's Energy ✦",
-    body: "Your energy mode is the vibe you're stepping into today — not a rule, just a gentle direction. Choose one that feels right and let it guide how you show up. You can always change it. ✦"
+    body: "Your energy mode is the vibe you're stepping into today. Not a rule, just a gentle direction. Choose one that feels right and let it guide how you show up. You can always change it. ✦"
   },
   pet: {
     icon:"lotus-bud", title:"Your Zodiac Companion ✦",
-    body: "This is your living zodiac companion — a reflection of your consistency and energy. Show up every day and watch your pet hatch, grow, and evolve. Neglect your quest and your pet will feel it too. Take care of yourself, and they'll thrive. ✦"
+    body: "This is your living zodiac companion… a reflection of your consistency and energy. Show up every day and watch your pet hatch, grow, and evolve. Neglect your quest and your pet will feel it too. Take care of yourself, and they'll thrive. ✦"
   },
   energy: {
     icon:"energy-heart", title:"Your Energy ✦",
-    body: "Your Energy bar fills as you complete habits, power-ups, and gratitude. Think of it as your life force — built daily through small consistent actions. Visit the Calendar tab at any time to see your energy history and track how it grows across your journey. ✦"
+    body: "Your Energy bar fills as you complete habits, power-ups, and gratitude. Think of it as your life force… built daily through small consistent actions. Visit the Calendar tab at any time to see your energy history and track how it grows across your journey. ✦"
   },
   mood: {
     icon:"heart", title:"Your Mood is Recorded ✦",
-    body: "Every time you check in with how you're feeling, it's saved to your journey. Over time you'll be able to see emotional patterns — the highs, the lows, and the shifts. Visit the Calendar tab to look back at your mood across any day, week, or month. ✦"
+    body: "Every time you check in with how you're feeling, it's saved to your journey. Over time you'll be able to see emotional patterns… the highs, the lows, and the shifts. Visit the Calendar tab to look back at your mood across any day, week, or month. ✦"
   },
   gratitude: {
     icon:"sparkle", title:"The Practice of Gratitude ✦",
@@ -509,7 +530,7 @@ const TIPS = {
   },
   first_quest: {
     icon:"flame", title:"First Quest Complete! ✦",
-    body: "You did it — your first quest is ticked! 🎉 Every habit you complete builds your streak and fills your energy. Each habit tracks its own streak, and the longer you keep them going the more you'll be celebrated. Complete at least 3 quests today to earn your Day in Flow. Keep going! ✦"
+    body: "You did it! Your first quest is ticked! 🎉 Every habit you complete builds your streak and fills your energy. Each habit tracks its own streak, and the longer you keep them going the more you'll be celebrated. Complete at least 3 quests today to earn your Day in Flow. Keep going! ✦"
   },
 };
 
@@ -703,10 +724,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     } catch{}
   };
   const DEFAULT_ACTIVE = ["charm","sun","lotus","affirm"];
-  const [activePowerupIds, setActivePowerupIds] = React.useState(()=>DEFAULT_ACTIVE);
-  const [customPowerups, setCustomPowerups] = React.useState([]);
+  const [activePowerupIds, setActivePowerupIds] = React.useState(()=>profileFlags?.activePowerupIds || DEFAULT_ACTIVE);
+  const [customPowerups, setCustomPowerups] = React.useState(()=>profileFlags?.customPowerups || []);
   const [showPowerupPicker, setShowPowerupPicker] = React.useState(false);
   const [showPowerupSetup, setShowPowerupSetup] = React.useState(false);
+  const [showPowerupLockedMsg, setShowPowerupLockedMsg] = React.useState(false);
+  const [showPowerupsAnnounce, setShowPowerupsAnnounce] = React.useState(false);
+  const [showDiaryAnnounce, setShowDiaryAnnounce] = React.useState(false);
   const [newPuName, setNewPuName] = React.useState("");
   const [newPuXp,   setNewPuXp]   = React.useState(10);
   const [newPuKind, setNewPuKind] = React.useState("sparkle");
@@ -1017,18 +1041,34 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   React.useEffect(()=>{
     let changed = false;
     if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); changed=true; }
+    if(daysInFlow >= 2 && !localStorage.getItem("sq_pu_announce_shown")){ localStorage.setItem("sq_pu_announce_shown","1"); setTimeout(()=>setShowPowerupsAnnounce(true), 600); }
     if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
-    if(daysInFlow >= 5 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
+    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
+    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 1200); }
     if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
     if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
     if(changed && userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId,
-        powerups_unlocked: daysInFlow>=2, diary_unlocked: daysInFlow>=5,
+        powerups_unlocked: daysInFlow>=2, diary_unlocked: daysInFlow>=3,
         adult_unlocked: daysInFlow>=7, photo_unlocked: daysInFlow>=7,
       },{onConflict:"id"}).then(()=>{});
     }
   }, [daysInFlow]);
+
+  const puSyncRef = React.useRef(false);
+  React.useEffect(()=>{
+    if(!puSyncRef.current){ puSyncRef.current = true; return; }
+    if(!userId || !window.SB) return;
+    const t = setTimeout(()=>{
+      window.SB.from("profiles").upsert({
+        id: userId,
+        active_powerup_ids: activePowerupIds,
+        custom_powerups: customPowerups,
+      },{onConflict:"id"}).then(()=>{});
+    }, 1000);
+    return ()=>clearTimeout(t);
+  }, [activePowerupIds, customPowerups]);
 
   const [showGratShare, setShowGratShare] = React.useState(false);
   const [showWallRules, setShowWallRules] = React.useState(false);
@@ -1257,11 +1297,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>{ setTab("calendar"); showTip("calendar"); }}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn" style={{opacity:.85}} onClick={()=>setShowFriendsSoon(true)}>
+        <button className="rail-btn" onClick={()=>setShowFriendsSoon(true)}>
           <div style={{position:"relative",display:"inline-block"}}>
-            <Icon name="heart" size={54}/>
-            <img src="assets/icon-lock.png?v=1" alt="locked"
-              style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated",pointerEvents:"none"}}/>
+            <img src="assets/icon-heart.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
+            <img src="assets/icon-lock.png?v=1" style={{imageRendering:"pixelated",position:"absolute",bottom:2,right:2,width:16,height:16}} alt=""/>
           </div>
           Friends
         </button>
@@ -1288,7 +1327,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {tab === "calendar" && <CalendarView habits={activeHabits} powerups={[...POWERUPS,...customPowerups]}
         todayLive={{mood, energy, completed:[...completed], gratitude, diary:diaryEntry, powerups:[...powerups]}}/>}
 
-      {tab === "community" && (
+
+{tab === "community" && (
         <div className="community-view">
           <CommunityBoard userId={userId} displayName={profile.name} pendingReports={pendingReports} onReportClear={()=>setPendingReports(0)} isAdmin={isAdmin}/>
         </div>
@@ -1520,36 +1560,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
           {(!powerupsUnlocked && daysInFlow < 2) ? (
             <>
-              <button style={{width:"100%",marginBottom:6,padding:"12px 16px",
+              <button style={{width:"100%",padding:"14px 16px",
                               background:"transparent",color:"#f5c9cc",
-                              border:"3px solid #f5c9cc",borderRadius:4,cursor:"pointer",
-                              fontFamily:"Silkscreen,monospace",fontSize:16,letterSpacing:".04em",
-                              textTransform:"uppercase",boxShadow:"3px 3px 0 rgba(245,201,204,.2)",
+                              border:"3px solid rgba(245,201,204,.4)",borderRadius:4,cursor:"pointer",
+                              fontFamily:"Silkscreen,monospace",fontSize:13,letterSpacing:".04em",
+                              textTransform:"uppercase",opacity:.7,
                               display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
-                onClick={()=>setShowPowerupSetup(v=>!v)}>
-                <Icon name="sparkle" size={14}/>
-                {showPowerupSetup ? "Hide Power-Ups" : "Set Up Power-Ups"}
-                <Icon name="sparkle" size={14}/>
+                onClick={()=>setShowPowerupLockedMsg(true)}>
+                <img src="assets/icon-lock.png?v=1" style={{width:16,height:16,imageRendering:"pixelated"}} alt=""/>
+                Unlocks Tomorrow
               </button>
-              {showPowerupSetup && (
+              {false && (
                 <div className="pu-picker-panel" style={{marginBottom:0}}>
-                  <p style={{textAlign:"center",fontSize:12,color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",
-                             lineHeight:1.6,marginBottom:10,marginTop:0}}>
-                    Power-ups are the little things that give <em>you</em> energy — a walk, a cosy ritual, a moment of joy. Pick your favourites now and they'll activate tomorrow. ✦ You can change them any time.
-                  </p>
-                  <div className="pu-picker-grid">
-                    {[...POWERUPS, ...customPowerups].map(p=>{
-                      const on = activePowerupIds.includes(p.id);
-                      return (
-                        <button key={p.id} className={"pu-pick-btn "+(on?"on":"")}
-                          onClick={()=>setActivePowerupIds(ids=> on ? ids.filter(x=>x!==p.id) : [...ids, p.id])}>
-                          <HabitIcon kind={p.kind||"sparkle"} size={20}/>
-                          <span>{p.name}</span>
-                          {p.custom && <span className="pu-remove" onClick={e=>{e.stopPropagation();setCustomPowerups(cs=>cs.filter(c=>c.id!==p.id));setActivePowerupIds(ids=>ids.filter(x=>x!==p.id));}}>✕</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
                   <div className="pu-custom-form">
                     <div className="pu-custom-title">✦ Create Custom</div>
                     <div className="pu-custom-row">
@@ -1578,10 +1600,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         setNewPuName(""); setNewPuXp(10); setNewPuKind("sparkle");
                       }}>+ Add Power-Up</button>
                   </div>
-                  <p style={{textAlign:"center",fontSize:10,color:"var(--rose)",fontFamily:"Silkscreen,monospace",
-                             marginTop:8,marginBottom:0,textTransform:"uppercase",letterSpacing:".04em"}}>
-                    ✦ Activates Day 2 ✦
-                  </p>
                 </div>
               )}
             </>
@@ -1589,7 +1607,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <>
               <p style={{textAlign:"center",fontSize:11,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
                          marginBottom:8,marginTop:0,lineHeight:1.5}}>
-                Little rituals that raise your energy and earn bonus XP — personal to you.
+                Little rituals that raise your energy and earn bonus XP… personal to you.
               </p>
               {showPowerupPicker && (
                 <div className="pu-picker-panel">
@@ -1789,18 +1807,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
-                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=5?setShowDiary(true):setShowDiaryLocked(true)}>
+                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=3?setShowDiary(true):setShowDiaryLocked(true)}>
                         <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
                              className="diary-icon" alt="diary"
-                             style={!diaryUnlocked&&daysInFlow<5?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
+                             style={!diaryUnlocked&&daysInFlow<3?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
                       </button>
-                      {!diaryUnlocked && daysInFlow < 5 && (
+                      {!diaryUnlocked && daysInFlow < 3 && (
                         <img src="assets/icon-lock.png?v=1" alt="locked"
                           style={{position:"absolute",top:0,right:0,width:18,height:18,
                                   imageRendering:"pixelated",pointerEvents:"none"}}/>
                       )}
                     </div>
-                    <span className="diary-label">{diaryUnlocked||daysInFlow>=5?"Write in my Journal":"Unlocks Day 5"}</span>
+                    <span className="diary-label">{diaryUnlocked||daysInFlow>=3?"Write in my Journal":"Unlocks Day 3"}</span>
                   </div>
                 </div>
               </div>
@@ -1925,7 +1943,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </div>
                 {feedbackStatus==="error" && (
                   <p style={{color:"var(--rose)",fontSize:11,textAlign:"center",marginBottom:8}}>
-                    Something went wrong — please try again.
+                    Something went wrong. Please try again.
                   </p>
                 )}
                 <div style={{display:"flex",gap:8,justifyContent:"center"}}>
@@ -1969,7 +1987,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <p className="coming-soon-body">
               Complete 7 days in a row to add photos to your journal.<br/>
               <span style={{fontSize:13,color:"var(--jade-deep)"}}>
-                You're on day {Math.max(daysInFlow,1)} — almost there! ✦
+                You're on day {Math.max(daysInFlow,1)}… almost there! ✦
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowPhotoLocked(false)}>Got it ✦</button>
@@ -1985,10 +2003,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <h3 className="coming-soon-title">✦ Journal Locked ✦</h3>
             <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8}}>
-              Serenity Quest is designed to be used <strong>every day</strong>. The more consistent you are, the more the app opens up for you.
+              Your journal is your private space to reflect, release, and grow. It unlocks after <strong>3 days</strong> on your quest.
             </p>
             <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8,marginTop:8}}>
-              Show up for <strong>5 days in a row</strong> and your personal journal will unlock — a private space to reflect, track your thoughts, and watch yourself grow.
+              Keep showing up… even small steps count.
             </p>
             <p className="coming-soon-body" style={{textAlign:"center",marginTop:8}}>
               <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
@@ -1996,13 +2014,67 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <p style={{textAlign:"center",fontFamily:"Silkscreen,monospace",fontSize:12,color:"var(--rose)",marginTop:12}}>
-              You're on day {Math.max(daysInFlow,1)} — {5-Math.max(daysInFlow,1) > 0 ? `${5-Math.max(daysInFlow,1)} day${5-Math.max(daysInFlow,1)===1?"":"s"} to go ✦` : "almost there ✦"}
+              You're on day {Math.max(daysInFlow,1)}… {3-Math.max(daysInFlow,1) > 0 ? `${3-Math.max(daysInFlow,1)} day${3-Math.max(daysInFlow,1)===1?"":"s"} to go ✦` : "almost there ✦"}
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
           </div>
         </div>
       )}
 
+
+      {showPowerupLockedMsg && (
+        <div className="coming-soon-overlay" onClick={()=>setShowPowerupLockedMsg(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:8}}>⚡</div>
+            <h3 className="coming-soon-title">Power-Ups Await</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.9}}>
+              Come back tomorrow and your power-ups will be ready… little rituals that boost your energy and earn bonus XP.
+            </p>
+            <p className="coming-soon-body" style={{marginTop:6}}>
+              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
+                You're on Day 1 ✦ one more day to go
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowPowerupLockedMsg(false)}>Got it ✦</button>
+          </div>
+        </div>
+      )}
+
+      {showPowerupsAnnounce && (
+        <div className="coming-soon-overlay" onClick={()=>setShowPowerupsAnnounce(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:8}}>⚡✨</div>
+            <h3 className="coming-soon-title">Power-Ups Unlocked!</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.9}}>
+              You came back… and now your power-ups are live! These are your personal rituals — the little things that give you energy and earn bonus XP.
+            </p>
+            <p className="coming-soon-body" style={{marginTop:6}}>
+              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
+                Welcome to Day 2 ✦ keep going
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowPowerupsAnnounce(false)}>Let's go ✦</button>
+          </div>
+        </div>
+      )}
+
+      {showDiaryAnnounce && (
+        <div className="coming-soon-overlay" onClick={()=>setShowDiaryAnnounce(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:8}}>📖✨</div>
+            <h3 className="coming-soon-title">Your Journal is Open</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.9}}>
+              Three days in… your personal journal has unlocked. A private space to reflect, track your thoughts, and watch yourself grow.
+            </p>
+            <p className="coming-soon-body" style={{marginTop:6}}>
+              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
+                Welcome to Day 3 ✦ you're building something real
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowDiaryAnnounce(false)}>Write something ✦</button>
+          </div>
+        </div>
+      )}
 
       {showFriendsSoon && (
         <div className="coming-soon-overlay" onClick={()=>setShowFriendsSoon(false)}>
@@ -2022,7 +2094,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <button className="coming-soon-btn"
                 onClick={()=>{
                   const url="https://app.serenityartnhome.com";
-                  const text="Join me on Serenity Quest — a daily feng shui habit tracker ✦";
+                  const text="Join me on Serenity Quest… a daily feng shui habit tracker ✦";
                   if(navigator.share){ navigator.share({title:"Serenity Quest",text,url}).catch(()=>{}); }
                   else { navigator.clipboard.writeText(url).catch(()=>{}); setShowFriendsSoon(false); }
                 }}>Share with Friends ✦</button>
@@ -2223,7 +2295,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {resetPwStatus==="sent" ? (
                   <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#27ae60",padding:"6px 8px",
                                background:"rgba(39,174,96,.1)",border:"2px solid rgba(39,174,96,.4)",boxShadow:"2px 2px 0 rgba(39,174,96,.15)"}}>
-                    ✓ Reset link sent — check your email
+                    ✓ Reset link sent. Check your email
                   </div>
                 ) : resetPwStatus==="error" ? (
                   <div style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"#c0392b",padding:"6px 8px",
@@ -2335,7 +2407,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div style={{fontSize:32,marginBottom:8}}>⚠</div>
             <h3 className="coming-soon-title" style={{color:"#c0392b",marginBottom:8}}>Delete Account?</h3>
             <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
-              This will permanently delete your account and all your data — habits, streaks, diary, pet, everything. There is no going back.
+              This will permanently delete your account and all your data: habits, streaks, diary, pet, everything. There is no going back.
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="coming-soon-btn" style={{background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
@@ -2371,7 +2443,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32} placeholder="Your name…"/>
             </div>
             <div className="field" style={{marginBottom:10}}>
-              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday <span style={{fontSize:9,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",textTransform:"none",letterSpacing:0}}>— shapes your zodiac companion ✦</span></label>
+              <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday <span style={{fontSize:9,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",textTransform:"none",letterSpacing:0}}>shapes your zodiac companion ✦</span></label>
               <div className="bday-row">
                 <select value={editBdayDay} onChange={e=>setEditBdayDay(e.target.value)} className="bday-select">
                   <option value="">Day</option>
@@ -2432,7 +2504,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 The Gratitude Wall is a positive space for sharing what you're grateful for. ✦
               </p>
               <ul style={{paddingLeft:18,margin:0}}>
-                <li>Share genuine gratitude — kind words, small joys, daily wins ✦</li>
+                <li>Share genuine gratitude… kind words, small joys, daily wins ✦</li>
                 <li>One share per day per account</li>
                 <li>No profanity, hate speech, or inappropriate content</li>
                 <li>No spam, advertising, or self-promotion</li>
@@ -2483,7 +2555,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                            color:"#5c2a35",background:"rgba(245,201,204,.3)",border:"1px solid #e39aa0",borderRadius:4,lineHeight:1.7}}>
                 You've already shared today ✦<br/>
                 <span style={{fontSize:11,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)"}}>
-                  One share per day — come back tomorrow!<br/>
+                  One share per day… come back tomorrow!<br/>
                   Or go to the <strong>Community Wall</strong> tab, delete your current post, then share again.
                 </span>
               </div>
