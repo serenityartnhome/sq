@@ -585,8 +585,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [newHabitName, setNewHabitName] = React.useState("");
   const [newHabitKind, setNewHabitKind] = React.useState("sparkle");
 
-  const [gratitude, setGratitude] = React.useState(["","",""]);
-  const [powerups, setPowerups]   = React.useState(()=>new Set());
+  const [gratitude, setGratitude] = React.useState(()=>{
+    try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return h[today]?.gratitude||["","",""]; } catch{ return ["","",""]; }
+  });
+  const [powerups, setPowerups]   = React.useState(()=>{
+    try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return new Set(h[today]?.powerups||[]); } catch{ return new Set(); }
+  });
   const [energyMode, setEnergyMode] = React.useState(()=>{
     try{ const s=JSON.parse(localStorage.getItem("sq_energy_today")||"{}"); return s.date===today?s.mode:null; }catch{ return null; }
   });
@@ -626,15 +630,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
-  const [mood, setMood] = React.useState(null);
+  const [mood, setMood] = React.useState(()=>{
+    try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return h[today]?.mood||null; } catch{ return null; }
+  });
   const lastMoodQuestIdx = React.useRef({});
   const shownMoodMsg = React.useRef({});
   const [celebrating, setCelebrating] = React.useState(false);
   const celebrateFlashTimer = React.useRef(null);
   const isFlashing = React.useRef(false);
   const [showDiary, setShowDiary] = React.useState(false);
-  const [diaryEntry, setDiaryEntry] = React.useState("");
-  const [diaryPhoto, setDiaryPhoto] = React.useState("");
+  const [diaryEntry, setDiaryEntry] = React.useState(()=>{
+    try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return h[today]?.diary||""; } catch{ return ""; }
+  });
+  const [diaryPhoto, setDiaryPhoto] = React.useState(()=>{
+    try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return h[today]?.photo||""; } catch{ return ""; }
+  });
   const diaryPhotoRef = React.useRef(null);
 
   const handleDiaryPhoto = (e) => {
