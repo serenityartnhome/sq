@@ -1899,14 +1899,13 @@ body{
   font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum);
   text-transform:uppercase;letter-spacing:.04em;text-align:center;line-height:1.4;
 }
-/* Photo preview — top-right, max 40% wide, full height of diary body */
+/* Photo preview — top-right corner, max 40% wide, natural height */
 .diary-photo-preview{
-  position:absolute;top:0;right:0;bottom:0;z-index:5;
-  max-width:40%;display:flex;align-items:stretch;
+  position:absolute;top:8px;right:8px;z-index:5;
+  max-width:40%;
 }
 .diary-photo-img{
-  display:block;width:100%;max-width:100%;height:auto;max-height:100%;
-  object-fit:contain;
+  display:block;width:100%;height:auto;
   box-shadow:2px 2px 0 rgba(92,42,53,.2);
 }
 .diary-photo-remove{
