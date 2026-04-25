@@ -74,6 +74,40 @@ const GOODNIGHT_MSGS = {
   },
 };
 
+const DAILY_GREETINGS = {
+  missed: [
+    "Welcome back. Every day you return is a choice — and you chose right ✨",
+    "You're back. No judgment, just forward. Today is a fresh page 🌙",
+    "Hey, you came back. That's the whole game — showing up again ✨",
+    "The door was always open. Glad you walked back through it 🌱",
+  ],
+  day1: [
+    "Day one. The hardest step is always the first — and you already took it ✨",
+    "A fresh beginning. Every journey starts exactly like this. One day at a time 🌱",
+    "Today is day one of something real. Let's make it count 🌙",
+  ],
+  building: [
+    "You're building something real here. Keep going ✨",
+    "Every day you show up, the version of you that does this gets stronger 🌙",
+    "You're not just doing quests — you're becoming someone who does this ✨",
+    "Consistency is a superpower. You're growing it daily 🌱",
+  ],
+  streak: [
+    "Look at you. Still here. Still going. That's rare ✨",
+    "Your streak speaks for itself. You've made this a part of who you are 🌙",
+    "This kind of consistency changes a person. You're living proof ✨",
+    "You show up so quietly and so powerfully. Never stop 🌱",
+  ],
+};
+function pickGreeting(daysInFlow){
+  const lastVisit = localStorage.getItem("sq_last_visit");
+  const pool = !lastVisit || daysInFlow===0 ? DAILY_GREETINGS.missed
+    : daysInFlow===1 ? DAILY_GREETINGS.day1
+    : daysInFlow<7  ? DAILY_GREETINGS.building
+    : DAILY_GREETINGS.streak;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 const ZODIAC_GOODNIGHT = {
   rat:     "The Rat sees opportunity where others see none — and today you seized yours. Rest well, clever one 🌙",
   ox:      "The Ox is steady, patient, unstoppable. Today proved it again. You carried the day with quiet power ✨",
@@ -673,6 +707,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [resetPwStatus, setResetPwStatus] = React.useState(null);
+  const [showDailyGreeting, setShowDailyGreeting] = React.useState(()=>localStorage.getItem("sq_greeting_date")!==appDay());
+  const [specialQuestInput, setSpecialQuestInput] = React.useState("");
+  const [specialQuestsToday, setSpecialQuestsToday] = React.useState(()=>{
+    try{
+      const s = JSON.parse(localStorage.getItem("sq_special_today")||"null");
+      return s?.date===appDay() ? s.quests : [];
+    }catch{ return []; }
+  });
+  const addSpecialQuest = (label) => {
+    if(!label.trim()) return;
+    const q = {id:"sq_"+Date.now(), label:label.trim(), kind:"sparkle"};
+    setSpecialQuestsToday(prev=>{
+      const next=[...prev,q];
+      localStorage.setItem("sq_special_today",JSON.stringify({date:appDay(),quests:next}));
+      return next;
+    });
+  };
   const [mood, setMood] = React.useState(()=>{
     try { const h=JSON.parse(localStorage.getItem("sq_history")||"{}"); return h[today]?.mood||null; } catch{ return null; }
   });
@@ -1012,6 +1063,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       ...customHabits.filter(h => activeHabitIds.includes(h.id)),
     ];
     earned += activeOptional.filter(h => completed.has(h.id)).length * 9;
+    earned += specialQuestsToday.filter(q => completed.has(q.id)).length * 9;
     return Math.min(100, Math.round(earned));
   };
 
@@ -1623,6 +1675,20 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           </div>
 
           <div>
+            {/* Special Quests */}
+            {specialQuestsToday.length > 0 && <>
+              <div className="quest-section-label" style={{color:"var(--gold)"}}>★ Special Quests</div>
+              {specialQuestsToday.map(q=>(
+                <label key={q.id} className={"check "+(completed.has(q.id)?"done":"")}>
+                  <input type="checkbox" style={{display:"none"}}
+                    checked={completed.has(q.id)} onChange={()=>toggleHabit(q.id)}/>
+                  <span className="box"/>
+                  <Icon name="sparkle" size={22}/>
+                  <span className="lbl">{q.label}</span>
+                </label>
+              ))}
+            </>}
+
             {/* Main Quests */}
             <div className="quest-section-label">✦ Main Quests</div>
             {activeHabits.filter(h=>isMainQuest(h)).map(h=>(
@@ -1693,6 +1759,37 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     </button>
                   );
                 })}
+              </div>
+              <div className="pu-custom-form" style={{borderTop:"2px solid var(--gold-soft)",paddingTop:10,marginTop:4}}>
+                <div className="pu-custom-title" style={{color:"var(--gold)"}}>★ Add Special Quest (today only)</div>
+                <div className="pu-custom-row">
+                  <input value={specialQuestInput} onChange={e=>setSpecialQuestInput(e.target.value)}
+                    onKeyDown={e=>e.key==="Enter"&&(addSpecialQuest(specialQuestInput),setSpecialQuestInput(""))}
+                    placeholder="One-time quest for today…" maxLength={40}
+                    className="pu-add-input" style={{flex:1}}/>
+                  <button className="pu-add-btn" style={{marginTop:0,marginLeft:6}}
+                    disabled={!specialQuestInput.trim()}
+                    onClick={()=>{addSpecialQuest(specialQuestInput);setSpecialQuestInput("");}}>+ Add</button>
+                </div>
+                {specialQuestsToday.length > 0 && (
+                  <div style={{marginTop:6,display:"flex",flexWrap:"wrap",gap:4}}>
+                    {specialQuestsToday.map(q=>(
+                      <span key={q.id} style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,
+                                               background:"rgba(197,154,85,.15)",color:"var(--plum)",
+                                               border:"1px solid var(--gold-soft)",padding:"2px 8px"}}>
+                        {q.label}
+                        <span style={{marginLeft:4,cursor:"pointer",color:"var(--rose)"}}
+                          onClick={()=>{
+                            setSpecialQuestsToday(prev=>{
+                              const next=prev.filter(x=>x.id!==q.id);
+                              localStorage.setItem("sq_special_today",JSON.stringify({date:appDay(),quests:next}));
+                              return next;
+                            });
+                          }}>✕</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="pu-custom-form">
                 <div className="pu-custom-title">✦ Add Custom Quest</div>
@@ -2016,6 +2113,62 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         )}
       </div>
 
+
+      {showDailyGreeting && (
+        <div style={{position:"fixed",inset:0,background:"rgba(8,4,20,.88)",zIndex:9200,
+                     display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"var(--parchment)",border:"3px solid var(--gold)",
+                       boxShadow:"6px 6px 0 rgba(0,0,0,.5), inset 0 0 0 2px var(--gold-soft)",
+                       maxWidth:320,width:"100%",padding:"24px 20px",display:"flex",
+                       flexDirection:"column",gap:14}}>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"var(--plum)",
+                         textTransform:"uppercase",letterSpacing:".06em",textAlign:"center"}}>
+              {daysInFlow > 0 ? `Day ${daysInFlow} in Flow ✦` : "Welcome Back ✦"}
+            </div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"var(--plum)",
+                         lineHeight:1.7,textAlign:"center"}}>
+              {pickGreeting(daysInFlow)}
+            </div>
+            <div style={{borderTop:"1px solid var(--gold-soft)",paddingTop:12}}>
+              <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)",
+                           textTransform:"uppercase",letterSpacing:".05em",marginBottom:8}}>
+                ★ Special Quest for today?
+              </div>
+              {!localStorage.getItem("sq_special_explained") && (
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)",
+                             lineHeight:1.6,marginBottom:8,
+                             background:"rgba(197,154,85,.1)",padding:"8px 10px",
+                             border:"1px solid var(--gold-soft)"}}>
+                  A one-time mission just for today — a task, an errand, something meaningful. Worth the same XP as a side quest. You can also add one anytime from the quest panel.
+                </div>
+              )}
+              <div style={{display:"flex",gap:6}}>
+                <input value={specialQuestInput} onChange={e=>setSpecialQuestInput(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&specialQuestInput.trim()&&(addSpecialQuest(specialQuestInput),setSpecialQuestInput(""))}
+                  placeholder="e.g. call mum, finish report…"
+                  style={{flex:1,fontFamily:"Pixelify Sans,monospace",fontSize:12,
+                          padding:"6px 8px",border:"2px solid var(--gold-soft)",
+                          background:"var(--cream)",color:"var(--plum)",outline:"none"}}
+                  maxLength={40}/>
+                <button onClick={()=>{if(specialQuestInput.trim()){addSpecialQuest(specialQuestInput);setSpecialQuestInput("");}}}
+                  style={{background:"var(--gold)",border:"none",color:"#fff",
+                          fontFamily:"Silkscreen,monospace",fontSize:10,padding:"6px 10px",
+                          cursor:"pointer",flexShrink:0}}>+</button>
+              </div>
+            </div>
+            <button onClick={()=>{
+              localStorage.setItem("sq_greeting_date",appDay());
+              localStorage.setItem("sq_special_explained","1");
+              setShowDailyGreeting(false);
+            }} style={{width:"100%",background:"var(--plum)",color:"var(--cream)",
+                       border:"none",fontFamily:"Silkscreen,monospace",fontSize:11,
+                       padding:"12px",cursor:"pointer",textTransform:"uppercase",
+                       letterSpacing:".05em",boxShadow:"3px 3px 0 rgba(0,0,0,.3)"}}>
+              Let's Go ✦
+            </button>
+          </div>
+        </div>
+      )}
 
       {showGoodnightPopup && (
         <div style={{position:"fixed",inset:0,background:"rgba(8,4,20,.92)",zIndex:9100,

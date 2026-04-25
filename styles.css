@@ -212,6 +212,11 @@ body{
   color:#3a7a50;
   border:1px solid #5aaa78;
 }
+.quest-type-tag.special{
+  background:rgba(197,154,85,.2);
+  color:var(--gold);
+  border:1px solid var(--gold);
+}
 .quest-section-label{
   font-family:"Silkscreen",monospace;
   font-size:9px;
