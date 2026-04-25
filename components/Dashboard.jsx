@@ -1807,54 +1807,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
         </div>
 
-        {/* BOTTOM LEFT: Emotions + Gratitude / Diary */}
+        {/* BOTTOM LEFT: Emotions + Gratitude */}
         <div className="panel emotions-panel">
-          {showDiary ? (
-            <div className="diary-view">
-              <div className="diary-header">
-                <button className="diary-back-btn" onClick={()=>setShowDiary(false)}>← Back</button>
-                <div style={{flex:1,textAlign:"center",fontFamily:"Silkscreen, monospace",
-                             fontSize:18,color:"var(--plum)",textTransform:"uppercase",
-                             letterSpacing:".05em",display:"flex",alignItems:"center",
-                             justifyContent:"center",gap:8}}>
-                  <Icon name="sparkle" size={16}/>My Diary<Icon name="sparkle" size={16}/>
-                </div>
-              </div>
-              <div className="diary-body">
-                <input type="file" accept="image/*" ref={diaryPhotoRef}
-                  style={{display:"none"}} onChange={handleDiaryPhoto}/>
-                <textarea
-                  className="diary-textarea"
-                  value={diaryEntry}
-                  onChange={e=>setDiaryEntry(e.target.value)}
-                  placeholder="Write your thoughts here… today was…"
-                  style={diaryPhoto ? {paddingRight:"calc(50% + 16px)"} : {}}
-                />
-                {diaryPhoto ? (
-                  <div className="diary-photo-preview">
-                    <img src={diaryPhoto} alt="diary photo" className="diary-photo-img"/>
-                    <button className="diary-photo-remove" title="Remove photo" onClick={()=>setDiaryPhoto("")}>✕</button>
-                  </div>
-                ) : (
-                  <button className="diary-photo-add" title={photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}
-                    onClick={()=>{ if(photoUnlocked||daysInFlow>=7){ diaryPhotoRef.current.click(); } else { setShowPhotoLocked(true); } }}
-                    style={!photoUnlocked&&daysInFlow<7?{opacity:.5,cursor:"default"}:{}}>
-                    <div style={{position:"relative",display:"inline-block"}}>
-                      <img src="assets/icon-camera.png" alt="camera"
-                        style={{width:64,height:64,imageRendering:"pixelated",display:"block"}}
-                        onError={e=>{e.currentTarget.replaceWith(Object.assign(document.createElement("span"),{textContent:"📷",style:"font-size:28px"}));}}/>
-                      {!photoUnlocked && daysInFlow < 7 && (
-                        <img src="assets/icon-lock.png?v=1" alt="locked"
-                          style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated"}}/>
-                      )}
-                    </div>
-                    <span className="diary-photo-lbl">{photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>
+          {(<>
               {/* Top half: How are you feeling */}
               <div className="emotions-half">
                 <div className="div-sparkle emotions-heading" style={{marginTop:0}}>✦ How Are You Feeling Today? ✦</div>
@@ -1996,6 +1951,56 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                       letterSpacing:".05em"}}>
               Not Yet
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Diary modal ── */}
+      {showDiary && (
+        <div className="diary-modal-overlay" onClick={()=>setShowDiary(false)}>
+          <div className="diary-modal-box" onClick={e=>e.stopPropagation()}>
+            <div className="diary-header">
+              <button className="diary-back-btn" onClick={()=>setShowDiary(false)}>← Close</button>
+              <div style={{flex:1,textAlign:"center",fontFamily:"Silkscreen,monospace",
+                           fontSize:16,color:"var(--plum)",textTransform:"uppercase",
+                           letterSpacing:".05em",display:"flex",alignItems:"center",
+                           justifyContent:"center",gap:8}}>
+                <Icon name="sparkle" size={14}/>My Diary<Icon name="sparkle" size={14}/>
+              </div>
+            </div>
+            <div className="diary-body">
+              <input type="file" accept="image/*" ref={diaryPhotoRef}
+                style={{display:"none"}} onChange={handleDiaryPhoto}/>
+              <textarea
+                className="diary-textarea"
+                value={diaryEntry}
+                onChange={e=>setDiaryEntry(e.target.value)}
+                placeholder="Write your thoughts here… today was…"
+                style={diaryPhoto ? {paddingRight:"calc(50% + 16px)"} : {}}
+                autoFocus
+              />
+              {diaryPhoto ? (
+                <div className="diary-photo-preview">
+                  <img src={diaryPhoto} alt="diary photo" className="diary-photo-img"/>
+                  <button className="diary-photo-remove" title="Remove photo" onClick={()=>setDiaryPhoto("")}>✕</button>
+                </div>
+              ) : (
+                <button className="diary-photo-add" title={photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}
+                  onClick={()=>{ if(photoUnlocked||daysInFlow>=7){ diaryPhotoRef.current.click(); } else { setShowPhotoLocked(true); } }}
+                  style={!photoUnlocked&&daysInFlow<7?{opacity:.5,cursor:"default"}:{}}>
+                  <div style={{position:"relative",display:"inline-block"}}>
+                    <img src="assets/icon-camera.png" alt="camera"
+                      style={{width:64,height:64,imageRendering:"pixelated",display:"block"}}
+                      onError={e=>{e.currentTarget.replaceWith(Object.assign(document.createElement("span"),{textContent:"📷",style:"font-size:28px"}));}}/>
+                    {!photoUnlocked && daysInFlow < 7 && (
+                      <img src="assets/icon-lock.png?v=1" alt="locked"
+                        style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated"}}/>
+                    )}
+                  </div>
+                  <span className="diary-photo-lbl">{photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
