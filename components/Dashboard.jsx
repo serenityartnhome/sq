@@ -1508,7 +1508,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="friends"?"active":"")}
           onClick={()=>{ if(isAdmin){ setTab("friends"); } else { setShowFriendsSoon(true); } }}>
           <div style={{position:"relative",display:"inline-block"}}>
-            <img src="assets/icon-heart.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
+            <img src="assets/icon-friends.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
             {!isAdmin && <img src="assets/icon-lock.png?v=1" style={{imageRendering:"pixelated",position:"absolute",bottom:2,right:2,width:16,height:16}} alt=""/>}
           </div>
           Friends

@@ -1,4 +1,4 @@
-const CACHE = "serenity-quest-v202";
+const CACHE = "serenity-quest-v203";
 const ASSETS = [
   "/",
   "/index.html",
@@ -18,6 +18,7 @@ const ASSETS = [
   "/components/Dashboard.jsx",
   "/assets/splash-bg.PNG",
   "/assets/icon-mail.png",
+  "/assets/icon-friends.png",
 ];
 
 self.addEventListener("install", e => {
