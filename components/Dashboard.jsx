@@ -688,6 +688,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showPhotoLocked, setShowPhotoLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
+  const [friendsNotif, setFriendsNotif] = React.useState(0);
+
+  React.useEffect(()=>{
+    if(!userId || !window.SB) return;
+    (async()=>{
+      const [{ data: msgs }, { data: reqs }] = await Promise.all([
+        window.SB.from("messages").select("id").eq("receiver_id",userId).eq("read",false).limit(99),
+        window.SB.from("friends").select("id").eq("addressee_id",userId).eq("status","pending").limit(99),
+      ]);
+      setFriendsNotif((msgs?.length||0) + (reqs?.length||0));
+    })();
+  },[userId]);
+
   const [friendsBonus, setFriendsBonus] = React.useState(()=>{
     const v = parseInt(localStorage.getItem("sq_friends_bonus_"+appDay())||"0",10);
     return isNaN(v)?0:v;
@@ -1505,8 +1518,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>{ setTab("calendar"); showTip("calendar"); }}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className={"rail-btn "+(tab==="friends"?"active":"")} onClick={()=>setTab("friends")}>
-          <img src="assets/icon-heart.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
+        <button className={"rail-btn "+(tab==="friends"?"active":"")} onClick={()=>{ setTab("friends"); setFriendsNotif(0); }}>
+          <div style={{position:"relative",display:"inline-block"}}>
+            <img src="assets/icon-heart.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
+            {friendsNotif > 0 && (
+              <span style={{position:"absolute",bottom:-2,right:-4,background:"#d63060",color:"#fff",
+                            borderRadius:"50%",minWidth:16,height:16,fontSize:9,
+                            fontFamily:"Silkscreen,monospace",
+                            display:"flex",alignItems:"center",justifyContent:"center",
+                            border:"2px solid var(--cream)",lineHeight:1,padding:"0 2px"}}>
+                {friendsNotif > 9 ? "9+" : friendsNotif}
+              </span>
+            )}
+          </div>
           Friends
         </button>
         <button className={"rail-btn "+(tab==="community"?"active":"")} onClick={()=>{ setTab("community"); showTip("community"); }}>

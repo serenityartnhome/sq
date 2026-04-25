@@ -491,7 +491,6 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                   <FriendIcon animal={f?.animal} size={36}/>
                   <div className="friends-inbox-info">
                     <span className="friends-inbox-name">{name}</span>
-                    <span className="friends-inbox-preview">{m.content}</span>
                   </div>
                   <div className="friends-inbox-meta">
                     <span className="friends-inbox-date">{ds}</span>
