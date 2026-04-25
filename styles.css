@@ -1241,23 +1241,6 @@ body{
 }
 
 /* ── Diary modal ── */
-.diary-modal-overlay{
-  position:fixed;inset:0;z-index:800;
-  background:rgba(20,6,12,.7);
-  display:flex;align-items:center;justify-content:center;
-}
-.diary-modal-box{
-  background:var(--parchment);
-  border:3px solid var(--gold);
-  box-shadow:6px 6px 0 rgba(0,0,0,.5), inset 0 0 0 2px var(--gold-soft);
-  display:flex;flex-direction:column;
-  gap:12px;
-  padding:16px;
-  width:min(520px,92vw);
-  height:min(78vh,680px);
-  max-width:92vw;
-  max-height:90vh;
-}
 
 /* Coming Soon */
 .coming-soon-overlay{position:fixed;inset:0;background:rgba(20,6,12,.6);z-index:1000;
