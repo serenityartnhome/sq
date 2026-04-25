@@ -466,15 +466,9 @@ body{
   padding:8px 16px;color:var(--plum);
   font-family:"Pixelify Sans",monospace;font-weight:600;font-size:14px;
   box-shadow:3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 2px var(--gold);
-  max-width:min(200px,50vw);
+  max-width:min(280px,70vw);
   line-height:1.4;
   overflow:visible;
-}
-.bubble-text{
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
 }
 .bubble::after{
   content:"";position:absolute;left:30px;bottom:-10px;width:12px;height:12px;
