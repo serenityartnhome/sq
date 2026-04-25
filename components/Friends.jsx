@@ -113,10 +113,11 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   const [shareMood, setShareMood] = React.useState(profile.share_mood !== false);
   const [shareGrat, setShareGrat] = React.useState(!!profile.share_gratitude);
+  const [localUsername, setLocalUsername] = React.useState(profile.username||"");
 
-  const username = profile.username;
+  const username = localUsername;
 
-  React.useEffect(()=>{ if(userId && window.SB) load(); },[userId]);
+  React.useEffect(()=>{ if(userId && window.SB && localUsername) load(); },[userId, localUsername]);
 
   const load = async () => {
     setLoading(true);
@@ -174,10 +175,13 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     try {
       const { error } = await window.SB.from("profiles").update({username:u}).eq("id",userId);
       if(error){
-        setUsernameError(error.code==="23505" ? "Username taken — try another." : error.message);
+        const msg = error.message||"";
+        setUsernameError(
+          msg.includes("23505")||msg.includes("unique") ? "Username taken — try another." : msg||"Could not save"
+        );
         setSavingUn(false); return;
       }
-      window.location.reload();
+      setLocalUsername(u);
     } catch(e){ setUsernameError(e.message||"Could not save"); }
     setSavingUn(false);
   };
@@ -253,30 +257,44 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     }
   };
 
-  // ── Username setup ──────────────────────────────────────────────────────────
+  // ── Username setup modal ────────────────────────────────────────────────────
   if(!username){
     return (
       <div className="friends-panel">
-        <div className="friends-username-setup">
-          <div style={{marginBottom:16}}>
-            <FriendAvatar animal={animal} stage={petStage} size={72}/>
+        <div className="coming-soon-overlay" onClick={e=>e.stopPropagation()}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
+               style={{maxWidth:320,textAlign:"center"}}>
+            <div style={{marginBottom:12}}>
+              <FriendAvatar animal={animal} stage={petStage} size={64}/>
+            </div>
+            <h3 className="coming-soon-title">✦ Choose a Username ✦</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.8,marginBottom:14}}>
+              Friends will find you by this name.<br/>
+              <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
+                letters · numbers · underscore only
+              </span>
+            </p>
+            <input
+              className="friends-un-input"
+              style={{marginBottom:8}}
+              value={usernameInput}
+              onChange={e=>setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,""))}
+              onKeyDown={e=>e.key==="Enter"&&saveUsername()}
+              placeholder="e.g. moonwalker99"
+              maxLength={20}
+              autoFocus
+            />
+            {usernameError && (
+              <p style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)",
+                         marginBottom:8,textAlign:"center"}}>
+                {usernameError}
+              </p>
+            )}
+            <button className="coming-soon-btn" onClick={saveUsername} disabled={savingUn}
+                    style={{width:"100%"}}>
+              {savingUn ? "Saving…" : "Set Username ✦"}
+            </button>
           </div>
-          <h2 className="friends-setup-title">Choose your username</h2>
-          <p className="friends-setup-body">
-            Friends will add you by this name.<br/>Pick something unique ✨
-          </p>
-          <input
-            className="friends-un-input"
-            value={usernameInput}
-            onChange={e=>setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,""))}
-            onKeyDown={e=>e.key==="Enter"&&saveUsername()}
-            placeholder="e.g. moonwalker99"
-            maxLength={20}
-          />
-          {usernameError && <p className="friends-un-error">{usernameError}</p>}
-          <button className="friends-btn-primary" onClick={saveUsername} disabled={savingUn}>
-            {savingUn ? "Saving…" : "Set Username ✦"}
-          </button>
         </div>
       </div>
     );
