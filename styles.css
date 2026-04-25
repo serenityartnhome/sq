@@ -2175,12 +2175,12 @@ body{
 }
 .friends-send-btn{
   font-family:"Silkscreen",monospace;font-size:8px;
-  color:var(--plum);
-  background:var(--cream);border:2px solid var(--gold);
+  color:var(--cream);
+  background:var(--rose);border:2px solid var(--rose);
   padding:6px 10px;cursor:pointer;white-space:nowrap;
   flex-shrink:0;
 }
-.friends-send-btn:hover{ background:var(--blush-soft); }
+.friends-send-btn:hover{ opacity:.85; }
 
 /* ── Friend request card ─────────────────────────────────────── */
 .friends-request-card{
@@ -2215,12 +2215,12 @@ body{
   margin:10px 14px 4px;
   width:calc(100% - 28px);
   font-family:"Silkscreen",monospace;font-size:10px;
-  color:var(--plum);
-  background:var(--cream);border:2px dashed var(--gold);
+  color:var(--cream);
+  background:var(--rose);border:2px solid var(--rose);
   padding:12px;cursor:pointer;
   text-transform:uppercase;letter-spacing:.06em;
 }
-.friends-add-btn:hover{ background:var(--blush-soft);border-style:solid; }
+.friends-add-btn:hover{ opacity:.85; }
 
 /* ── Add friend / search ─────────────────────────────────────── */
 .friends-add-body{ padding:16px; }
@@ -2239,8 +2239,8 @@ body{
 .friends-search-input:focus{ border-color:var(--plum); }
 .friends-btn-search{
   font-family:"Silkscreen",monospace;font-size:9px;
-  background:var(--plum);color:var(--cream);
-  border:2px solid var(--plum);padding:8px 12px;cursor:pointer;
+  background:var(--rose);color:var(--cream);
+  border:2px solid var(--rose);padding:8px 12px;cursor:pointer;
   text-transform:uppercase;
 }
 .friends-searching{
@@ -2273,8 +2273,8 @@ body{
 }
 .friends-btn-add{
   font-family:"Silkscreen",monospace;font-size:8px;
-  color:var(--cream);background:var(--plum);
-  border:2px solid var(--plum);padding:8px 12px;cursor:pointer;
+  color:var(--cream);background:var(--rose);
+  border:2px solid var(--rose);padding:8px 12px;cursor:pointer;
 }
 
 /* ── Inbox ───────────────────────────────────────────────────── */
@@ -2409,12 +2409,12 @@ body{
 }
 .friends-btn-primary{
   font-family:"Silkscreen",monospace;font-size:10px;
-  color:var(--cream);background:var(--plum);
-  border:2px solid var(--plum);
+  color:var(--cream);background:var(--rose);
+  border:2px solid var(--rose);
   padding:12px 24px;cursor:pointer;
   text-transform:uppercase;letter-spacing:.06em;
 }
-.friends-btn-primary:hover{ background:var(--plum-soft); }
+.friends-btn-primary:hover{ opacity:.85; }
 .friends-btn-primary:disabled{ opacity:.5;cursor:default; }
 .friends-btn-edit{
   font-family:"Silkscreen",monospace;font-size:8px;

@@ -286,7 +286,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     setAddStatus(s=>({...s,[toId]:"sending"}));
     const { error } = await window.SB.from("friends")
       .insert({requester_id:userId, addressee_id:toId, status:"pending"});
-    setAddStatus(s=>({...s,[toId]: error?"error":"sent"}));
+    setAddStatus(s=>({...s,[toId]: error?(error.message||"error"):"sent"}));
   };
 
   const sendMessage = async (preset) => {
@@ -580,11 +580,13 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                     ? <span className="friends-rel-tag">Friends ✦</span>
                     : (sr.rel?.status==="pending" || addStatus[sr.found.id]==="sent")
                       ? <span className="friends-rel-tag">Sent ✦</span>
-                      : <button className="friends-btn-add"
-                                onClick={()=>sendRequest(sr.found.id)}
-                                disabled={addStatus[sr.found.id]==="sending"}>
-                          {addStatus[sr.found.id]==="sending"?"Sending…":"Add ✦"}
-                        </button>
+                      : addStatus[sr.found.id] && addStatus[sr.found.id]!=="sending"
+                        ? <span className="friends-rel-tag" style={{color:"var(--rose)",fontSize:8}}>{addStatus[sr.found.id]}</span>
+                        : <button className="friends-btn-add"
+                                  onClick={()=>sendRequest(sr.found.id)}
+                                  disabled={addStatus[sr.found.id]==="sending"}>
+                            {addStatus[sr.found.id]==="sending"?"Sending…":"Add ✦"}
+                          </button>
                   }
                 </div>
               )}
