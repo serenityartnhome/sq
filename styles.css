@@ -478,12 +478,6 @@ body{
   background:var(--cream);border-right:2px solid var(--plum);border-bottom:2px solid var(--plum);
   transform:rotate(45deg);box-shadow:2px 2px 0 rgba(0,0,0,.1);
 }
-.bubble.bubble-below::after{
-  top:-10px;bottom:auto;
-  border-right:none;border-bottom:none;
-  border-left:2px solid var(--plum);border-top:2px solid var(--plum);
-  box-shadow:-1px -1px 0 rgba(0,0,0,.08);
-}
 
 /* ============================================================
    HERO TITLE (onboarding)
@@ -2031,8 +2025,9 @@ body{
   transform:scale(1.04);
 }
 
-/* Laptop: energy bar moves with pet instead of pinning to column bottom */
+/* Desktop: push pet group down, collapse bottom spacer so energy bar stays with pet */
 @media (min-width:769px){
+  .zodiac-pet-col > div[style*="flex:1"]:first-child{ flex:0 0 clamp(60px,10vh,120px) !important; }
   .zodiac-pet-col > div[style*="flex:1"]:last-of-type{ flex:0 0 0 !important; }
   .pet-energy-bar{ margin-top:10px; }
 }

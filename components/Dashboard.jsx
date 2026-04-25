@@ -1501,6 +1501,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </>
               )}
             </div>
+            <div className="bubble-wrap">
+              <div className="bubble" key={petBubble}>
+                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
+              </div>
+            </div>
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
@@ -1525,11 +1530,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
               <img src="assets/cloud.png" alt="" className="pet-cloud"
                    style={{width:"min(360px,100%)"}} aria-hidden="true"/>
-            </div>
-            <div className="bubble-wrap">
-              <div className="bubble bubble-below" key={petBubble}>
-                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
-              </div>
             </div>
             <div style={{textAlign:"center",fontFamily:"Silkscreen, monospace",
                          color:"#fff",fontSize:14,marginTop:5,textTransform:"uppercase",letterSpacing:".05em",
