@@ -501,7 +501,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   // ── Main list view ──────────────────────────────────────────────────────────
   return (
-    <div className="friends-panel">
+    <div className="friends-panel panel">
       <div className="friends-header">
         <div>
           <div className="friends-title">Friends</div>
