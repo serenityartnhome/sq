@@ -1559,6 +1559,22 @@ body{
 .baby-sprite.baby-happy     { animation: babyHappy    0.7s steps(1) infinite; }
 .baby-sprite.baby-neglected { animation: babyNeglected 1.8s steps(1) infinite; }
 
+/* Child + Teen spritesheet animation (8 cols = moods, 4 rows = frames) */
+@keyframes childFrame { to { background-position-y: calc(var(--cframe) * -4); } }
+@keyframes teenFrame  { to { background-position-y: calc(var(--tframe) * -4); } }
+.child-sprite {
+  display:block;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
+  animation: childFrame 0.8s steps(4) infinite;
+}
+.teen-sprite {
+  display:block;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
+  animation: teenFrame 0.8s steps(4) infinite;
+}
+
 /* ============================================================
    ZODIAC + MOOD PICKER
    ============================================================ */

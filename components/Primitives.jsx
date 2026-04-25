@@ -39,8 +39,48 @@ function BabyPet({ animal, happy, neglected, size=64, className="" }){
   );
 }
 
+const SHEET_MOODS = ["happy","calm","neutral","sad","frustrated","anxious","tired","excited"];
+
+function ChildPet({ animal, mood="neutral", size=64, className="" }){
+  const col = Math.max(0, SHEET_MOODS.indexOf(mood));
+  return (
+    <div className={`child-sprite ${className}`}
+      style={{
+        width: size, height: size,
+        "--cframe": `${size}px`,
+        backgroundImage: `url(assets/zodiac/child-${animal}-sheet.png)`,
+        backgroundSize: `${size * 8}px ${size * 4}px`,
+        backgroundPositionX: `-${col * size}px`,
+        backgroundPositionY: 0,
+        backgroundRepeat: "no-repeat",
+        imageRendering: "pixelated",
+      }}
+    />
+  );
+}
+
+function TeenPet({ animal, mood="neutral", size=64, className="" }){
+  const col = Math.max(0, SHEET_MOODS.indexOf(mood));
+  return (
+    <div className={`teen-sprite ${className}`}
+      style={{
+        width: size, height: size,
+        "--tframe": `${size}px`,
+        backgroundImage: `url(assets/zodiac/teen-${animal}-sheet.png)`,
+        backgroundSize: `${size * 8}px ${size * 4}px`,
+        backgroundPositionX: `-${col * size}px`,
+        backgroundPositionY: 0,
+        backgroundRepeat: "no-repeat",
+        imageRendering: "pixelated",
+      }}
+    />
+  );
+}
+
 window.Icon = Icon;
 window.HabitIcon = HabitIcon;
 window.Sparkle = Sparkle;
 window.Flame = Flame;
 window.BabyPet = BabyPet;
+window.ChildPet = ChildPet;
+window.TeenPet = TeenPet;

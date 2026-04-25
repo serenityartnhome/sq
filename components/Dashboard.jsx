@@ -1512,8 +1512,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div className="pet-on-cloud">
                 {(()=>{
                   const sz = Math.round(Math.min(140, window.innerHeight*0.14));
-                  if((petStage==="adult"||petStage==="child"||petStage==="teen"||petStage==="final") && !isHatching)
-                    return <ZodiacPet animal={animal} mood={isSleeping?"tired":justWokeUp?"happy":(celebrating?"happy":(mood||"neutral"))} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
+                  const petMood = isSleeping?"tired":justWokeUp?"happy":(celebrating?"happy":(mood||"neutral"));
+                  if((petStage==="adult"||petStage==="final") && !isHatching)
+                    return <ZodiacPet animal={animal} mood={petMood} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
+                  if(petStage==="child" && !isHatching)
+                    return <ChildPet animal={animal} mood={petMood} size={sz}/>;
+                  if(petStage==="teen" && !isHatching)
+                    return <TeenPet animal={animal} mood={petMood} size={sz}/>;
                   if(petStage==="baby" && !isHatching)
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
