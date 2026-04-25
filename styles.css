@@ -191,6 +191,14 @@ body{
   display:flex;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;
   font-family:"Silkscreen",monospace;font-size:10px;color:var(--gold);font-weight:700;
 }
+.quest-section-label{
+  font-family:"Silkscreen",monospace;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--plum-soft);
+  margin:6px 0 4px;
+}
 .habit-edit-tile{
   width:100%;background:transparent;border:2px dashed var(--gold-soft);
   color:var(--plum-soft);gap:8px;justify-content:center;cursor:pointer;

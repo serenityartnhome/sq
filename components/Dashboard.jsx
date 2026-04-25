@@ -1592,7 +1592,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           </div>
 
           <div>
-            {activeHabits.map(h=>(
+            {/* Main Quests */}
+            <div className="quest-section-label">✦ Main Quests</div>
+            {activeHabits.filter(h=>h.required!==false).map(h=>(
               <label key={h.id} className={"check "+(completed.has(h.id)?"done":"")}>
                 <input type="checkbox" style={{display:"none"}}
                   checked={completed.has(h.id)} onChange={()=>toggleHabit(h.id)}/>
@@ -1615,6 +1617,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <Icon name="sparkle" size={22}/>
               <span className="lbl">Choose a power-up</span>
             </label>
+
+            {/* Side Quests */}
+            {activeHabits.filter(h=>h.required===false).length > 0 && <>
+              <div className="quest-section-label" style={{marginTop:10}}>✦ Side Quests</div>
+              {activeHabits.filter(h=>h.required===false).map(h=>(
+                <label key={h.id} className={"check "+(completed.has(h.id)?"done":"")}>
+                  <input type="checkbox" style={{display:"none"}}
+                    checked={completed.has(h.id)} onChange={()=>toggleHabit(h.id)}/>
+                  <span className="box"/>
+                  <HabitIcon kind={h.kind} size={22}/>
+                  <span className="lbl">{h.label}</span>
+                  {(()=>{
+                    const base = streaks[h.id]||0;
+                    return base > 0 ? <span className="habit-streak"><Icon name="flame" size={13}/>{base}</span> : null;
+                  })()}
+                </label>
+              ))}
+            </>}
+
             <button className="check habit-edit-tile" onClick={()=>setShowHabitPicker(v=>!v)}>
               <span style={{fontSize:18}}>✎</span>
               <span className="lbl" style={{flex:"unset"}}>Edit Quests</span>
