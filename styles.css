@@ -724,8 +724,8 @@ body{
   animation: cloudDrift 6s ease-in-out infinite;
 }
 @media(min-width:769px){
-  .pet-cloud-stage{ height:clamp(220px,32vh,300px); }
-  .bubble-wrap{ margin-bottom:0; }
+  .pet-cloud-stage{ height:clamp(220px,32vh,300px); margin-top:30px; }
+  .zodiac-pet-col{ padding-bottom:clamp(4px,1vh,12px); }
 }
 @keyframes cloudDrift{
   0%,100%{transform:translateY(0)}
