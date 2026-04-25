@@ -1524,7 +1524,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
                         <BabyPet animal={animal} happy={(celebrating||justWokeUp)&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
-                          size={Math.round(sz*0.3)}
+                          size={Math.round(sz*0.6)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
                     );
