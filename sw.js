@@ -1,4 +1,4 @@
-const CACHE = "serenity-quest-v216";
+const CACHE = "serenity-quest-v217";
 const ASSETS = [
   "/",
   "/index.html",
@@ -20,6 +20,18 @@ const ASSETS = [
   "/assets/icon-mail.png",
   "/assets/icon-friends.png",
   "/assets/icon-share.png",
+  "/assets/icon-account-rat.png",
+  "/assets/icon-account-ox.png",
+  "/assets/icon-account-tiger.png",
+  "/assets/icon-account-rabbit.png",
+  "/assets/icon-account-dragon.png",
+  "/assets/icon-account-snake.png",
+  "/assets/icon-account-horse.png",
+  "/assets/icon-account-goat.png",
+  "/assets/icon-account-monkey.png",
+  "/assets/icon-account-rooster.png",
+  "/assets/icon-account-dog.png",
+  "/assets/icon-account-pig.png",
 ];
 
 self.addEventListener("install", e => {

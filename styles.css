@@ -2124,6 +2124,21 @@ body{
   font-size:9px;color:var(--plum-soft);
   text-align:center;padding:32px;
 }
+.friends-accepted-banner{
+  padding:8px 12px;
+  background:var(--jade);
+  border-bottom:2px solid var(--jade-deep);
+}
+.friends-accepted-row{
+  display:flex;align-items:center;gap:10px;
+  font-family:"Pixelify Sans",sans-serif;font-size:13px;color:var(--cream);
+  padding:4px 0;
+}
+.friends-accepted-row strong{ font-family:"Silkscreen",monospace;font-size:10px; }
+.friends-accepted-dismiss{
+  margin-left:auto;background:none;border:none;color:var(--cream);
+  cursor:pointer;font-size:14px;padding:0 4px;line-height:1;
+}
 .friends-empty{
   padding:24px 16px;text-align:center;
   font-family:"Pixelify Sans",sans-serif;

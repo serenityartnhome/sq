@@ -240,7 +240,8 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
 
 /* ── Main Onboarding ─────────────────────────────────────────── */
 function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
-  const [name, setName] = React.useState("");
+  const [name,     setName]     = React.useState("");
+  const [lastName, setLastName] = React.useState("");
   const [bdayDay, setBdayDay]     = React.useState("");
   const [bdayMonth, setBdayMonth] = React.useState("");
   const [bdayYear, setBdayYear]   = React.useState("");
@@ -302,10 +303,11 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
 
   const selCount    = selected.size;
   const nonNegCount = [...selected].filter(id=>!optionalIds.has(id)).length;
+  const fullName    = [name.trim(), lastName.trim()].filter(Boolean).join(" ");
   const canSubmit   = name.trim().length > 0 && selCount >= 3 && selCount <= 8 && nonNegCount >= 3;
 
   const profileData = () => ({
-    profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor },
+    profile:{ name:fullName, bday, loc:loc.trim(), why:why.trim(), cursor },
     habits: habits.filter(h=>selected.has(h.id)).map(h=>({ ...h, required: !optionalIds.has(h.id) }))
   });
 
@@ -390,9 +392,15 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
             Tell us about yourself to begin your journey
           </div>
 
-          <div className="field">
-            <label><Icon name="name" size={18} style={{marginRight:2}}/> Your Name</label>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Enter your name…" maxLength={32}/>
+          <div style={{display:"flex",gap:10}}>
+            <div className="field" style={{flex:1}}>
+              <label><Icon name="name" size={18}/> First Name</label>
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="First name…" maxLength={24}/>
+            </div>
+            <div className="field" style={{flex:1}}>
+              <label style={{visibility:"hidden"}}>Last</label>
+              <input value={lastName} onChange={e=>setLastName(e.target.value)} placeholder="Last name…" maxLength={24}/>
+            </div>
           </div>
 
           <div className="field">

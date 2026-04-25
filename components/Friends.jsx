@@ -12,6 +12,18 @@ const MOOD_EMOJI = {
   frustrated:"😤", anxious:"😰", tired:"😴", excited:"✨",
 };
 
+const firstName = (name) => (name||"").split(" ")[0] || (name||"");
+
+function FriendIcon({ animal, size=40 }){
+  if(!animal) return <HabitIcon kind="sparkle" size={size}/>;
+  return (
+    <img src={`assets/icon-account-${animal}.png?v=1`}
+         width={size} height={size}
+         style={{imageRendering:"pixelated",flexShrink:0}} alt={animal}
+         onError={e=>{e.currentTarget.onerror=null;e.currentTarget.style.opacity=".3";}}/>
+  );
+}
+
 function FriendAvatar({ animal, stage, size=40 }){
   if(!animal) return <HabitIcon kind="sparkle" size={size}/>;
   const s = stage||"baby";
@@ -81,7 +93,7 @@ function FriendMessageNotif({ userId, onBoost }){
       <FriendAvatar animal={msg.sender.animal} stage={msg.sender.pet_stage} size={56}/>
       {phase === "showing" && (
         <div className="friend-notif-bubble">
-          <div className="friend-notif-name">{msg.sender.name||msg.sender.username||"A friend"}</div>
+          <div className="friend-notif-name">{firstName(msg.sender.name)||msg.sender.username||"A friend"}</div>
           <div className="friend-notif-text">{msg.text}</div>
           <div className="friend-notif-energy">+5 energy ✨</div>
         </div>
@@ -97,8 +109,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [pendingIn,    setPendingIn]    = React.useState([]);
   const [messages,     setMessages]     = React.useState([]);
   const [unread,       setUnread]       = React.useState(0);
-  const [loading,      setLoading]      = React.useState(true);
-  const [loadError,    setLoadError]    = React.useState(false);
+  const [loading,       setLoading]       = React.useState(true);
+  const [loadError,     setLoadError]     = React.useState(false);
+  const [newlyAccepted, setNewlyAccepted] = React.useState([]);
   const [selectedLetter, setSelectedLetter] = React.useState(null);
   const [composeTo,    setComposeTo]    = React.useState(null);
   const [sendAnim,     setSendAnim]     = React.useState(false);
@@ -147,6 +160,23 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
     const accepted = fships.filter(f=>f.status==="accepted");
     const incoming = fships.filter(f=>f.status==="pending" && f.addressee_id===userId);
+
+    // Detect newly accepted requests (requests I sent that got accepted)
+    const knownKey = "sq_friends_known_"+userId;
+    const knownStr = localStorage.getItem(knownKey);
+    const mySentAccepted = accepted.filter(f=>f.requester_id===userId);
+    if(knownStr !== null){
+      let knownIds = []; try{ knownIds=JSON.parse(knownStr); }catch{}
+      const knownSet = new Set(knownIds);
+      const brandNew = mySentAccepted.filter(f=>!knownSet.has(f.addressee_id));
+      if(brandNew.length){
+        const newIds = brandNew.map(f=>f.addressee_id);
+        const { data: newProfs } = await window.SB.from("profiles")
+          .select("id, name, username, animal").in("id", newIds);
+        setNewlyAccepted(newProfs||[]);
+      }
+    }
+    localStorage.setItem(knownKey, JSON.stringify(mySentAccepted.map(f=>f.addressee_id)));
 
     if(accepted.length){
       const ids = accepted.map(f=>f.requester_id===userId ? f.addressee_id : f.requester_id);
@@ -345,8 +375,8 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         </div>
         <div className="friends-compose-body">
           <div className="friends-compose-to">
-            <FriendAvatar animal={composeTo.animal} stage={composeTo.pet_stage} size={48}/>
-            <span className="friends-compose-name">to {composeTo.name||composeTo.username}</span>
+            <FriendIcon animal={composeTo.animal} size={48}/>
+            <span className="friends-compose-name">to {firstName(composeTo.name)||composeTo.username}</span>
           </div>
 
           <div className="friends-send-stage">
@@ -413,14 +443,14 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           <div className="friends-inbox-list">
             {messages.map(m=>{
               const f   = friends.find(fr=>fr.id===m.sender_id);
-              const name = f?.name||f?.username||"Friend";
+              const name = firstName(f?.name)||f?.username||"Friend";
               const d   = new Date(m.created_at);
               const ds  = d.toLocaleDateString("en-AU",{day:"numeric",month:"short"});
               return (
                 <button key={m.id}
                         className={"friends-inbox-row"+(m.read?"":" unread")}
                         onClick={()=>{ setSelectedLetter({...m,_senderName:name}); setView("letter"); }}>
-                  <FriendAvatar animal={f?.animal} stage={f?.pet_stage} size={36}/>
+                  <FriendIcon animal={f?.animal} size={36}/>
                   <div className="friends-inbox-info">
                     <span className="friends-inbox-name">{name}</span>
                     <span className="friends-inbox-preview">{m.content}</span>
@@ -541,9 +571,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
               {sr.notFound && <p className="friends-search-msg">No one found. Check the username.</p>}
               {sr.found && (
                 <div className="friends-result-card">
-                  <FriendAvatar animal={sr.found.animal} stage={sr.found.pet_stage} size={52}/>
+                  <FriendIcon animal={sr.found.animal} size={52}/>
                   <div className="friends-result-info">
-                    <div className="friends-result-name">{sr.found.name||sr.found.username}</div>
+                    <div className="friends-result-name">{firstName(sr.found.name)||sr.found.username}</div>
                     <div className="friends-result-un">@{sr.found.username}</div>
                   </div>
                   {sr.rel?.status==="accepted"
@@ -608,6 +638,19 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         </div>
       )}
 
+      {!loading && newlyAccepted.length > 0 && (
+        <div className="friends-accepted-banner">
+          {newlyAccepted.map(p=>(
+            <div key={p.id} className="friends-accepted-row">
+              <FriendIcon animal={p.animal} size={32}/>
+              <span>✦ <strong>{firstName(p.name)||p.username}</strong> accepted your friend request!</span>
+              <button className="friends-accepted-dismiss"
+                onClick={()=>setNewlyAccepted(a=>a.filter(x=>x.id!==p.id))}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {!loading && <>
         {/* Pending requests */}
         {pendingIn.length > 0 && (
@@ -615,9 +658,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
             <div className="quest-section-label">Friend Requests</div>
             {pendingIn.map(p=>(
               <div key={p.id} className="friends-request-card">
-                <FriendAvatar animal={p.animal} stage={p.pet_stage} size={40}/>
+                <FriendIcon animal={p.animal} size={40}/>
                 <div className="friends-request-info">
-                  <div className="friends-request-name">{p.name||p.username}</div>
+                  <div className="friends-request-name">{firstName(p.name)||p.username}</div>
                   <div className="friends-request-un">@{p.username}</div>
                 </div>
                 <div className="friends-request-btns">
@@ -639,9 +682,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           ) : (
             friends.map(f=>(
               <div key={f.id} className="friends-card">
-                <FriendAvatar animal={f.animal} stage={f.pet_stage} size={48}/>
+                <FriendIcon animal={f.animal} size={48}/>
                 <div className="friends-card-info">
-                  <div className="friends-card-name">{f.name||f.username}</div>
+                  <div className="friends-card-name">{firstName(f.name)||f.username}</div>
                   <div className="friends-card-un">@{f.username}</div>
                   {f.share_mood && f.today_mood && (
                     <div className="friends-card-mood">
