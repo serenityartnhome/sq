@@ -263,41 +263,39 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   // ── Username setup modal ────────────────────────────────────────────────────
   if(!username){
     return (
-      <div className="friends-panel">
-        <div className="coming-soon-overlay" onClick={e=>e.stopPropagation()}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
-               style={{maxWidth:320,textAlign:"center"}}>
-            <div style={{marginBottom:12}}>
-              <FriendAvatar animal={animal} stage={petStage} size={64}/>
-            </div>
-            <h3 className="coming-soon-title">✦ Choose a Username ✦</h3>
-            <p className="coming-soon-body" style={{lineHeight:1.8,marginBottom:14}}>
-              Friends will find you by this name.<br/>
-              <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
-                letters · numbers · underscore only
-              </span>
-            </p>
-            <input
-              className="friends-un-input"
-              style={{marginBottom:8}}
-              value={usernameInput}
-              onChange={e=>setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,""))}
-              onKeyDown={e=>e.key==="Enter"&&saveUsername()}
-              placeholder="e.g. moonwalker99"
-              maxLength={20}
-              autoFocus
-            />
-            {usernameError && (
-              <p style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)",
-                         marginBottom:8,textAlign:"center"}}>
-                {usernameError}
-              </p>
-            )}
-            <button className="coming-soon-btn" onClick={saveUsername} disabled={savingUn}
-                    style={{width:"100%"}}>
-              {savingUn ? "Saving…" : "Set Username ✦"}
-            </button>
+      <div className="coming-soon-overlay" onClick={e=>e.stopPropagation()}>
+        <div className="coming-soon-box" onClick={e=>e.stopPropagation()}
+             style={{maxWidth:320,textAlign:"center"}}>
+          <div style={{marginBottom:12}}>
+            <FriendAvatar animal={animal} stage={petStage} size={64}/>
           </div>
+          <h3 className="coming-soon-title">✦ Choose a Username ✦</h3>
+          <p className="coming-soon-body" style={{lineHeight:1.8,marginBottom:14}}>
+            Friends will find you by this name.<br/>
+            <span style={{fontSize:10,color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace"}}>
+              letters · numbers · underscore only
+            </span>
+          </p>
+          <input
+            className="friends-un-input"
+            style={{marginBottom:8,maxWidth:"100%",boxSizing:"border-box"}}
+            value={usernameInput}
+            onChange={e=>setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,""))}
+            onKeyDown={e=>e.key==="Enter"&&saveUsername()}
+            placeholder="e.g. moonwalker99"
+            maxLength={20}
+            autoFocus
+          />
+          {usernameError && (
+            <p style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)",
+                       marginBottom:8,textAlign:"center"}}>
+              {usernameError}
+            </p>
+          )}
+          <button className="coming-soon-btn" onClick={saveUsername} disabled={savingUn}
+                  style={{width:"100%"}}>
+            {savingUn ? "Saving…" : "Set Username ✦"}
+          </button>
         </div>
       </div>
     );
