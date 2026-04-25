@@ -1516,7 +1516,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   if((petStage==="adult"||petStage==="final") && !isHatching)
                     return <ZodiacPet animal={animal} mood={petMood} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
                   if(petStage==="child" && !isHatching)
-                    return <ChildPet animal={animal} mood={petMood} size={Math.round(sz*0.3)}/>;
+                    return <ChildPet animal={animal} mood={petMood} size={Math.round(sz*0.9)}/>;
                   if(petStage==="teen" && !isHatching)
                     return <TeenPet animal={animal} mood={petMood} size={Math.round(sz*0.75)}/>;
                   if(petStage==="baby" && !isHatching)
