@@ -848,11 +848,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   React.useEffect(()=>{
     if(!profileFlags || syncedFlags.current) return;
     syncedFlags.current = true;
-    if(profileFlags.hatched)          { setHatched(true);          localStorage.setItem("sq_hatched","1"); }
-    if(profileFlags.adultUnlocked)    { setAdultUnlocked(true);    localStorage.setItem("sq_adult","1"); }
-    if(profileFlags.diaryUnlocked)    { setDiaryUnlocked(true);    localStorage.setItem("sq_diary_unlocked","1"); }
-    if(profileFlags.photoUnlocked)    { setPhotoUnlocked(true);    localStorage.setItem("sq_photo_unlocked","1"); }
-    if(profileFlags.powerupsUnlocked) { setPowerupsUnlocked(true); localStorage.setItem("sq_powerups_unlocked","1"); }
+    // Set OR clear each flag to match the loaded profile exactly
+    setHatched(!!profileFlags.hatched);
+    if(profileFlags.hatched) localStorage.setItem("sq_hatched","1"); else localStorage.removeItem("sq_hatched");
+    setAdultUnlocked(!!profileFlags.adultUnlocked);
+    if(profileFlags.adultUnlocked) localStorage.setItem("sq_adult","1"); else localStorage.removeItem("sq_adult");
+    setDiaryUnlocked(!!profileFlags.diaryUnlocked);
+    if(profileFlags.diaryUnlocked) localStorage.setItem("sq_diary_unlocked","1"); else localStorage.removeItem("sq_diary_unlocked");
+    setPhotoUnlocked(!!profileFlags.photoUnlocked);
+    if(profileFlags.photoUnlocked) localStorage.setItem("sq_photo_unlocked","1"); else localStorage.removeItem("sq_photo_unlocked");
+    setPowerupsUnlocked(!!profileFlags.powerupsUnlocked);
+    if(profileFlags.powerupsUnlocked) localStorage.setItem("sq_powerups_unlocked","1"); else localStorage.removeItem("sq_powerups_unlocked");
     if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
   }, [profileFlags]);
 
