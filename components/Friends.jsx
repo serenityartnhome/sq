@@ -113,7 +113,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   const [shareMood, setShareMood] = React.useState(profile.share_mood !== false);
   const [shareGrat, setShareGrat] = React.useState(!!profile.share_gratitude);
-  const [localUsername, setLocalUsername] = React.useState(profile.username||"");
+  const [localUsername, setLocalUsername] = React.useState(
+    profile.username || localStorage.getItem("sq_username") || ""
+  );
 
   const username = localUsername;
 
@@ -182,6 +184,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         setSavingUn(false); return;
       }
       setLocalUsername(u);
+      localStorage.setItem("sq_username", u);
     } catch(e){ setUsernameError(e.message||"Could not save"); }
     setSavingUn(false);
   };
