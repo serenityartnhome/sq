@@ -250,6 +250,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
   const [why, setWhy]   = React.useState("");
   const [habits, setHabits] = React.useState(DEFAULT_HABITS.map(h=>({...h})));
   const [selected, setSelected] = React.useState(new Set());
+  const [optionalIds, setOptionalIds] = React.useState(new Set());
   const [customDraft, setCustomDraft] = React.useState("");
   const [customKind, setCustomKind] = React.useState("sparkle");
   const [showCustomInput, setShowCustomInput] = React.useState(false);
@@ -271,7 +272,20 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
     setEditingIconFor(null);
   };
 
-  const toggleHabit = (id) => setSelected(prev=>{
+  const toggleHabit = (id) => {
+    setSelected(prev=>{
+      const next = new Set(prev);
+      if(next.has(id)){
+        next.delete(id);
+        setOptionalIds(o=>{ const n=new Set(o); n.delete(id); return n; });
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleOptional = (id) => setOptionalIds(prev=>{
     const next = new Set(prev);
     next.has(id) ? next.delete(id) : next.add(id);
     return next;
@@ -286,12 +300,13 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
     setCustomDraft(""); setCustomKind("sparkle"); setShowCustomInput(false);
   };
 
-  const selCount = selected.size;
-  const canSubmit = name.trim().length > 0 && selCount >= 3 && selCount <= 8;
+  const selCount    = selected.size;
+  const nonNegCount = [...selected].filter(id=>!optionalIds.has(id)).length;
+  const canSubmit   = name.trim().length > 0 && selCount >= 3 && selCount <= 8 && nonNegCount >= 3;
 
   const profileData = () => ({
     profile:{ name:name.trim(), bday, loc:loc.trim(), why:why.trim(), cursor },
-    habits: habits.filter(h=>selected.has(h.id))
+    habits: habits.filter(h=>selected.has(h.id)).map(h=>({ ...h, required: !optionalIds.has(h.id) }))
   });
 
   return (
@@ -307,7 +322,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
         <Icon name="sparkle" size={28}/>
       </h1>
       <div className="hero-sub">
-        Align your habits <span className="dot">◆</span> Raise your energy <span className="dot">◆</span> Become your best self
+        Align your quests <span className="dot">◆</span> Raise your energy <span className="dot">◆</span> Become your best self
       </div>
 
       <div className="features-row">
@@ -329,7 +344,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
               </li>
               <li>
                 <span className="mini"><Icon name="energy-heart" size={28}/></span>
-                <div><strong>Build Your Energy</strong><span>Complete habits, gain energy, maintain flow</span></div>
+                <div><strong>Build Your Energy</strong><span>Complete quests, gain energy, maintain flow</span></div>
               </li>
               <li>
                 <span className="mini"><Icon name="flame" size={28}/></span>
@@ -416,23 +431,38 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
             <div className="charcount">{why.length} / 200</div>
           </div>
 
-          <div className="div-sparkle">✦ Select Your Habits ✦</div>
-          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:12,marginBottom:10,fontFamily:"Pixelify Sans, monospace"}}>
-            Choose or create daily habits (pick 3–8)
+          <div className="div-sparkle">✦ Select Your Quests ✦</div>
+          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:11,marginBottom:4,fontFamily:"Pixelify Sans, monospace"}}>
+            Pick 3–8 quests. Min 3 must be <span style={{color:"var(--rose)",fontFamily:"Silkscreen,monospace",fontSize:10}}>Must</span> — they count toward your daily XP.
+          </div>
+          <div style={{textAlign:"center",color:"var(--plum-soft)",fontSize:10,marginBottom:10,fontFamily:"Silkscreen,monospace",letterSpacing:".03em"}}>
+            Tap a selected quest to toggle <span style={{color:"var(--rose)"}}>Must</span> / <span style={{color:"var(--gold)"}}>Bonus</span>
           </div>
 
           <div className="habit-pick-grid">
-            {habits.map(h=>(
-              <div key={h.id}
-                   className={"habit-card "+(selected.has(h.id)?"active":"")+(editingIconFor===h.id?" icon-editing":"")}
-                   onClick={()=>toggleHabit(h.id)}>
-                <span className="habit-card-icon" title="Change icon"
-                  onClick={e=>{e.stopPropagation(); setEditingIconFor(editingIconFor===h.id?null:h.id); setShowCustomInput(false);}}>
-                  <HabitIcon kind={h.kind} size={32}/>
-                </span>
-                <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.label}</span>
-              </div>
-            ))}
+            {habits.map(h=>{
+              const isSel     = selected.has(h.id);
+              const isBonus   = optionalIds.has(h.id);
+              return (
+                <div key={h.id}
+                     className={"habit-card "+(isSel?"active":"")+(editingIconFor===h.id?" icon-editing":"")}
+                     style={{position:"relative"}}
+                     onClick={()=>toggleHabit(h.id)}>
+                  <span className="habit-card-icon" title="Change icon"
+                    onClick={e=>{e.stopPropagation(); setEditingIconFor(editingIconFor===h.id?null:h.id); setShowCustomInput(false);}}>
+                    <HabitIcon kind={h.kind} size={32}/>
+                  </span>
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.label}</span>
+                  {isSel && (
+                    <button className={"habit-type-badge "+(isBonus?"bonus":"must")}
+                      onClick={e=>{ e.stopPropagation(); toggleOptional(h.id); }}
+                      title={isBonus?"Click to make Must":"Click to make Bonus"}>
+                      {isBonus ? "Bonus" : "Must"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {editingIconFor && (
@@ -458,7 +488,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
 
           {!showCustomInput ? (
             <button className="add-custom" onClick={()=>setShowCustomInput(true)}>
-              + Add Custom Habit
+              + Add Custom Quest
             </button>
           ) : (
             <div className="pu-picker-panel" style={{marginBottom:0}}>
@@ -509,8 +539,9 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
           <div style={{marginTop:18,display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
             <div style={{fontSize:11,color:"var(--plum-soft)",fontFamily:"Silkscreen, monospace",
                          textTransform:"uppercase",letterSpacing:".04em",textAlign:"center"}}>
-              {selCount < 3 ? `Pick ${3-selCount} more habit${3-selCount===1?"":"s"} to begin` :
-               selCount > 8 ? "Pick at most 8 habits" :
+              {selCount < 3 ? `Pick ${3-selCount} more quest${3-selCount===1?"":"s"} to begin` :
+               selCount > 8 ? "Pick at most 8 quests" :
+               nonNegCount < 3 ? `Mark ${3-nonNegCount} more as Must to continue` :
                name.trim().length===0 ? "Enter your name to continue" :
                "✦ You're ready to begin ✦"}
             </div>

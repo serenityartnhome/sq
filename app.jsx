@@ -60,6 +60,14 @@ function App(){
     if(window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) return false;
     return /iphone|ipad|ipod|android/i.test(navigator.userAgent);
   });
+  const today = new Date(Date.now() - 3*60*60*1000).toLocaleDateString("en-CA");
+  const [showSplash, setShowSplash] = React.useState(()=>localStorage.getItem("sq_splash_date") !== today);
+  const [splashFading, setSplashFading] = React.useState(false);
+  const dismissSplash = React.useCallback(()=>{
+    localStorage.setItem("sq_splash_date", today);
+    setSplashFading(true);
+    setTimeout(()=>setShowSplash(false), 500);
+  },[today]);
   React.useEffect(()=>{
     const c = saved?.profile?.cursor;
     applyCursor(c||null);
@@ -117,6 +125,9 @@ function App(){
                 customEnergy:     data.custom_energy || null,
                 activePowerupIds: data.active_powerup_ids || null,
                 customPowerups:   data.custom_powerups || null,
+                petStage:         data.pet_stage || null,
+                stageXP:          data.stage_xp  || 0,
+                petName:          data.pet_name  || null,
               },
               todayData: dayData || null,
             };
@@ -249,7 +260,8 @@ function App(){
      "sq_diary_unlocked","sq_photo_unlocked","sq_streaks_date","sq_wall_agreed",
      "sq_wall_last_date","sq_wall_last_post_id","sq_share_loc","sq_sb_session",
      "sq_test_stage","sq_energy_today","sq_custom_energy","sq_sleep_date",
-     "sq_pu_announce_shown","sq_diary_announce_shown"]
+     "sq_pu_announce_shown","sq_diary_announce_shown",
+     "sq_pet_stage","sq_stage_xp","sq_last_visit","sq_xp_committed_date","sq_today_xp","sq_pet_name"]
       .forEach(k=>localStorage.removeItem(k));
     // Clear all tip-seen flags
     Object.keys(localStorage).filter(k=>k.startsWith("sq_tip_")).forEach(k=>localStorage.removeItem(k));
@@ -310,6 +322,7 @@ function App(){
 
   return (
     <>
+      {showSplash && <SplashScreen fading={splashFading} onStart={dismissSplash}/>}
       {recoveryToken
         ? <ResetPassword accessToken={recoveryToken} onDone={()=>{ window.location.hash=""; setRecoveryToken(null); }}/>
         : showConfirmed
@@ -362,6 +375,21 @@ function App(){
       )}
       {showPwaPrompt && <PwaPrompt onDone={()=>{ localStorage.setItem("sq_pwa_shown","1"); setShowPwaPrompt(false); }}/>}
     </>
+  );
+}
+
+function SplashScreen({ fading, onStart }){
+  return (
+    <div
+      className={"splash-screen"+(fading?" fading":"")}
+      style={{backgroundImage:"url(assets/splash-bg.PNG)"}}
+      onClick={onStart}
+    >
+      <div className="splash-title">Serenity Quest</div>
+      <button className="splash-start" onClick={e=>{ e.stopPropagation(); onStart(); }}>
+        &gt; Start Adventure
+      </button>
+    </div>
   );
 }
 

@@ -3,6 +3,15 @@ function appDay(d){
   return t.toLocaleDateString("en-CA");
 }
 
+const STAGE_THRESHOLDS = { egg:300, baby:500, child:600, teen:700 };
+const STAGE_ORDER      = ["egg","baby","child","teen","adult"];
+const STAGE_LABELS     = { egg:"Egg", baby:"Baby", child:"Child", teen:"Teen", adult:"Adult ✦" };
+const STAGE_COLORS     = { egg:"var(--rose)", baby:"#a8e0a8", child:"#a8c8e8", teen:"var(--gold)", adult:"var(--gold)" };
+
+function daysBetween(a, b){
+  return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000);
+}
+
 const ENERGY_MODES = [
   { id:"soft",     emoji:"🌸", name:"Soft Energy",  desc:"Gentle, slow, healing",              tags:["Calm","Rest","Self-love","Acceptance"] },
   { id:"boss",     emoji:"⚡", name:"Boss Energy",  desc:"Focused, getting things done",        tags:["Focus","Discipline","Confidence","Success"] },
@@ -404,7 +413,7 @@ const CHILD_BUBBLES = {
 
 const TEEN_BUBBLES = {
   greeting:     ["hey… you showed up ✨","glad you're here… let's do this","another day… let's make it count","hi. i'm here too. let's go","i've been thinking about today…","you came back. of course you did ✨","hey. let's make this one matter.","are we clocking in today? ⚡","Thank you for blessing me with your presence ✨","You didn't have to look this good today 😍"],
-  streak_high:  ["we've built something real here","look how consistent we've become…","this is who we're becoming","i feel stronger every time you come back","we don't stop… that's us now","habits are forming… i can feel it"],
+  streak_high:  ["we've built something real here","look how consistent we've become…","this is who we're becoming","i feel stronger every time you come back","we don't stop… that's us now","quests are becoming second nature… i can feel it"],
   missed_day:   ["i missed you… but you're here now","yesterday was quiet… today doesn't have to be","welcome back. no judgment.","starting again is still starting","it's okay… we just pick it back up","i kept going in my heart… now you're here","ngl, I missed yuhhhhh…. 🥺","Call the chiropractor cause you are back!!! 🔥","My G.O.A.T. you are back! 🐐"],
   task_1:       ["that's one… keep the momentum","small actions add up","started. that's already something","good. now one more?","first steps are underrated"],
   task_3:       ["this energy is real…","you're in flow… stay here","three in and it's getting easier","i feel it when you try like this","this is what growth feels like"],
@@ -502,7 +511,7 @@ const TIPS = {
   },
   calendar: {
     icon:"calendar", title:"Your Journey Calendar ✦",
-    body: "Everything you do is saved here. Every day you complete your quest, your mood, energy, habits, gratitude, and journal entries are recorded. Come back any time to see patterns, re-read past journal entries, and watch how far you've come. ✦"
+    body: "Everything you do is saved here. Every day you complete your quest, your mood, energy, quests, gratitude, and journal entries are recorded. Come back any time to see patterns, re-read past journal entries, and watch how far you've come. ✦"
   },
   community: {
     icon:"earth", title:"The Gratitude Wall ✦",
@@ -518,7 +527,7 @@ const TIPS = {
   },
   energy: {
     icon:"energy-heart", title:"Your Energy ✦",
-    body: "Your Energy bar fills as you complete habits, power-ups, and gratitude. Think of it as your life force… built daily through small consistent actions. Visit the Calendar tab at any time to see your energy history and track how it grows across your journey. ✦"
+    body: "Your Energy bar fills as you complete quests, power-ups, and gratitude. Think of it as your life force… built daily through small consistent actions. Visit the Calendar tab at any time to see your energy history and track how it grows across your journey. ✦"
   },
   mood: {
     icon:"heart", title:"Your Mood is Recorded ✦",
@@ -530,7 +539,7 @@ const TIPS = {
   },
   first_quest: {
     icon:"flame", title:"First Quest Complete! ✦",
-    body: "You did it! Your first quest is ticked! 🎉 Every habit you complete builds your streak and fills your energy. Each habit tracks its own streak, and the longer you keep them going the more you'll be celebrated. Complete at least 3 quests today to earn your Day in Flow. Keep going! ✦"
+    body: "You did it! Your first quest is ticked! 🎉 Every quest you complete builds your streak and fills your energy. Each quest tracks its own streak, and the longer you keep them going the more you'll be celebrated. Complete at least 3 quests today to earn your Day in Flow. Keep going! ✦"
   },
 };
 
@@ -625,6 +634,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [tab, setTab] = React.useState("home");
   const [showSignOut, setShowSignOut] = React.useState(false);
   const [showPetMenu, setShowPetMenu] = React.useState(false);
+  const [petName, setPetName] = React.useState(()=>localStorage.getItem("sq_pet_name")||"");
+  const [showNamePrompt, setShowNamePrompt] = React.useState(false);
+  const [petNameInput, setPetNameInput] = React.useState("");
   const [pendingReports, setPendingReports] = React.useState(0);
   const [showMyAccount, setShowMyAccount] = React.useState(false);
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
@@ -765,15 +777,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   }, [completed, powerups, gratitude, diaryEntry]);
 
   const [adultUnlocked, setAdultUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_adult"));
-  const testStage = localStorage.getItem("sq_test_stage");
-  const petStage = testStage || (()=>{
-    if(daysInFlow >= 21) return "final";
-    if(daysInFlow >= 18 || adultUnlocked) return "adult";
-    if(daysInFlow >= 13) return "teen";
-    if(daysInFlow >= 8) return "child";
-    if(daysInFlow >= 4 || hatched) return "baby";
+  const [petStageState, setPetStage] = React.useState(()=>{
+    const stored = localStorage.getItem("sq_pet_stage");
+    if(stored) return stored;
+    if(isAdmin || !!localStorage.getItem("sq_adult")) return "adult";
+    if(!!localStorage.getItem("sq_hatched")) return "baby";
     return "egg";
-  })();
+  });
+  const [stageXP, setStageXP] = React.useState(()=>{
+    try{ return parseInt(localStorage.getItem("sq_stage_xp")||"0",10)||0; }catch{ return 0; }
+  });
+  const testStage = localStorage.getItem("sq_test_stage");
+  const petStage  = testStage || petStageState;
   const eggSrc = (m) => `assets/icon-egg-${m}.png?v=1`;
   const EGG_SOUNDS = [
     "...bloop?","mrrp.","skrrt","*knock knock*","pip.","...","bweh","eep!",
@@ -866,6 +881,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
     if(profileFlags.activePowerupIds) setActivePowerupIds(profileFlags.activePowerupIds);
     if(profileFlags.customPowerups?.length) setCustomPowerups(profileFlags.customPowerups);
+    if(profileFlags.petStage){ setPetStage(profileFlags.petStage); localStorage.setItem("sq_pet_stage", profileFlags.petStage); }
+    if(profileFlags.stageXP > 0){ setStageXP(profileFlags.stageXP); localStorage.setItem("sq_stage_xp", String(profileFlags.stageXP)); }
+    if(profileFlags.petName){ setPetName(profileFlags.petName); localStorage.setItem("sq_pet_name", profileFlags.petName); }
   }, [profileFlags]);
 
   // Admin always gets everything unlocked, even if cloud flags say otherwise
@@ -949,12 +967,54 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   // Supabase push only happens via saveProgressNow (manual Save or Goodnight)
 
+  const computeDailyXP = () => {
+    // Non-negotiable = onboarding habits with required !== false
+    const activeNonNeg = habits.filter(h => activeHabitIds.includes(h.id) && h.required !== false);
+    const coreSlots    = Math.max(1, activeNonNeg.length) + 1 + (powerupsUnlocked ? 1 : 0);
+    const slotXP       = 100 / coreSlots;
+    let earned = activeNonNeg.filter(h => completed.has(h.id)).length * slotXP;
+    earned += writingDone ? slotXP : 0;
+    if(powerupsUnlocked && powerups.size > 0) earned += slotXP + 5;
+    // Optional = onboarding habits marked required:false + all custom habits
+    const activeOptional = [
+      ...habits.filter(h => activeHabitIds.includes(h.id) && h.required === false),
+      ...customHabits.filter(h => activeHabitIds.includes(h.id)),
+    ];
+    earned += activeOptional.filter(h => completed.has(h.id)).length * 9;
+    return Math.min(100, Math.round(earned));
+  };
+
   const saveProgressNow = async () => {
     setSaveStatus("saving");
     try {
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
       hist[today] = { mood, energy, completed:[...completed], powerups:[...powerups], gratitude, diary:diaryEntry, photo:diaryPhoto, intention: energyMode ? energyMode.name+" "+energyMode.emoji : null, done: doneCount >= 3 };
       localStorage.setItem("sq_history", JSON.stringify(hist));
+
+      // Commit today's XP (only the improvement since last save today)
+      const dailyXP    = computeDailyXP();
+      const prevCommit = localStorage.getItem("sq_xp_committed_date") === today
+        ? (parseInt(localStorage.getItem("sq_today_xp")||"0",10)||0) : 0;
+      const delta = Math.max(0, dailyXP - prevCommit);
+      let newStage = petStageState;
+      let newXP    = stageXP + delta;
+      let thr = STAGE_THRESHOLDS[newStage];
+      while(thr && newXP >= thr){
+        newXP -= thr;
+        newStage = STAGE_ORDER[Math.min(STAGE_ORDER.indexOf(newStage)+1, STAGE_ORDER.length-1)];
+        thr = STAGE_THRESHOLDS[newStage];
+      }
+      if(newStage !== petStageState || newXP !== stageXP){
+        setPetStage(newStage);
+        setStageXP(newXP);
+        localStorage.setItem("sq_pet_stage", newStage);
+        localStorage.setItem("sq_stage_xp", String(newXP));
+      }
+      if(delta > 0){
+        localStorage.setItem("sq_xp_committed_date", today);
+        localStorage.setItem("sq_today_xp", String(dailyXP));
+      }
+
       if(userId && window.SB){
         const [{ error }] = await Promise.all([
           window.SB.from("daily_data").upsert({
@@ -970,6 +1030,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             diary_unlocked: diaryUnlocked, photo_unlocked: photoUnlocked,
             powerups_unlocked: powerupsUnlocked,
             custom_energy: savedCustomEnergy||null,
+            pet_stage: newStage, stage_xp: newXP,
           },{onConflict:"id"}),
         ]);
         if(error) throw error;
@@ -1070,22 +1131,41 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     } catch{}
   }, []);
 
-  // Diary + adult + photo unlocks tied to quest completion (daysInFlow updates after done=true)
+  // Decay stage XP for missed days on app open
   React.useEffect(()=>{
+    const lastVisit = localStorage.getItem("sq_last_visit");
+    const todayStr  = appDay();
+    if(lastVisit && lastVisit !== todayStr && petStageState !== "adult"){
+      const missed = Math.max(0, daysBetween(lastVisit, todayStr) - 1);
+      if(missed > 0){
+        setStageXP(prev=>{
+          const n = Math.max(0, prev - missed * 25);
+          localStorage.setItem("sq_stage_xp", String(n));
+          return n;
+        });
+      }
+    }
+    localStorage.setItem("sq_last_visit", todayStr);
+  }, []);
+
+  // Diary + adult + photo unlocks driven by pet stage
+  React.useEffect(()=>{
+    if(isAdmin) return;
     let changed = false;
-    if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
-    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
-    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 800); }
-    if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
-    if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
+    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>setIsHatching(true), 400); }
+    if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
+    if(petStageState !== "egg" && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 800); }
+    if(petStageState === "adult" && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
+    if(petStageState === "adult" && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
     if(changed && userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId,
-        diary_unlocked: daysInFlow>=3,
-        adult_unlocked: daysInFlow>=7, photo_unlocked: daysInFlow>=7,
+        diary_unlocked: petStageState !== "egg",
+        adult_unlocked: petStageState === "adult",
+        photo_unlocked: petStageState === "adult",
       },{onConflict:"id"}).then(()=>{});
     }
-  }, [daysInFlow]);
+  }, [petStageState]);
 
   const puSyncRef = React.useRef(false);
   React.useEffect(()=>{
@@ -1444,7 +1524,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   return <img src={eggSrc(mood||"neutral")} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
                     style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
-                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); } }}
+                    onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); setPetNameInput(""); setShowNamePrompt(true); } }}
                   />;
                 })()}
               </div>
@@ -1530,13 +1610,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </label>
             <button className="check habit-edit-tile" onClick={()=>setShowHabitPicker(v=>!v)}>
               <span style={{fontSize:18}}>✎</span>
-              <span className="lbl" style={{flex:"unset"}}>Edit Habits</span>
+              <span className="lbl" style={{flex:"unset"}}>Edit Quests</span>
             </button>
           </div>
 
           {showHabitPicker && (
             <div className="pu-picker-panel">
-              <div className="pu-picker-title">Your Habits</div>
+              <div className="pu-picker-title">Your Quests</div>
               <div className="pu-picker-grid">
                 {allHabits.map(h=>{
                   const on = activeHabitIds.includes(h.id);
@@ -1551,11 +1631,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 })}
               </div>
               <div className="pu-custom-form">
-                <div className="pu-custom-title">✦ Add Custom Habit</div>
+                <div className="pu-custom-title">✦ Add Custom Quest</div>
                 <div className="pu-custom-row">
                   <input value={newHabitName} onChange={e=>setNewHabitName(e.target.value)}
                     onKeyDown={e=>e.key==="Enter"&&addCustomHabit()}
-                    placeholder="Habit name…" maxLength={24} className="pu-add-input" style={{flex:1}}/>
+                    placeholder="Quest name…" maxLength={24} className="pu-add-input" style={{flex:1}}/>
                 </div>
                 <div className="pu-icon-grid">
                   {ALL_ICONS.map(ic=>(
@@ -1565,7 +1645,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     </button>
                   ))}
                 </div>
-                <button className="pu-add-btn" disabled={!newHabitName.trim()} onClick={addCustomHabit}>+ Add Habit</button>
+                <button className="pu-add-btn" disabled={!newHabitName.trim()} onClick={addCustomHabit}>+ Add Quest</button>
               </div>
             </div>
           )}
@@ -2229,10 +2309,40 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {/* ── Pet menu: 3 choices ── */}
       {showPetMenu && (
         <div className="coming-soon-overlay" onClick={()=>setShowPetMenu(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:280,width:"88%"}}>
-            <h3 className="coming-soon-title" style={{fontSize:14}}>
-              <span style={{color:"var(--gold)"}}>✦</span> {profile.name||"Adventurer"} <span style={{color:"var(--gold)"}}>✦</span>
-            </h3>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:280,width:"88%",paddingBottom:20}}>
+            {/* Pet display */}
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,marginBottom:16}}>
+              <div style={{width:72,height:72,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {petStage==="egg"
+                  ? <img src={eggSrc(mood||"neutral")} style={{width:64,height:64,imageRendering:"pixelated"}} alt="egg"/>
+                  : petStage==="baby"
+                  ? <BabyPet animal={animal} happy={celebrating} size={22}/>
+                  : <ZodiacPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} size={64}/>
+                }
+              </div>
+              <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"var(--plum)",letterSpacing:".04em"}}>
+                {petStage==="egg" ? "???" : (petName || profile.name || "Adventurer")}
+              </div>
+              {/* XP bar */}
+              {petStage === "adult" ? (
+                <div style={{width:"100%",textAlign:"center",fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--gold)",letterSpacing:".05em"}}>✦ Journey Complete ✦</div>
+              ) : (()=>{
+                const thr = STAGE_THRESHOLDS[petStage]||300;
+                const pct = Math.min(100, (stageXP / thr) * 100);
+                return (
+                  <div style={{width:"100%"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                      <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--plum-soft)",textTransform:"uppercase",letterSpacing:".05em"}}>XP</span>
+                      <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--plum-soft)",letterSpacing:".04em"}}>{stageXP} / {thr}</span>
+                    </div>
+                    <div style={{width:"100%",height:8,background:"rgba(92,42,53,.15)",border:"2px solid var(--rose)",overflow:"hidden"}}>
+                      <div style={{width:`${pct}%`,height:"100%",background:STAGE_COLORS[petStage]||"var(--rose)",transition:"width .6s ease"}}/>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            {/* Buttons */}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="acct-btn" onClick={()=>{
                 setEditName(profile.name||""); setEditLoc(profile.loc||"");
@@ -2241,6 +2351,52 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               }}>Edit Profile</button>
               <button className="acct-btn" onClick={()=>{ setShowPetMenu(false); setShowMyAccount(true); setResetPwStatus(null); }}>My Account</button>
               <button className="acct-btn" onClick={()=>setShowPetMenu(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pet name prompt (shown on first hatch) ── */}
+      {showNamePrompt && (
+        <div className="coming-soon-overlay">
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:280,width:"88%",textAlign:"center"}}>
+            <div style={{fontSize:32,marginBottom:8}}>🐣</div>
+            <h3 className="coming-soon-title" style={{fontSize:14,marginBottom:8}}>It hatched!</h3>
+            <p style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"var(--plum-soft)",marginBottom:16,lineHeight:1.5}}>
+              Your companion is here. What would you like to name it?
+            </p>
+            <div className="field" style={{marginBottom:14}}>
+              <input
+                type="text"
+                value={petNameInput}
+                onChange={e=>setPetNameInput(e.target.value)}
+                placeholder="Name your companion…"
+                maxLength={20}
+                onKeyDown={e=>{
+                  if(e.key==="Enter" && petNameInput.trim()){
+                    const n=petNameInput.trim();
+                    setPetName(n); localStorage.setItem("sq_pet_name",n);
+                    if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,pet_name:n},{onConflict:"id"}).then(()=>{});
+                    setShowNamePrompt(false);
+                  }
+                }}
+                autoFocus
+                style={{textAlign:"center"}}
+              />
+            </div>
+            <button className="coming-soon-btn" disabled={!petNameInput.trim()} onClick={()=>{
+              const n=petNameInput.trim();
+              if(!n) return;
+              setPetName(n); localStorage.setItem("sq_pet_name",n);
+              if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,pet_name:n},{onConflict:"id"}).then(()=>{});
+              setShowNamePrompt(false);
+            }}>Name It ✦</button>
+            <div style={{marginTop:10}}>
+              <button onClick={()=>setShowNamePrompt(false)}
+                style={{background:"none",border:"none",color:"var(--plum-soft)",fontFamily:"Silkscreen,monospace",
+                        fontSize:9,cursor:"pointer",textDecoration:"underline"}}>
+                skip for now
+              </button>
             </div>
           </div>
         </div>
@@ -2331,7 +2487,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div style={{marginBottom:14,padding:"10px",background:"rgba(201,127,165,.08)",border:"3px solid var(--rose)",boxShadow:"3px 3px 0 rgba(201,127,165,.3)"}}>
                 <div style={{fontSize:10,fontFamily:"Silkscreen,monospace",color:"var(--plum)",marginBottom:8}}>✦ Pet Stage (admin)</div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                  {["egg","baby","adult"].map(s=>(
+                  {["egg","baby","child","teen","adult"].map(s=>(
                     <button key={s} onClick={()=>{ localStorage.setItem("sq_test_stage",s); window.location.reload(); }}
                       style={{fontFamily:"Silkscreen,monospace",fontSize:10,padding:"4px 10px",cursor:"pointer",
                               textTransform:"uppercase",letterSpacing:".04em",
@@ -2396,7 +2552,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div style={{fontSize:32,marginBottom:8}}>🔄</div>
             <h3 className="coming-soon-title" style={{marginBottom:8}}>Reset My Data?</h3>
             <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
-              This will wipe your habits, streaks, diary and pet progress. Your account stays active and you can log back in to start fresh.
+              This will wipe your quests, streaks, diary and pet progress. Your account stays active and you can log back in to start fresh.
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="coming-soon-btn" style={{background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",boxShadow:"none"}}
@@ -2418,7 +2574,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div style={{fontSize:32,marginBottom:8}}>⚠</div>
             <h3 className="coming-soon-title" style={{color:"#c0392b",marginBottom:8}}>Delete Account?</h3>
             <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.7,marginBottom:20}}>
-              This will permanently delete your account and all your data: habits, streaks, diary, pet, everything. There is no going back.
+              This will permanently delete your account and all your data: quests, streaks, diary, pet, everything. There is no going back.
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="coming-soon-btn" style={{background:"#8b1a1a",color:"#fff",borderColor:"#8b1a1a"}}
