@@ -1471,7 +1471,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           {/* Single col: Intention at top, then centered pet */}
           <div className="zodiac-pet-col">
             {/* Top spacer — pushes intention + monkey down to center */}
-            <div style={{flex:1}}/>
+            <div className="pet-col-spacer-top" style={{flex:1}}/>
             {/* Today's Energy sits above the pet */}
             <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>{ showTip("intention"); setShowEnergyModal(true); }}>
               <div className="intention-side-label">Today's Energy</div>
@@ -1503,7 +1503,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <div className="bubble-wrap">
               <div className="bubble" key={petBubble}>
-                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
+                <div className="bubble-inner">
+                  {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
+                </div>
               </div>
             </div>
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
@@ -1541,7 +1543,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               ✎ tap pet to edit profile
             </div>
             {/* Bottom spacer — equal to top spacer, keeps content centered */}
-            <div style={{flex:1}}/>
+            <div className="pet-col-spacer-bot" style={{flex:1}}/>
             {/* Energy bar pinned to bottom */}
             <div className="pet-energy-bar" onClick={()=>showTip("energy")} style={{cursor:"pointer"}}>
               <div className="pet-energy-header">
