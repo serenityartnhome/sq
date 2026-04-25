@@ -851,18 +851,29 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     // Set OR clear each flag to match the loaded profile exactly
     setHatched(!!profileFlags.hatched);
     if(profileFlags.hatched) localStorage.setItem("sq_hatched","1"); else localStorage.removeItem("sq_hatched");
-    setAdultUnlocked(!!profileFlags.adultUnlocked);
-    if(profileFlags.adultUnlocked) localStorage.setItem("sq_adult","1"); else localStorage.removeItem("sq_adult");
-    setDiaryUnlocked(!!profileFlags.diaryUnlocked);
-    if(profileFlags.diaryUnlocked) localStorage.setItem("sq_diary_unlocked","1"); else localStorage.removeItem("sq_diary_unlocked");
-    setPhotoUnlocked(!!profileFlags.photoUnlocked);
-    if(profileFlags.photoUnlocked) localStorage.setItem("sq_photo_unlocked","1"); else localStorage.removeItem("sq_photo_unlocked");
-    setPowerupsUnlocked(!!profileFlags.powerupsUnlocked);
-    if(profileFlags.powerupsUnlocked) localStorage.setItem("sq_powerups_unlocked","1"); else localStorage.removeItem("sq_powerups_unlocked");
+    const _adult = isAdmin || !!profileFlags.adultUnlocked;
+    setAdultUnlocked(_adult);
+    if(_adult) localStorage.setItem("sq_adult","1"); else localStorage.removeItem("sq_adult");
+    const _diary = isAdmin || !!profileFlags.diaryUnlocked;
+    setDiaryUnlocked(_diary);
+    if(_diary) localStorage.setItem("sq_diary_unlocked","1"); else localStorage.removeItem("sq_diary_unlocked");
+    const _photo = isAdmin || !!profileFlags.photoUnlocked;
+    setPhotoUnlocked(_photo);
+    if(_photo) localStorage.setItem("sq_photo_unlocked","1"); else localStorage.removeItem("sq_photo_unlocked");
+    const _pu = isAdmin || !!profileFlags.powerupsUnlocked;
+    setPowerupsUnlocked(_pu);
+    if(_pu) localStorage.setItem("sq_powerups_unlocked","1"); else localStorage.removeItem("sq_powerups_unlocked");
     if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
     if(profileFlags.activePowerupIds) setActivePowerupIds(profileFlags.activePowerupIds);
     if(profileFlags.customPowerups?.length) setCustomPowerups(profileFlags.customPowerups);
   }, [profileFlags]);
+
+  // Admin always gets everything unlocked, even if cloud flags say otherwise
+  React.useEffect(()=>{
+    if(!isAdmin) return;
+    setDiaryUnlocked(true); setPhotoUnlocked(true);
+    setPowerupsUnlocked(true); setAdultUnlocked(true);
+  }, [isAdmin]);
 
   const allHabits = React.useMemo(()=>{
     // Merge presets with any icon customizations from onboarding, then add custom habits
