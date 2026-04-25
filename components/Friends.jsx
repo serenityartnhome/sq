@@ -574,6 +574,15 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           <div className="friends-my-un">@{username}</div>
         </div>
         <div className="friends-header-icons">
+          <button className="friends-icon-btn" onClick={openInbox} title="Inbox">
+            <img src="assets/icon-mail.png" width={28} height={28}
+                 style={{imageRendering:"pixelated"}} alt="mail"/>
+            {unread > 0 && <span className="friends-badge">{unread > 9?"9+":unread}</span>}
+          </button>
+          <button className="friends-icon-btn" onClick={()=>setView("settings")} title="Privacy">
+            <img src="assets/icon-friends.png?v=1" width={28} height={28}
+                 style={{imageRendering:"pixelated"}} alt="settings"/>
+          </button>
           <button className="friends-icon-btn" onClick={()=>{
             const shareData = {
               title:"Serenity Quest",
@@ -585,15 +594,6 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           }} title="Share">
             <img src="assets/icon-share.png?v=1" width={28} height={28}
                  style={{imageRendering:"pixelated"}} alt="share"/>
-          </button>
-          <button className="friends-icon-btn" onClick={openInbox} title="Inbox">
-            <img src="assets/icon-mail.png" width={28} height={28}
-                 style={{imageRendering:"pixelated"}} alt="mail"/>
-            {unread > 0 && <span className="friends-badge">{unread > 9?"9+":unread}</span>}
-          </button>
-          <button className="friends-icon-btn" onClick={()=>setView("settings")} title="Privacy">
-            <img src="assets/icon-friends.png?v=1" width={28} height={28}
-                 style={{imageRendering:"pixelated"}} alt="settings"/>
           </button>
         </div>
       </div>
