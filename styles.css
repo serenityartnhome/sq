@@ -723,6 +723,10 @@ body{
   height:clamp(120px,20vh,200px);
   animation: cloudDrift 6s ease-in-out infinite;
 }
+@media(min-width:769px){
+  .pet-cloud-stage{ height:clamp(220px,32vh,300px); }
+  .bubble-wrap{ margin-bottom:0; }
+}
 @keyframes cloudDrift{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-10px)}
