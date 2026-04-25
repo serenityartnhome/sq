@@ -2484,11 +2484,12 @@ body{
   margin-top:14px;
   height:calc(100vh - 185px);
   max-width:520px;
-  /* override .panel padding so the inner panel controls its own spacing */
-  padding:0;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
+}
+/* panel class is on friends-panel itself — override padding so inner layout controls spacing */
+.friends-panel.panel{
+  padding:0;
 }
 
 /* ── Splash Screen ── */

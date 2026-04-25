@@ -1544,7 +1544,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       )}
 
       {tab === "friends" && (
-        <div className="friends-view panel">
+        <div className="friends-view">
           <Friends
             userId={userId}
             profile={profile}

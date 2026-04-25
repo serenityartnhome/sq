@@ -304,7 +304,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   // ── Compose view ────────────────────────────────────────────────────────────
   if(view === "compose" && composeTo){
     return (
-      <div className="friends-panel">
+      <div className="friends-panel panel">
         <div className="friends-header">
           <button className="friends-back" onClick={()=>{ setComposeTo(null); setView("list"); }}>← Back</button>
           <span className="friends-header-title">Send a Message</span>
@@ -344,7 +344,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     const d = new Date(selectedLetter.created_at);
     const dateStr = d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
     return (
-      <div className="friends-panel">
+      <div className="friends-panel panel">
         <div className="friends-header">
           <button className="friends-back" onClick={()=>setView("inbox")}>← Inbox</button>
           <span className="friends-header-title">A Letter ✦</span>
@@ -366,7 +366,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   // ── Inbox view ──────────────────────────────────────────────────────────────
   if(view === "inbox"){
     return (
-      <div className="friends-panel">
+      <div className="friends-panel panel">
         <div className="friends-header">
           <button className="friends-back" onClick={()=>setView("list")}>← Back</button>
           <span className="friends-header-title">Messages</span>
@@ -408,7 +408,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   // ── Privacy / settings view ─────────────────────────────────────────────────
   if(view === "settings"){
     return (
-      <div className="friends-panel">
+      <div className="friends-panel panel">
         <div className="friends-header">
           <button className="friends-back" onClick={()=>setView("list")}>← Back</button>
           <span className="friends-header-title">Privacy</span>
@@ -449,7 +449,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   if(view === "add"){
     const sr = searchResult;
     return (
-      <div className="friends-panel">
+      <div className="friends-panel panel">
         <div className="friends-header">
           <button className="friends-back" onClick={()=>{ setView("list"); setSearchInput(""); setSearchResult(null); }}>← Back</button>
           <span className="friends-header-title">Add Friend</span>
