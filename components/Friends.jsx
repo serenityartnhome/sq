@@ -7,10 +7,11 @@ const PRESET_MESSAGES = [
   { key:"howareyou",  text:"How are you really? 💙" },
 ];
 
-const MOOD_EMOJI = {
-  happy:"😊", calm:"🌸", neutral:"😌", sad:"💧",
-  frustrated:"😤", anxious:"😰", tired:"😴", excited:"✨",
-};
+function MoodIcon({ mood, size=20 }){
+  if(!mood) return null;
+  return <img src={`assets/mood-${mood}.png?v=1`} width={size} height={size}
+              style={{imageRendering:"pixelated",verticalAlign:"middle",flexShrink:0}} alt={mood}/>;
+}
 
 const firstName = (name) => (name||"").split(" ")[0] || (name||"");
 
@@ -413,15 +414,6 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
             {sendDone && <div className="friends-sent-confirm">Message sent! ✨</div>}
           </div>
 
-          <div className="friends-presets">
-            {PRESET_MESSAGES.map(p=>(
-              <button key={p.key} className="friends-preset-btn"
-                      onClick={()=>sendMessage(p)}
-                      disabled={sendAnim||sendDone}>
-                {p.text}
-              </button>
-            ))}
-          </div>
           <div className="friends-custom-msg">
             <textarea
               className="friends-custom-input"
@@ -771,7 +763,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                   <div className="friends-card-un">@{f.username}</div>
                   {(f.share_mood !== false) && f.today_mood && (
                     <div className="friends-card-mood">
-                      {MOOD_EMOJI[f.today_mood]||"✨"} {f.today_mood}
+                      <MoodIcon mood={f.today_mood} size={18}/> {f.today_mood}
                     </div>
                   )}
                   {f.share_gratitude && f.today_gratitude?.some(g=>g) && (
