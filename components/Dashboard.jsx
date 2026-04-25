@@ -1501,11 +1501,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 </>
               )}
             </div>
-            <div className="bubble-wrap">
-              <div className="bubble" key={petBubble}>
-                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
-              </div>
-            </div>
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
@@ -1530,6 +1525,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
               <img src="assets/cloud.png" alt="" className="pet-cloud"
                    style={{width:"min(360px,100%)"}} aria-hidden="true"/>
+            </div>
+            <div className="bubble-wrap">
+              <div className="bubble bubble-below" key={petBubble}>
+                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
+              </div>
             </div>
             <div style={{textAlign:"center",fontFamily:"Silkscreen, monospace",
                          color:"#fff",fontSize:14,marginTop:5,textTransform:"uppercase",letterSpacing:".05em",
@@ -2662,7 +2662,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       )}
 
       {showWallRules && (
-        <div className="coming-soon-overlay" onClick={()=>setShowWallRules(false)}>
+        <div className="coming-soon-overlay" onClick={()=>{ setShowWallRules(false); setWallRulesChecked(false); }}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:360,width:"92%"}}>
             <h3 className="coming-soon-title">✦ Community Guidelines ✦</h3>
             <div style={{fontSize:12,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",
@@ -2689,7 +2689,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </label>
             <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-              <button onClick={()=>{ localStorage.setItem("sq_wall_agreed","1"); setShowWallRules(false); setShowGratShare(true); }}
+              <button
+                onClick={()=>{
+                  localStorage.setItem("sq_wall_agreed","1");
+                  setShowWallRules(false); setWallRulesChecked(false); setShowGratShare(true);
+                }}
                 disabled={!wallRulesChecked}
                 style={{background:wallRulesChecked?"#f5c9cc":"#e0d0d8",color:"#5c2a35",border:"2px solid #e39aa0",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:wallRulesChecked?"pointer":"default",
@@ -2698,12 +2702,15 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         borderRadius:2,opacity:wallRulesChecked?1:0.55}}>
                 I Agree ✦
               </button>
-              <button onClick={()=>setShowWallRules(false)}
+              <button onClick={()=>{ setShowWallRules(false); setWallRulesChecked(false); }}
                 style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
                         fontFamily:"Silkscreen,monospace",fontSize:11,padding:"10px 20px",cursor:"pointer",
                         textTransform:"uppercase",letterSpacing:".05em",boxShadow:"none",borderRadius:2}}>
-                Cancel
+                Not Now
               </button>
+            </div>
+            <div style={{marginTop:10,textAlign:"center",fontSize:9,fontFamily:"Silkscreen,monospace",color:"var(--plum-soft)"}}>
+              You must agree to share on the wall
             </div>
           </div>
         </div>

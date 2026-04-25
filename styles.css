@@ -209,6 +209,7 @@ body{
 }
 .habit-card:hover{transform:translate(-1px,-1px);border-color:var(--rose);box-shadow:3px 3px 0 rgba(92,42,53,.2)}
 .habit-card.active{background:var(--blush-soft);border-color:var(--rose);box-shadow:2px 2px 0 var(--rose)}
+.habit-card.active.bonus{background:rgba(100,180,120,.15);border-color:#5aaa78;box-shadow:2px 2px 0 #5aaa78}
 .habit-card.icon-editing{border-color:var(--plum);box-shadow:2px 2px 0 var(--plum)}
 .habit-card-icon{display:flex;align-items:center;cursor:pointer;border-radius:2px;padding:1px;}
 .habit-card-icon:hover{outline:2px solid var(--gold);}
@@ -460,17 +461,28 @@ body{
    SPEECH BUBBLE
    ============================================================ */
 .bubble{
-  position:relative;display:inline-block;
+  position:relative;
   background:var(--cream);border:2px solid var(--plum);
   padding:8px 16px;color:var(--plum);
   font-family:"Pixelify Sans",monospace;font-weight:600;font-size:14px;
   box-shadow:3px 3px 0 rgba(0,0,0,.25), inset 0 0 0 2px var(--gold);
   max-width:min(170px,46vw);
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  line-height:1.4;
 }
 .bubble::after{
   content:"";position:absolute;left:30px;bottom:-10px;width:12px;height:12px;
   background:var(--cream);border-right:2px solid var(--plum);border-bottom:2px solid var(--plum);
   transform:rotate(45deg);box-shadow:2px 2px 0 rgba(0,0,0,.1);
+}
+.bubble.bubble-below::after{
+  top:-10px;bottom:auto;
+  border-right:none;border-bottom:none;
+  border-left:2px solid var(--plum);border-top:2px solid var(--plum);
+  box-shadow:-1px -1px 0 rgba(0,0,0,.08);
 }
 
 /* ============================================================
@@ -2017,4 +2029,10 @@ body{
   color:#fff;
   text-shadow:2px 2px 0 rgba(0,0,0,.9), 0 0 20px rgba(255,224,51,1), 0 0 40px rgba(255,224,51,.5);
   transform:scale(1.04);
+}
+
+/* Laptop: energy bar moves with pet instead of pinning to column bottom */
+@media (min-width:769px){
+  .zodiac-pet-col > div[style*="flex:1"]:last-of-type{ flex:0 0 0 !important; }
+  .pet-energy-bar{ margin-top:10px; }
 }

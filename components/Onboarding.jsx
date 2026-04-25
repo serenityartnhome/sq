@@ -445,7 +445,7 @@ function Onboarding({ onComplete, onLogin, authUser, onSignOut }){
               const isBonus   = optionalIds.has(h.id);
               return (
                 <div key={h.id}
-                     className={"habit-card "+(isSel?"active":"")+(editingIconFor===h.id?" icon-editing":"")}
+                     className={"habit-card "+(isSel?"active":"")+(isSel&&isBonus?" bonus":"")+(editingIconFor===h.id?" icon-editing":"")}
                      style={{position:"relative"}}
                      onClick={()=>toggleHabit(h.id)}>
                   <span className="habit-card-icon" title="Change icon"
