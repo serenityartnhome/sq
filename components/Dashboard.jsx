@@ -74,8 +74,24 @@ const GOODNIGHT_MSGS = {
   },
 };
 
-function pickGoodnightMsg(doneCount, totalSlots, mood){
+const ZODIAC_GOODNIGHT = {
+  rat:     "The Rat sees opportunity where others see none — and today you seized yours. Rest well, clever one 🌙",
+  ox:      "The Ox is steady, patient, unstoppable. Today proved it again. You carried the day with quiet power ✨",
+  tiger:   "The Tiger showed up with full fire today. Bold, brave, and beautiful. Rest now, brave heart 🌙",
+  rabbit:  "The Rabbit moves with such grace and care. Today you were gentle with yourself and still got it done ✨",
+  dragon:  "The Dragon breathes magic into everything they touch — and today was no different. Sleep well, luminous one 🌙",
+  snake:   "The Snake knows when to move and when to be still. Today you moved wisely. Rest in that knowing ✨",
+  horse:   "The Horse ran free and far today. All that beautiful energy well spent. Rest your spirit now 🌙",
+  goat:    "The Goat climbs steadily, step by step, and always reaches the top. Today was no different ✨",
+  monkey:  "The Monkey brings joy and cleverness to everything — you made today feel lighter. Sleep well 🌙",
+  rooster:  "The Rooster greets every day with intention and pride. You showed up fully today. Rest well ✨",
+  dog:     "The Dog's loyalty — to themselves, to their journey — showed today. That's rare and beautiful 🌙",
+  pig:     "The Pig brings warmth and heart to everything. Today you poured yourself in fully. Rest now ✨",
+};
+
+function pickGoodnightMsg(doneCount, totalSlots, mood, animal){
   const tier = doneCount >= Math.max(totalSlots, 3) ? "done_all" : doneCount >= 1 ? "done_some" : "done_none";
+  if(tier === "done_all" && animal && ZODIAC_GOODNIGHT[animal]) return ZODIAC_GOODNIGHT[animal];
   const pool = GOODNIGHT_MSGS[tier];
   return pool[mood] || pool._default;
 }
@@ -2024,7 +2040,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,
                          color:"rgba(255,255,255,.78)",lineHeight:1.85,marginBottom:24}}>
-              {pickGoodnightMsg(doneCount, totalSlots, mood)}
+              {pickGoodnightMsg(doneCount, totalSlots, mood, animal)}
             </div>
             <button onClick={confirmGoodnight}
               style={{width:"100%",background:"rgba(50,20,90,.9)",
