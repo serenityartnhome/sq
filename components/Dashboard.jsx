@@ -2324,6 +2324,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   ? <img src={eggSrc(mood||"neutral")} style={{width:64,height:64,imageRendering:"pixelated"}} alt="egg"/>
                   : petStage==="baby"
                   ? <BabyPet animal={animal} happy={celebrating} size={22}/>
+                  : petStage==="child"
+                  ? <ChildPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} size={42}/>
+                  : petStage==="teen"
+                  ? <TeenPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} size={54}/>
                   : <ZodiacPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} size={64}/>
                 }
               </div>
