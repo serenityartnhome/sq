@@ -48,10 +48,9 @@ function ChildPet({ animal, mood="neutral", size=64, className="" }){
       style={{
         width: size, height: size,
         "--cframe": `${size}px`,
+        "--cx": `-${col * size}px`,
         backgroundImage: `url(assets/zodiac/child-${animal}-sheet.png)`,
         backgroundSize: `${size * 8}px ${size * 4}px`,
-        backgroundPositionX: `-${col * size}px`,
-        backgroundPositionY: 0,
         backgroundRepeat: "no-repeat",
         imageRendering: "pixelated",
       }}
@@ -66,10 +65,9 @@ function TeenPet({ animal, mood="neutral", size=64, className="" }){
       style={{
         width: size, height: size,
         "--tframe": `${size}px`,
+        "--tx": `-${col * size}px`,
         backgroundImage: `url(assets/zodiac/teen-${animal}-sheet.png)`,
         backgroundSize: `${size * 8}px ${size * 4}px`,
-        backgroundPositionX: `-${col * size}px`,
-        backgroundPositionY: 0,
         backgroundRepeat: "no-repeat",
         imageRendering: "pixelated",
       }}

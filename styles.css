@@ -1560,8 +1560,14 @@ body{
 .baby-sprite.baby-neglected { animation: babyNeglected 1.8s steps(1) infinite; }
 
 /* Child + Teen spritesheet animation (8 cols = moods, 4 rows = frames) */
-@keyframes childFrame { to { background-position-y: calc(var(--cframe) * -4); } }
-@keyframes teenFrame  { to { background-position-y: calc(var(--tframe) * -4); } }
+@keyframes childFrame {
+  from { background-position: var(--cx) 0px; }
+  to   { background-position: var(--cx) calc(var(--cframe) * -4); }
+}
+@keyframes teenFrame {
+  from { background-position: var(--tx) 0px; }
+  to   { background-position: var(--tx) calc(var(--tframe) * -4); }
+}
 .child-sprite {
   display:block;
   background-repeat:no-repeat;
