@@ -1820,7 +1820,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   <Icon name="sparkle" size={16}/>My Diary<Icon name="sparkle" size={16}/>
                 </div>
               </div>
-              <div className="diary-body">
+              <div className={"diary-body"+(diaryPhoto?" has-photo":"")}>
                 <input type="file" accept="image/*" ref={diaryPhotoRef}
                   style={{display:"none"}} onChange={handleDiaryPhoto}/>
                 <textarea
@@ -1828,7 +1828,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   value={diaryEntry}
                   onChange={e=>setDiaryEntry(e.target.value)}
                   placeholder="Write your thoughts here… today was…"
-                  style={diaryPhoto ? {paddingRight:"calc(50% + 16px)"} : {}}
                 />
                 {diaryPhoto ? (
                   <div className="diary-photo-preview">
