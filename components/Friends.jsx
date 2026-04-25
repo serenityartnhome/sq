@@ -107,6 +107,11 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [usernameError, setUsernameError] = React.useState("");
   const [savingUn,      setSavingUn]      = React.useState(false);
 
+  const [editingUn,    setEditingUn]    = React.useState(false);
+  const [editUnInput,  setEditUnInput]  = React.useState("");
+  const [editUnError,  setEditUnError]  = React.useState("");
+  const [savingEditUn, setSavingEditUn] = React.useState(false);
+
   const [searchInput,  setSearchInput]  = React.useState("");
   const [searchResult, setSearchResult] = React.useState(null);
   const [addStatus,    setAddStatus]    = React.useState({});
@@ -187,6 +192,27 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
       localStorage.setItem("sq_username", u);
     } catch(e){ setUsernameError(e.message||"Could not save"); }
     setSavingUn(false);
+  };
+
+  const saveEditUsername = async () => {
+    const u = editUnInput.trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
+    if(!u || u.length < 3){ setEditUnError("3+ characters. Letters, numbers, underscore only."); return; }
+    if(u === localUsername){ setEditingUn(false); return; }
+    setSavingEditUn(true); setEditUnError("");
+    try {
+      const { error } = await window.SB.from("profiles").update({username:u}).eq("id",userId);
+      if(error){
+        const msg = error.message||"";
+        setEditUnError(
+          msg.includes("23505")||msg.includes("unique") ? "Username taken — try another." : msg||"Could not save"
+        );
+        setSavingEditUn(false); return;
+      }
+      setLocalUsername(u);
+      localStorage.setItem("sq_username", u);
+      setEditingUn(false);
+    } catch(e){ setEditUnError(e.message||"Could not save"); }
+    setSavingEditUn(false);
   };
 
   const acceptRequest = async (requestId) => {
@@ -417,7 +443,40 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         <div className="friends-settings-body">
           <div className="friends-un-display">
             <span className="friends-settings-label">Your username</span>
-            <span className="friends-un-badge">@{username}</span>
+            {editingUn ? (
+              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%",marginTop:6}}>
+                <input
+                  className="friends-un-input"
+                  value={editUnInput}
+                  onChange={e=>{ setEditUnInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"")); setEditUnError(""); }}
+                  onKeyDown={e=>e.key==="Enter"&&saveEditUsername()}
+                  placeholder={username}
+                  maxLength={20}
+                  autoFocus
+                  style={{maxWidth:"100%",boxSizing:"border-box"}}
+                />
+                {editUnError && (
+                  <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)"}}>
+                    {editUnError}
+                  </span>
+                )}
+                <div style={{display:"flex",gap:8}}>
+                  <button className="friends-btn-primary" onClick={saveEditUsername} disabled={savingEditUn}>
+                    {savingEditUn?"Saving…":"Save ✦"}
+                  </button>
+                  <button className="friends-btn-cancel" onClick={()=>{ setEditingUn(false); setEditUnError(""); }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}>
+                <span className="friends-un-badge">@{username}</span>
+                <button className="friends-btn-edit" onClick={()=>{ setEditUnInput(username); setEditingUn(true); }}>
+                  Edit
+                </button>
+              </div>
+            )}
           </div>
           <div className="friends-toggle-row">
             <div>
