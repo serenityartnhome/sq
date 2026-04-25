@@ -860,6 +860,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     setPowerupsUnlocked(!!profileFlags.powerupsUnlocked);
     if(profileFlags.powerupsUnlocked) localStorage.setItem("sq_powerups_unlocked","1"); else localStorage.removeItem("sq_powerups_unlocked");
     if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
+    if(profileFlags.activePowerupIds) setActivePowerupIds(profileFlags.activePowerupIds);
+    if(profileFlags.customPowerups?.length) setCustomPowerups(profileFlags.customPowerups);
   }, [profileFlags]);
 
   const allHabits = React.useMemo(()=>{

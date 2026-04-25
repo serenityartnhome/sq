@@ -148,6 +148,7 @@
     const q = {
       select(cols){ _sel=cols; return q; },
       eq(col,val){ _filters.push(col+"=eq."+encodeURIComponent(val)); return q; },
+      neq(col,val){ _filters.push(col+"=neq."+encodeURIComponent(val)); return q; },
       gte(col,val){ _filters.push(col+"=gte."+encodeURIComponent(val)); return q; },
       lt(col,val){ _filters.push(col+"=lt."+encodeURIComponent(val)); return q; },
       match(obj){ Object.entries(obj).forEach(([k,v])=>_filters.push(k+"=eq."+encodeURIComponent(v))); return q; },

@@ -56,9 +56,9 @@ function App(){
     return !!p.access_token || !!localStorage.getItem("sq_sb_session");
   });
   const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
-    const p = parseHashParams();
-    const isGoogleOAuth = !!p.access_token && !p.type;
-    return isGoogleOAuth && !localStorage.getItem("sq_pwa_shown");
+    if(localStorage.getItem("sq_pwa_shown")) return false;
+    if(window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) return false;
+    return /iphone|ipad|ipod|android/i.test(navigator.userAgent);
   });
   React.useEffect(()=>{
     const c = saved?.profile?.cursor;
@@ -187,8 +187,10 @@ function App(){
           const local = load();
           if(local?.profile?.name) { setSaved(local); }
         }
-      } catch{}
-      setSessionLoading(false);
+      } catch{
+      } finally {
+        setSessionLoading(false);
+      }
     })();
   },[]);
 
