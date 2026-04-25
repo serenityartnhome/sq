@@ -2479,16 +2479,18 @@ body{
 }
 
 .friends-view{
-  margin-left:calc(var(--rail-left) + var(--rail-w) + 18px);
-  margin-right:20px;
+  margin-left:calc(var(--rail-left) + var(--rail-w) + 10px);
+  margin-right:10px;
   margin-top:14px;
   height:calc(100vh - 185px);
-  max-width:520px;
   display:flex;
-  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
 }
-/* panel class is on friends-panel itself — override padding so inner layout controls spacing */
 .friends-panel.panel{
+  width:100%;
+  max-width:520px;
+  height:100%;
   padding:0;
 }
 
