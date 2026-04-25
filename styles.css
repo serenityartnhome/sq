@@ -2507,20 +2507,22 @@ body{
   color:var(--jade-deep);margin-top:6px;
 }
 
-.friends-view{
-  margin-left:calc(var(--rail-left) + var(--rail-w) + 10px);
-  margin-right:10px;
-  margin-top:14px;
-  height:calc(100vh - 185px);
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-}
-.friends-panel.panel{
-  width:100%;
-  max-width:520px;
-  height:100%;
-  padding:0;
+@media (min-width: 981px){
+  .friends-view{
+    margin-left:calc(var(--rail-left) + var(--rail-w) + 10px);
+    margin-right:10px;
+    margin-top:14px;
+    height:calc(100vh - 185px);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+  .friends-panel.panel{
+    width:100%;
+    max-width:520px;
+    height:100%;
+    padding:0;
+  }
 }
 
 /* ── Splash Screen ── */
