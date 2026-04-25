@@ -50,7 +50,11 @@ function App(){
     const p = parseHashParams();
     return p.type === "signup" && !!p.access_token;
   });
-  const [checkEmailMsg, setCheckEmailMsg] = React.useState(null); // email address awaiting confirmation
+  const [checkEmailMsg, setCheckEmailMsg] = React.useState(null);
+  const [sessionLoading, setSessionLoading] = React.useState(()=>{
+    const p = parseHashParams();
+    return !!p.access_token || !!localStorage.getItem("sq_sb_session");
+  });
   const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
     const p = parseHashParams();
     const isGoogleOAuth = !!p.access_token && !p.type;
@@ -117,7 +121,9 @@ function App(){
               todayData: dayData || null,
             };
             setSaved(p); save(p);
+            return true;
           }
+          return false;
         };
 
         // Handle email confirm / OAuth redirect — session arrives in URL hash
@@ -135,9 +141,7 @@ function App(){
               const session = { access_token: hash.access_token, refresh_token: hash.refresh_token||"", user };
               window.SB.auth.setSession(session);
               setAuthUser(user);
-              await loadProfile(user.id);
-              // If no profile in DB yet (email/password signup before confirmation),
-              // sync whatever was saved locally so the user doesn't lose their data
+              const found = await loadProfile(user.id);
               const local = load();
               if(local?.profile?.name){
                 try {
@@ -148,6 +152,11 @@ function App(){
                   });
                 } catch{}
               }
+              // If DB had no profile, fall back to local data so user lands on Dashboard
+              if(!found){
+                const fallback = local || load();
+                if(fallback?.profile?.name) { setSaved(fallback); save(fallback); }
+              }
               return;
             }
           } catch{}
@@ -156,7 +165,7 @@ function App(){
         const { data:{ session } } = await window.SB.auth.getSession();
         if(!session) return;
         let user = session.user;
-        if(!user && session.access_token){
+        if((!user || !user.email) && session.access_token){
           try {
             const SB_URL2 = "https://hplmgpxnbgmdmqmsuisz.supabase.co";
             const SB_KEY2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbG1ncHhuYmdtZG1xbXN1aXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2ODM3OTAsImV4cCI6MjA5MjI1OTc5MH0.eKh6KMxsyOls_3V9KoCE0b7TECFKmpbYEDCDJ4QN67A";
@@ -173,8 +182,13 @@ function App(){
         }
         if(!user) return;
         setAuthUser(user);
-        await loadProfile(user.id);
+        const found = await loadProfile(user.id);
+        if(!found){
+          const local = load();
+          if(local?.profile?.name) { setSaved(local); }
+        }
       } catch{}
+      setSessionLoading(false);
     })();
   },[]);
 
@@ -294,7 +308,14 @@ function App(){
         ? <ResetPassword accessToken={recoveryToken} onDone={()=>{ window.location.hash=""; setRecoveryToken(null); }}/>
         : showConfirmed
           ? <EmailConfirmed onContinue={()=>setShowConfirmed(false)}/>
-          : !saved
+          : sessionLoading && !saved
+            ? (
+              <div style={{position:"fixed",inset:0,background:"#2a0e1a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16}}>
+                <img src="assets/icon-lotus.png" alt="" style={{width:48,height:48,imageRendering:"pixelated",animation:"spin 1.2s linear infinite"}}/>
+                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#e8c5cc",letterSpacing:".08em"}}>Loading your quest…</div>
+              </div>
+            )
+            : !saved
             ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser} onSignOut={signOut}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}

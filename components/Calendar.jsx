@@ -59,7 +59,9 @@ function CalendarView({ habits, powerups, todayLive }){
   const numWeeks = cells.length / 7;
 
   const selKey  = selectedDay ? dateKey(selectedDay) : null;
-  const selData = selKey ? history[selKey] : null;
+  const selData = selKey
+    ? (selKey === todayStr ? { ...(history[selKey]||{}), ...todayLive } : history[selKey])
+    : null;
 
   const saveNotes = (v) => {
     setQuickNotes(v);
@@ -99,7 +101,7 @@ function CalendarView({ habits, powerups, todayLive }){
               if(!d) return <div key={`e${i}`} className="cal-cell cal-blank"/>;
               const key  = dateKey(d);
               const isToday    = key === todayStr;
-              const data = isToday ? (history[key] || todayLive) : history[key];
+              const data = isToday ? { ...(history[key]||{}), ...todayLive } : history[key];
               const isSelected = selectedDay === d;
               const hasJournal = data && (data.diary?.trim() ||
                 data.gratitude?.some(g=>g?.trim()));

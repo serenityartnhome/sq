@@ -928,21 +928,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     } catch{}
   }, [completed, mood, gratitude, powerups, diaryEntry, energyMode, diaryPhoto]);
 
-  // Debounced Supabase push
-  React.useEffect(()=>{
-    if(!userId || !window.SB) return;
-    if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current);
-    supabasePushTimer.current = setTimeout(()=>{
-      window.SB.from("daily_data").upsert({
-        user_id:userId, date:today, mood, energy,
-        completed:[...completed], powerups:[...powerups],
-        gratitude, diary:diaryEntry,
-        energy_mode: energyMode||null,
-        intention: energyMode ? energyMode.name+" "+energyMode.emoji : null,
-      },{onConflict:"user_id,date"}).then(()=>{});
-    }, 3000);
-    return ()=>{ if(supabasePushTimer.current) clearTimeout(supabasePushTimer.current); };
-  }, [completed, mood, gratitude, powerups, diaryEntry, energyMode]);
+  // Supabase push only happens via saveProgressNow (manual Save or Goodnight)
 
   const saveProgressNow = async () => {
     setSaveStatus("saving");
@@ -1047,20 +1033,36 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     run();
   }, []);
 
-  // Unlock checks when daysInFlow changes — save flags to Supabase immediately
+  // Power-ups unlock on day 2 OPEN (before completing quests) — check on mount
+  React.useEffect(()=>{
+    try {
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      const yd = new Date(); yd.setDate(yd.getDate()-1);
+      if(!hist[appDay(yd)]?.done) return; // yesterday not done — still day 1
+      if(!localStorage.getItem("sq_powerups_unlocked")){
+        localStorage.setItem("sq_powerups_unlocked","1");
+        setPowerupsUnlocked(true);
+        if(userId && window.SB) window.SB.from("profiles").upsert({ id:userId, powerups_unlocked:true },{onConflict:"id"}).then(()=>{});
+      }
+      if(!localStorage.getItem("sq_pu_announce_shown")){
+        localStorage.setItem("sq_pu_announce_shown","1");
+        setTimeout(()=>setShowPowerupsAnnounce(true), 800);
+      }
+    } catch{}
+  }, []);
+
+  // Diary + adult + photo unlocks tied to quest completion (daysInFlow updates after done=true)
   React.useEffect(()=>{
     let changed = false;
-    if(daysInFlow >= 2 && !localStorage.getItem("sq_powerups_unlocked")){ localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); changed=true; }
-    if(daysInFlow >= 2 && !localStorage.getItem("sq_pu_announce_shown")){ localStorage.setItem("sq_pu_announce_shown","1"); setTimeout(()=>setShowPowerupsAnnounce(true), 600); }
     if(daysInFlow >= 3 && !localStorage.getItem("sq_hatched")){ setTimeout(()=>setIsHatching(true), 400); }
     if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
-    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 1200); }
+    if(daysInFlow >= 3 && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 800); }
     if(daysInFlow >= 7 && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
     if(daysInFlow >= 7 && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
     if(changed && userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId,
-        powerups_unlocked: daysInFlow>=2, diary_unlocked: daysInFlow>=3,
+        diary_unlocked: daysInFlow>=3,
         adult_unlocked: daysInFlow>=7, photo_unlocked: daysInFlow>=7,
       },{onConflict:"id"}).then(()=>{});
     }
@@ -2007,25 +2009,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
       {showDiaryLocked && (
         <div className="coming-soon-overlay" onClick={()=>setShowDiaryLocked(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,textAlign:"center"}}>
             <div className="coming-soon-lock">
               <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt="locked"/>
             </div>
             <h3 className="coming-soon-title">✦ Journal Locked ✦</h3>
-            <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8}}>
-              Your journal is your private space to reflect, release, and grow. It unlocks after <strong>3 days</strong> on your quest.
-            </p>
-            <p className="coming-soon-body" style={{textAlign:"center",lineHeight:1.8,marginTop:8}}>
-              Keep showing up… even small steps count.
-            </p>
-            <p className="coming-soon-body" style={{textAlign:"center",marginTop:8}}>
-              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
-                📖 Once unlocked, you can read back through past entries any time in the <strong>Calendar</strong> tab.
-              </span>
-            </p>
-            <p style={{textAlign:"center",fontFamily:"Silkscreen,monospace",fontSize:12,color:"var(--rose)",marginTop:12}}>
-              You're on day {Math.max(daysInFlow,1)}… {3-Math.max(daysInFlow,1) > 0 ? `${3-Math.max(daysInFlow,1)} day${3-Math.max(daysInFlow,1)===1?"":"s"} to go ✦` : "almost there ✦"}
-            </p>
+            <p className="coming-soon-body">Unlocks after you complete your Day 3 quest ✦</p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
           </div>
         </div>
@@ -2034,17 +2023,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
       {showPowerupLockedMsg && (
         <div className="coming-soon-overlay" onClick={()=>setShowPowerupLockedMsg(false)}>
-          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
-            <div style={{fontSize:36,marginBottom:8}}>⚡</div>
-            <h3 className="coming-soon-title">Power-Ups Await</h3>
-            <p className="coming-soon-body" style={{lineHeight:1.9}}>
-              Come back tomorrow and your power-ups will be ready… little rituals that boost your energy and earn bonus XP.
-            </p>
-            <p className="coming-soon-body" style={{marginTop:6}}>
-              <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
-                You're on Day 1 ✦ one more day to go
-              </span>
-            </p>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,textAlign:"center"}}>
+            <div style={{fontSize:32,marginBottom:8}}>⚡</div>
+            <h3 className="coming-soon-title">Unlocks Tomorrow</h3>
+            <p className="coming-soon-body">Come back tomorrow and your power-ups will be waiting ✦</p>
             <button className="coming-soon-btn" onClick={()=>setShowPowerupLockedMsg(false)}>Got it ✦</button>
           </div>
         </div>
@@ -2054,13 +2036,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="coming-soon-overlay" onClick={()=>setShowPowerupsAnnounce(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
             <div style={{fontSize:36,marginBottom:8}}>⚡✨</div>
-            <h3 className="coming-soon-title">Power-Ups Unlocked!</h3>
+            <h3 className="coming-soon-title">You came back!!</h3>
             <p className="coming-soon-body" style={{lineHeight:1.9}}>
-              You came back… and now your power-ups are live! These are your personal rituals — the little things that give you energy and earn bonus XP.
+              Welcome to Day 2 ✦ your Power-Ups are now unlocked. These are your personal energy rituals — small daily practices that boost your XP and keep your energy high.
             </p>
             <p className="coming-soon-body" style={{marginTop:6}}>
               <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
-                Welcome to Day 2 ✦ keep going
+                Scroll down to set them up ✦
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowPowerupsAnnounce(false)}>Let's go ✦</button>
@@ -2072,13 +2054,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="coming-soon-overlay" onClick={()=>setShowDiaryAnnounce(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
             <div style={{fontSize:36,marginBottom:8}}>📖✨</div>
-            <h3 className="coming-soon-title">Your Journal is Open</h3>
+            <h3 className="coming-soon-title">Quest Complete — Journal Unlocked!</h3>
             <p className="coming-soon-body" style={{lineHeight:1.9}}>
-              Three days in… your personal journal has unlocked. A private space to reflect, track your thoughts, and watch yourself grow.
+              3 days in and you earned it ✦ Your personal journal is now open. A private space to reflect, process your day, and watch yourself grow — completely yours.
             </p>
             <p className="coming-soon-body" style={{marginTop:6}}>
               <span style={{color:"var(--jade-deep)",fontFamily:"Silkscreen,monospace",fontSize:12}}>
-                Welcome to Day 3 ✦ you're building something real
+                Find it in today's quest section ✦
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryAnnounce(false)}>Write something ✦</button>
