@@ -116,6 +116,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [composeTo,    setComposeTo]    = React.useState(null);
   const [sendAnim,     setSendAnim]     = React.useState(false);
   const [sendDone,     setSendDone]     = React.useState(false);
+  const [customMsg,    setCustomMsg]    = React.useState("");
 
   const [usernameInput, setUsernameInput] = React.useState("");
   const [usernameError, setUsernameError] = React.useState("");
@@ -125,6 +126,12 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [editUnInput,  setEditUnInput]  = React.useState("");
   const [editUnError,  setEditUnError]  = React.useState("");
   const [savingEditUn, setSavingEditUn] = React.useState(false);
+
+  const [editingName,    setEditingName]    = React.useState(false);
+  const [editFirstInput, setEditFirstInput] = React.useState("");
+  const [editLastInput,  setEditLastInput]  = React.useState("");
+  const [editNameError,  setEditNameError]  = React.useState("");
+  const [savingName,     setSavingName]     = React.useState(false);
 
   const [searchInput,  setSearchInput]  = React.useState("");
   const [searchResult, setSearchResult] = React.useState(null);
@@ -252,6 +259,21 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     setSavingEditUn(false);
   };
 
+  const saveEditName = async () => {
+    const first = editFirstInput.trim();
+    const last  = editLastInput.trim();
+    if(!first){ setEditNameError("First name required."); return; }
+    const full = last ? first+" "+last : first;
+    setSavingName(true); setEditNameError("");
+    try {
+      const { error } = await window.SB.from("profiles").update({name:full}).eq("id",userId);
+      if(error){ setEditNameError(error.message||"Could not save"); setSavingName(false); return; }
+      profile.name = full;
+      setEditingName(false);
+    } catch(e){ setEditNameError(e.message||"Could not save"); }
+    setSavingName(false);
+  };
+
   const acceptRequest = async (requestId) => {
     await window.SB.from("friends").update({status:"accepted"}).eq("id",requestId);
     load();
@@ -289,19 +311,22 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     setAddStatus(s=>({...s,[toId]: error?(error.message||"error"):"sent"}));
   };
 
-  const sendMessage = async (preset) => {
+  const sendMessage = async (preset, customText) => {
     if(!composeTo) return;
+    const content = customText || preset?.text;
+    if(!content?.trim()) return;
     setSendAnim(true);
     setTimeout(async ()=>{
       await window.SB.from("messages").insert({
         sender_id: userId,
         receiver_id: composeTo.id,
-        content: preset.text,
-        preset_key: preset.key,
+        content: content.trim(),
+        preset_key: preset?.key || null,
         read: false,
       });
       setSendAnim(false);
       setSendDone(true);
+      setCustomMsg("");
       setTimeout(()=>{ setSendDone(false); setComposeTo(null); setView("list"); }, 2000);
     }, 1200);
   };
@@ -396,6 +421,27 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                 {p.text}
               </button>
             ))}
+          </div>
+          <div className="friends-custom-msg">
+            <textarea
+              className="friends-custom-input"
+              value={customMsg}
+              onChange={e=>setCustomMsg(e.target.value.slice(0,200))}
+              placeholder="Write your own message… (200 chars)"
+              rows={3}
+              disabled={sendAnim||sendDone}
+            />
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
+              <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--plum-soft)"}}>
+                {customMsg.length}/200
+              </span>
+              <button className="friends-btn-primary"
+                      onClick={()=>sendMessage(null, customMsg)}
+                      disabled={sendAnim||sendDone||!customMsg.trim()}
+                      style={{padding:"8px 16px"}}>
+                Send ✦
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -515,6 +561,41 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
               </div>
             )}
           </div>
+          <div className="friends-un-display" style={{marginBottom:12}}>
+            <span className="friends-settings-label">Your name</span>
+            {editingName ? (
+              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%",marginTop:6}}>
+                <div style={{display:"flex",gap:8}}>
+                  <input className="friends-un-input" style={{flex:1,maxWidth:"100%",boxSizing:"border-box"}}
+                    value={editFirstInput}
+                    onChange={e=>{ setEditFirstInput(e.target.value); setEditNameError(""); }}
+                    placeholder="First name" maxLength={24}/>
+                  <input className="friends-un-input" style={{flex:1,maxWidth:"100%",boxSizing:"border-box"}}
+                    value={editLastInput}
+                    onChange={e=>setEditLastInput(e.target.value)}
+                    placeholder="Last name" maxLength={24}/>
+                </div>
+                {editNameError && <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)"}}>{editNameError}</span>}
+                <div style={{display:"flex",gap:8}}>
+                  <button className="friends-btn-primary" onClick={saveEditName} disabled={savingName} style={{padding:"8px 16px"}}>
+                    {savingName?"Saving…":"Save ✦"}
+                  </button>
+                  <button className="friends-btn-cancel" onClick={()=>{ setEditingName(false); setEditNameError(""); }}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}>
+                <span className="friends-un-badge">{profile.name||"—"}</span>
+                <button className="friends-btn-edit" onClick={()=>{
+                  const parts = (profile.name||"").split(" ");
+                  setEditFirstInput(parts[0]||"");
+                  setEditLastInput(parts.slice(1).join(" ")||"");
+                  setEditingName(true);
+                }}>Edit</button>
+              </div>
+            )}
+          </div>
+
           <div className="friends-toggle-row">
             <div>
               <div className="friends-settings-label">Share mood</div>
@@ -688,7 +769,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                 <div className="friends-card-info">
                   <div className="friends-card-name">{firstName(f.name)||f.username}</div>
                   <div className="friends-card-un">@{f.username}</div>
-                  {f.share_mood && f.today_mood && (
+                  {(f.share_mood !== false) && f.today_mood && (
                     <div className="friends-card-mood">
                       {MOOD_EMOJI[f.today_mood]||"✨"} {f.today_mood}
                     </div>
