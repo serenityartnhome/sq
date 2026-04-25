@@ -1511,7 +1511,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
               <div className="pet-on-cloud">
                 {(()=>{
-                  const sz = Math.round(Math.min(140, window.innerHeight*0.14));
+                  const sz = Math.round(Math.min(180, window.innerHeight*0.18));
                   const petMood = isSleeping?"tired":justWokeUp?"happy":(celebrating?"happy":(mood||"neutral"));
                   if((petStage==="adult"||petStage==="final") && !isHatching)
                     return <ZodiacPet animal={animal} mood={petMood} happy={(celebrating||justWokeUp)&&!isSleeping} size={sz}/>;
