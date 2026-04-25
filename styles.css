@@ -470,6 +470,12 @@ body{
   line-height:1.4;
   overflow:visible;
 }
+.bubble-text{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
 .bubble::after{
   content:"";position:absolute;left:30px;bottom:-10px;width:12px;height:12px;
   background:var(--cream);border-right:2px solid var(--plum);border-bottom:2px solid var(--plum);
