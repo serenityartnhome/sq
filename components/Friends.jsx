@@ -98,6 +98,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [messages,     setMessages]     = React.useState([]);
   const [unread,       setUnread]       = React.useState(0);
   const [loading,      setLoading]      = React.useState(true);
+  const [loadError,    setLoadError]    = React.useState(false);
   const [selectedLetter, setSelectedLetter] = React.useState(null);
   const [composeTo,    setComposeTo]    = React.useState(null);
   const [sendAnim,     setSendAnim]     = React.useState(false);
@@ -128,7 +129,13 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   const load = async () => {
     setLoading(true);
-    try { await Promise.all([loadFriends(), loadMessages()]); } catch{}
+    setLoadError(false);
+    try {
+      const timeout = new Promise((_,rej)=>setTimeout(()=>rej("timeout"),8000));
+      await Promise.race([Promise.all([loadFriends(), loadMessages()]), timeout]);
+    } catch{
+      setLoadError(true);
+    }
     setLoading(false);
   };
 
@@ -567,6 +574,18 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           <div className="friends-my-un">@{username}</div>
         </div>
         <div className="friends-header-icons">
+          <button className="friends-icon-btn" onClick={()=>{
+            const shareData = {
+              title:"Serenity Quest",
+              text:`Join me on Serenity Quest — a daily wellness journey ✦\nFind me as @${username}`,
+              url:"https://app.serenityartnhome.com"
+            };
+            if(navigator.share) navigator.share(shareData).catch(()=>{});
+            else { navigator.clipboard?.writeText(shareData.url+"  @"+username).catch(()=>{}); }
+          }} title="Share">
+            <img src="assets/icon-share.png?v=1" width={28} height={28}
+                 style={{imageRendering:"pixelated"}} alt="share"/>
+          </button>
           <button className="friends-icon-btn" onClick={openInbox} title="Inbox">
             <img src="assets/icon-mail.png" width={28} height={28}
                  style={{imageRendering:"pixelated"}} alt="mail"/>
@@ -580,6 +599,14 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
       </div>
 
       {loading && <div className="friends-loading">Loading…</div>}
+      {!loading && loadError && (
+        <div className="friends-empty">
+          <p>Couldn't load — check your connection.</p>
+          <button className="friends-btn-primary" onClick={load} style={{marginTop:12}}>
+            Try again ✦
+          </button>
+        </div>
+      )}
 
       {!loading && <>
         {/* Pending requests */}
