@@ -584,6 +584,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [customHabits, setCustomHabits] = React.useState(()=>{
     try { return JSON.parse(localStorage.getItem("sq_custom_habits")||"[]"); } catch{ return []; }
   });
+  const [habitTypeOverrides, setHabitTypeOverrides] = React.useState(()=>{
+    try { return JSON.parse(localStorage.getItem("sq_habit_type_overrides")||"{}"); } catch{ return {}; }
+  });
+  const toggleHabitType = (id) => {
+    setHabitTypeOverrides(prev => {
+      const current = id in prev ? prev[id] : (habits.find(h=>h.id===id)?.required !== false);
+      const next = { ...prev, [id]: !current };
+      localStorage.setItem("sq_habit_type_overrides", JSON.stringify(next));
+      return next;
+    });
+  };
+  const isMainQuest = (h) => {
+    if(h.id in habitTypeOverrides) return habitTypeOverrides[h.id];
+    return h.required !== false;
+  };
   const [activeHabitIds, setActiveHabitIds] = React.useState(()=>{
     try {
       const s = localStorage.getItem("sq_active_habits");
@@ -1594,7 +1609,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           <div>
             {/* Main Quests */}
             <div className="quest-section-label">✦ Main Quests</div>
-            {activeHabits.filter(h=>h.required!==false).map(h=>(
+            {activeHabits.filter(h=>isMainQuest(h)).map(h=>(
               <label key={h.id} className={"check "+(completed.has(h.id)?"done":"")}>
                 <input type="checkbox" style={{display:"none"}}
                   checked={completed.has(h.id)} onChange={()=>toggleHabit(h.id)}/>
@@ -1619,9 +1634,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </label>
 
             {/* Side Quests */}
-            {activeHabits.filter(h=>h.required===false).length > 0 && <>
+            {activeHabits.filter(h=>!isMainQuest(h)).length > 0 && <>
               <div className="quest-section-label" style={{marginTop:10}}>✦ Side Quests</div>
-              {activeHabits.filter(h=>h.required===false).map(h=>(
+              {activeHabits.filter(h=>!isMainQuest(h)).map(h=>(
                 <label key={h.id} className={"check "+(completed.has(h.id)?"done":"")}>
                   <input type="checkbox" style={{display:"none"}}
                     checked={completed.has(h.id)} onChange={()=>toggleHabit(h.id)}/>
@@ -1648,11 +1663,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <div className="pu-picker-grid">
                 {allHabits.map(h=>{
                   const on = activeHabitIds.includes(h.id);
+                  const main = isMainQuest(h);
                   return (
                     <button key={h.id} className={"pu-pick-btn "+(on?"on":"")}
                       onClick={()=>toggleActiveHabit(h.id)}>
                       <HabitIcon kind={h.kind||"sparkle"} size={30}/>
                       <span>{h.label}</span>
+                      <span className={"quest-type-tag "+(main?"main":"side")}
+                        onClick={e=>{e.stopPropagation();toggleHabitType(h.id);}}>
+                        {main?"Main":"Side"}
+                      </span>
                       {h.custom && <span className="pu-remove" onClick={e=>{e.stopPropagation();removeCustomHabit(h.id);}}>✕</span>}
                     </button>
                   );

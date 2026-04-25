@@ -191,6 +191,27 @@ body{
   display:flex;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;
   font-family:"Silkscreen",monospace;font-size:10px;color:var(--gold);font-weight:700;
 }
+.quest-type-tag{
+  font-family:"Silkscreen",monospace;
+  font-size:8px;
+  padding:2px 5px;
+  border-radius:0;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-left:auto;
+  flex-shrink:0;
+}
+.quest-type-tag.main{
+  background:var(--blush);
+  color:var(--plum);
+  border:1px solid var(--rose);
+}
+.quest-type-tag.side{
+  background:rgba(100,180,120,.15);
+  color:#3a7a50;
+  border:1px solid #5aaa78;
+}
 .quest-section-label{
   font-family:"Silkscreen",monospace;
   font-size:9px;
