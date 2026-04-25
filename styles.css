@@ -2041,6 +2041,448 @@ body{
   .pet-energy-bar{ margin-top:0; }
 }
 
+/* ============================================================
+   FRIENDS — social panel
+   ============================================================ */
+.friends-panel{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  background:var(--cream);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:80px;
+  min-height:0;
+}
+.friends-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px 10px;
+  border-bottom:2px solid var(--blush);
+  background:var(--cream);
+  position:sticky;top:0;z-index:10;
+  flex-shrink:0;
+}
+.friends-title{
+  font-family:"Silkscreen",monospace;
+  font-size:14px;color:var(--plum);
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.friends-header-title{
+  font-family:"Silkscreen",monospace;
+  font-size:11px;color:var(--plum);
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.friends-my-un{
+  font-family:"Silkscreen",monospace;
+  font-size:9px;color:var(--plum-soft);
+}
+.friends-back{
+  font-family:"Silkscreen",monospace;
+  font-size:9px;color:var(--plum);
+  background:none;border:none;cursor:pointer;padding:4px 0;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.friends-header-icons{
+  display:flex;gap:6px;align-items:center;
+}
+.friends-icon-btn{
+  position:relative;
+  background:none;border:none;cursor:pointer;padding:4px;
+  display:flex;align-items:center;justify-content:center;
+}
+.friends-badge{
+  position:absolute;top:-2px;right:-2px;
+  background:var(--rose);color:var(--plum);
+  font-family:"Silkscreen",monospace;font-size:8px;
+  min-width:16px;height:16px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--cream);
+  pointer-events:none;
+}
+.friends-section{
+  padding:12px 14px 4px;
+}
+.friends-loading{
+  font-family:"Silkscreen",monospace;
+  font-size:9px;color:var(--plum-soft);
+  text-align:center;padding:32px;
+}
+.friends-empty{
+  padding:24px 16px;text-align:center;
+  font-family:"Pixelify Sans",sans-serif;
+  font-size:13px;color:var(--plum-soft);line-height:1.8;
+}
+
+/* ── Friend card ─────────────────────────────────────────────── */
+.friends-card{
+  display:flex;align-items:center;gap:10px;
+  background:var(--parchment);
+  border:2px solid var(--blush);
+  padding:10px 12px;
+  margin-bottom:8px;
+}
+.friends-card-info{ flex:1;min-width:0; }
+.friends-card-name{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.friends-card-un{
+  font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum-soft);
+  margin-top:2px;
+}
+.friends-card-mood{
+  font-family:"Pixelify Sans",sans-serif;font-size:11px;
+  color:var(--plum-soft);margin-top:4px;
+}
+.friends-card-grat{
+  font-family:"Pixelify Sans",sans-serif;font-size:11px;
+  color:var(--plum-soft);font-style:italic;
+  margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.friends-send-btn{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--plum);
+  background:var(--cream);border:2px solid var(--gold);
+  padding:6px 10px;cursor:pointer;white-space:nowrap;
+  flex-shrink:0;
+}
+.friends-send-btn:hover{ background:var(--blush-soft); }
+
+/* ── Friend request card ─────────────────────────────────────── */
+.friends-request-card{
+  display:flex;align-items:center;gap:10px;
+  background:var(--blush-soft);
+  border:2px solid var(--rose);
+  padding:10px 12px;
+  margin-bottom:8px;
+}
+.friends-request-info{ flex:1;min-width:0; }
+.friends-request-name{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);text-transform:uppercase;
+}
+.friends-request-un{
+  font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum-soft);
+}
+.friends-request-btns{ display:flex;gap:6px;flex-shrink:0; }
+.friends-btn-accept{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  background:var(--jade);color:#fff;border:2px solid var(--jade-deep);
+  padding:6px 10px;cursor:pointer;
+}
+.friends-btn-decline{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  background:none;color:var(--plum-soft);border:2px solid var(--rose);
+  padding:4px 8px;cursor:pointer;
+}
+
+/* ── Add friend button ───────────────────────────────────────── */
+.friends-add-btn{
+  margin:10px 14px 4px;
+  width:calc(100% - 28px);
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);
+  background:var(--cream);border:2px dashed var(--gold);
+  padding:12px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.friends-add-btn:hover{ background:var(--blush-soft);border-style:solid; }
+
+/* ── Add friend / search ─────────────────────────────────────── */
+.friends-add-body{ padding:16px; }
+.friends-add-hint{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum-soft);text-transform:uppercase;
+  letter-spacing:.04em;margin-bottom:12px;
+}
+.friends-search-row{ display:flex;gap:8px; }
+.friends-search-input{
+  flex:1;
+  font-family:"Pixelify Sans",sans-serif;font-size:14px;
+  color:var(--plum);background:var(--parchment);
+  border:2px solid var(--rose);padding:8px 10px;outline:none;
+}
+.friends-search-input:focus{ border-color:var(--plum); }
+.friends-btn-search{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  background:var(--plum);color:var(--cream);
+  border:2px solid var(--plum);padding:8px 12px;cursor:pointer;
+  text-transform:uppercase;
+}
+.friends-searching{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum-soft);text-align:center;padding:16px;
+}
+.friends-search-result{ margin-top:16px; }
+.friends-search-msg{
+  font-family:"Pixelify Sans",sans-serif;font-size:13px;
+  color:var(--plum-soft);text-align:center;padding:12px;
+}
+.friends-result-card{
+  display:flex;align-items:center;gap:10px;
+  background:var(--parchment);border:2px solid var(--blush);
+  padding:12px;
+}
+.friends-result-info{ flex:1;min-width:0; }
+.friends-result-name{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);text-transform:uppercase;
+}
+.friends-result-un{
+  font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum-soft);
+  margin-top:2px;
+}
+.friends-rel-tag{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--plum-soft);padding:4px 6px;
+  border:2px solid var(--blush);background:var(--cream);
+}
+.friends-btn-add{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--cream);background:var(--plum);
+  border:2px solid var(--plum);padding:8px 12px;cursor:pointer;
+}
+
+/* ── Inbox ───────────────────────────────────────────────────── */
+.friends-inbox-list{ padding:8px; }
+.friends-inbox-row{
+  width:100%;display:flex;align-items:center;gap:10px;
+  background:var(--parchment);border:2px solid var(--blush);
+  padding:10px 12px;margin-bottom:6px;
+  cursor:pointer;text-align:left;
+}
+.friends-inbox-row.unread{ border-color:var(--rose);background:var(--blush-soft); }
+.friends-inbox-row:hover{ background:var(--cream); }
+.friends-inbox-info{ flex:1;min-width:0; display:flex;flex-direction:column;gap:2px; }
+.friends-inbox-name{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);text-transform:uppercase;
+}
+.friends-inbox-preview{
+  font-family:"Pixelify Sans",sans-serif;font-size:12px;
+  color:var(--plum-soft);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.friends-inbox-meta{ display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0; }
+.friends-inbox-date{
+  font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum-soft);
+}
+.friends-inbox-dot{
+  width:8px;height:8px;background:var(--rose);border-radius:50%;
+  border:2px solid var(--cream);
+}
+
+/* ── Letter / parchment ──────────────────────────────────────── */
+.friends-letter-parchment{
+  margin:16px;
+  background:var(--parchment-deep);
+  border:3px solid var(--gold);
+  padding:24px 20px 28px;
+  box-shadow:4px 4px 0 rgba(92,42,53,.18);
+  display:flex;flex-direction:column;gap:12px;
+}
+.friends-letter-top{
+  display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--gold);padding-bottom:8px;
+}
+.friends-letter-from{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum);text-transform:uppercase;
+}
+.friends-letter-date{
+  font-family:"Silkscreen",monospace;font-size:8px;color:var(--plum-soft);
+}
+.friends-letter-seal{
+  font-size:22px;text-align:center;color:var(--gold);letter-spacing:.2em;
+}
+.friends-letter-body{
+  font-family:"Pixelify Sans",sans-serif;font-size:16px;
+  color:var(--plum);line-height:1.8;text-align:center;
+  padding:8px 0;
+}
+.friends-letter-footer{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--plum-soft);text-align:right;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+
+/* ── Compose view ────────────────────────────────────────────── */
+.friends-compose-body{ padding:20px 16px; }
+.friends-compose-to{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:20px;
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum);text-transform:uppercase;
+}
+.friends-compose-name{ font-size:10px; }
+.friends-send-stage{
+  display:flex;justify-content:center;align-items:center;
+  height:90px;margin-bottom:20px;overflow:hidden;
+}
+.friends-my-pet{
+  transition:transform 1s cubic-bezier(.4,.0,.6,1), opacity .8s ease;
+}
+.friends-my-pet.pet-walk-out{
+  transform:translateX(160px);
+  opacity:0;
+}
+.friends-sent-confirm{
+  font-family:"Silkscreen",monospace;font-size:11px;
+  color:var(--jade-deep);text-transform:uppercase;
+  letter-spacing:.06em;
+  animation:slideUpFade .4s ease both;
+}
+.friends-presets{
+  display:flex;flex-direction:column;gap:10px;
+}
+.friends-preset-btn{
+  width:100%;
+  font-family:"Pixelify Sans",sans-serif;font-size:15px;
+  color:var(--plum);
+  background:var(--parchment);
+  border:2px solid var(--gold);
+  padding:14px 16px;cursor:pointer;text-align:left;
+  transition:background .1s steps(2);
+}
+.friends-preset-btn:hover:not(:disabled){ background:var(--blush-soft); }
+.friends-preset-btn:disabled{ opacity:.45;cursor:default; }
+
+/* ── Username setup ──────────────────────────────────────────── */
+.friends-username-setup{
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 24px;text-align:center;
+}
+.friends-setup-title{
+  font-family:"Silkscreen",monospace;font-size:13px;
+  color:var(--plum);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:10px;
+}
+.friends-setup-body{
+  font-family:"Pixelify Sans",sans-serif;font-size:13px;
+  color:var(--plum-soft);line-height:1.8;margin-bottom:20px;
+}
+.friends-un-input{
+  width:100%;max-width:280px;
+  font-family:"Pixelify Sans",sans-serif;font-size:16px;
+  color:var(--plum);background:var(--parchment);
+  border:2px solid var(--rose);padding:10px 12px;
+  outline:none;margin-bottom:8px;box-sizing:border-box;
+}
+.friends-un-input:focus{ border-color:var(--plum); }
+.friends-un-error{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--rose);text-align:center;margin-bottom:10px;
+}
+.friends-btn-primary{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--cream);background:var(--plum);
+  border:2px solid var(--plum);
+  padding:12px 24px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.friends-btn-primary:hover{ background:var(--plum-soft); }
+.friends-btn-primary:disabled{ opacity:.5;cursor:default; }
+
+/* ── Privacy / settings ──────────────────────────────────────── */
+.friends-settings-body{ padding:16px; }
+.friends-un-display{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--parchment);border:2px solid var(--blush);
+  padding:10px 12px;margin-bottom:16px;
+}
+.friends-settings-label{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum);text-transform:uppercase;letter-spacing:.04em;
+}
+.friends-un-badge{
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:var(--plum-soft);
+}
+.friends-toggle-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--blush);
+  gap:12px;
+}
+.friends-settings-desc{
+  font-family:"Pixelify Sans",sans-serif;font-size:11px;
+  color:var(--plum-soft);margin-top:4px;
+}
+.friends-toggle{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum-soft);
+  background:var(--blush-soft);border:2px solid var(--rose);
+  padding:8px 12px;cursor:pointer;
+  flex-shrink:0;text-transform:uppercase;min-width:48px;
+}
+.friends-toggle.on{
+  background:var(--jade);color:#fff;border-color:var(--jade-deep);
+}
+
+/* ── Incoming message walk-in overlay ────────────────────────── */
+@keyframes friendWalkIn{
+  from{ transform:translateX(-200px); opacity:0; }
+  to  { transform:translateX(0);      opacity:1; }
+}
+@keyframes friendWalkOut{
+  from{ transform:translateX(0);      opacity:1; }
+  to  { transform:translateX(-200px); opacity:0; }
+}
+.friend-notif-wrap{
+  position:fixed;
+  bottom:90px;left:12px;
+  z-index:800;
+  display:flex;align-items:flex-end;gap:10px;
+  cursor:pointer;
+}
+.friend-notif-wrap.notif-in{
+  animation:friendWalkIn .9s cubic-bezier(.2,.8,.4,1) both;
+}
+.friend-notif-wrap.notif-show{
+  transform:translateX(0);opacity:1;
+}
+.friend-notif-wrap.notif-out{
+  animation:friendWalkOut .9s cubic-bezier(.6,.0,.8,.2) both;
+}
+.friend-notif-bubble{
+  background:var(--cream);
+  border:2px solid var(--gold);
+  padding:10px 12px;
+  max-width:200px;
+  box-shadow:3px 3px 0 rgba(92,42,53,.2);
+  animation:slideUpFade .3s ease both;
+  position:relative;
+}
+.friend-notif-bubble::before{
+  content:"";
+  position:absolute;bottom:12px;left:-8px;
+  border:4px solid transparent;
+  border-right-color:var(--gold);
+}
+.friend-notif-name{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--plum-soft);text-transform:uppercase;
+  margin-bottom:4px;
+}
+.friend-notif-text{
+  font-family:"Pixelify Sans",sans-serif;font-size:13px;
+  color:var(--plum);line-height:1.5;
+}
+.friend-notif-energy{
+  font-family:"Silkscreen",monospace;font-size:8px;
+  color:var(--jade-deep);margin-top:6px;
+}
+
+/* community-view already used — match friends-view */
+.friends-view{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;min-height:0;
+}
+
 /* ── Splash Screen ── */
 .splash-screen{
   position:fixed;inset:0;z-index:10000;

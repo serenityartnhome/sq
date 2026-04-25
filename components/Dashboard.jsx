@@ -688,6 +688,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showPhotoLocked, setShowPhotoLocked] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
+  const [friendsBonus, setFriendsBonus] = React.useState(()=>{
+    const v = parseInt(localStorage.getItem("sq_friends_bonus_"+appDay())||"0",10);
+    return isNaN(v)?0:v;
+  });
+  const handleEnergyBoost = (amount) => {
+    setFriendsBonus(prev=>{
+      const n = Math.min(prev+amount, 20);
+      localStorage.setItem("sq_friends_bonus_"+appDay(), String(n));
+      return n;
+    });
+  };
   const [showShopPrompt, setShowShopPrompt] = React.useState(false);
   const [saveStatus, setSaveStatus] = React.useState(null); // null | "saving" | "saved" | "error"
   const [isSleeping, setIsSleeping] = React.useState(()=> localStorage.getItem("sq_sleep_date") === appDay());
@@ -1064,7 +1075,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     ];
     earned += activeOptional.filter(h => completed.has(h.id)).length * 9;
     earned += specialQuestsToday.filter(q => completed.has(q.id)).length * 9;
-    return Math.min(100, Math.round(earned));
+    return Math.min(100, Math.round(earned) + friendsBonus);
   };
 
   const saveProgressNow = async () => {
@@ -1114,6 +1125,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             powerups_unlocked: powerupsUnlocked,
             custom_energy: savedCustomEnergy||null,
             pet_stage: newStage, stage_xp: newXP,
+            animal: animal||null,
+            today_mood: mood||null,
+            today_gratitude: gratitude.filter(g=>g.trim()),
           },{onConflict:"id"}),
         ]);
         if(error) throw error;
@@ -1491,10 +1505,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <button className={"rail-btn "+(tab==="calendar"?"active":"")} onClick={()=>{ setTab("calendar"); showTip("calendar"); }}>
           <Icon name="calendar" size={54}/>Calendar
         </button>
-        <button className="rail-btn" onClick={()=>setShowFriendsSoon(true)}>
+        <button className={"rail-btn "+(tab==="friends"?"active":"")}
+          onClick={()=>{ if(isAdmin){ setTab("friends"); } else { setShowFriendsSoon(true); } }}>
           <div style={{position:"relative",display:"inline-block"}}>
             <img src="assets/icon-heart.png?v=1" width={54} height={54} style={{imageRendering:"pixelated"}} alt="friends"/>
-            <img src="assets/icon-lock.png?v=1" style={{imageRendering:"pixelated",position:"absolute",bottom:2,right:2,width:16,height:16}} alt=""/>
+            {!isAdmin && <img src="assets/icon-lock.png?v=1" style={{imageRendering:"pixelated",position:"absolute",bottom:2,right:2,width:16,height:16}} alt=""/>}
           </div>
           Friends
         </button>
@@ -1528,6 +1543,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
+      {tab === "friends" && (
+        <div className="friends-view">
+          <Friends
+            userId={userId}
+            profile={profile}
+            animal={animal}
+            petStage={petStage}
+            onEnergyBoost={handleEnergyBoost}
+          />
+        </div>
+      )}
+
+      {/* Incoming message walk-in — shown once per session on app open */}
+      {userId && window.FriendMessageNotif && (
+        <FriendMessageNotif userId={userId} onBoost={handleEnergyBoost}/>
+      )}
+
       {showSignOut && (
         <div className="coming-soon-overlay" onClick={()=>setShowSignOut(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
@@ -1546,7 +1578,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
-      <div className="dash-grid-4" style={{display: (tab==="calendar"||tab==="community")?"none":"grid"}}>
+      <div className="dash-grid-4" style={{display: (tab==="calendar"||tab==="community"||tab==="friends")?"none":"grid"}}>
 
         {/* TOP LEFT: Zodiac + Intention — no frame */}
         <div className="dash-zodiac-panel">
