@@ -1503,9 +1503,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <div className="bubble-wrap">
               <div className="bubble" key={petBubble}>
-                <div className="bubble-inner">
-                  {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
-                </div>
+                {petStage === "egg" ? EGG_SOUNDS[Math.floor(Date.now()/6500) % EGG_SOUNDS.length] : petBubble}
               </div>
             </div>
             <div className="pet-cloud-stage" onClick={()=>{ showTip("pet", ()=>setShowPetMenu(true)); }} style={{cursor:"pointer",opacity:isSleeping?.45:1,transition:"opacity .6s",filter:isSleeping?"saturate(.3) brightness(.6)":"none"}} title="My account">
