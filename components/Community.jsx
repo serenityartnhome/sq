@@ -79,7 +79,8 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const loadFlagged = async () => {
     setAdminLoading(true);
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const _t = new Date(new Date().getTime() - 3*60*60*1000);
+      const today = _t.toLocaleDateString("en-CA");
       const [{ data: modData }, { data: profileData }, { data: postsData }, { data: activeData }, { data: newData }] = await Promise.all([
         window.SB.from("moderation_log").select("*").order("created_at", {ascending:false}),
         window.SB.from("profiles").select("id"),
