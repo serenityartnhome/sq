@@ -513,7 +513,8 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
             {unread > 0 && <span className="friends-badge">{unread > 9?"9+":unread}</span>}
           </button>
           <button className="friends-icon-btn" onClick={()=>setView("settings")} title="Privacy">
-            <HabitIcon kind="lotus" size={28}/>
+            <img src="assets/icon-friends.png?v=1" width={28} height={28}
+                 style={{imageRendering:"pixelated"}} alt="settings"/>
           </button>
         </div>
       </div>

@@ -1450,7 +1450,7 @@ body{
   .grat-half{ flex-direction:column; }
   .diary-col{ flex:0 0 auto;width:100%;flex-direction:row;justify-content:center;gap:12px; }
   .community-view{ margin-left:0;margin-right:0;height:auto;overflow-y:visible; }
-  .friends-view{ margin-left:0;margin-right:0;margin-top:0;height:auto;max-width:100%; }
+  .friends-view{ margin-left:0;margin-right:0;margin-top:0;height:auto;max-width:100%;overflow:visible; }
   .cal-view{
     flex-direction:column;height:auto;margin-left:0;margin-right:0;
     overflow-y:auto;
@@ -2049,10 +2049,10 @@ body{
   flex:1;
   display:flex;
   flex-direction:column;
-  background:var(--cream);
+  background:transparent;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  padding-bottom:80px;
+  padding-bottom:60px;
   min-height:0;
 }
 .friends-header{
@@ -2483,8 +2483,12 @@ body{
   margin-right:20px;
   margin-top:14px;
   height:calc(100vh - 185px);
-  overflow-y:auto;
   max-width:520px;
+  /* override .panel padding so the inner panel controls its own spacing */
+  padding:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 
 /* ── Splash Screen ── */
