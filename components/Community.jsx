@@ -225,10 +225,14 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const saveEditedNotice = async () => {
     if(!editingText.trim() || !editingNotice) return;
     const id = editingNotice.id;
-    setNotices(prev => prev.map(n => n.id === id ? {...n, content: editingText.trim()} : n));
+    const newContent = editingText.trim();
     setEditingNotice(null);
     setEditingText("");
-    try { await window.SB.from("community_notices").update({content: editingText.trim()}).eq("id", id); } catch {}
+    const { error } = await window.SB.from("community_notices").update({content: newContent}).eq("id", id);
+    if(error) {
+      console.error("Notice update failed:", error.message, error.code);
+    }
+    await loadNotices();
   };
 
   const timeAgo = (ts) => {
