@@ -204,12 +204,13 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
     if(!noticeInput.trim() || postingNotice) return;
     setPostingNotice(true);
     try {
-      const { data } = await window.SB.from("community_notices")
-        .insert({ content: noticeInput.trim(), admin_id: userId })
-        .select().single();
-      if(data) setNotices(prev => [data, ...prev]);
-      setNoticeInput("");
-      setShowNoticeCompose(false);
+      const { error } = await window.SB.from("community_notices")
+        .insert({ content: noticeInput.trim(), admin_id: userId });
+      if(!error) {
+        await loadNotices();
+        setNoticeInput("");
+        setShowNoticeCompose(false);
+      }
     } catch {}
     setPostingNotice(false);
   };
