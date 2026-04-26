@@ -1802,7 +1802,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             if(activeDuoQuest && activeDuoQuest.status === "active") return (
               <div className="duo-quest-card">
                 <div className="duo-quest-header">
-                  <span className="duo-quest-label">✦ Duo Quest</span>
+                  <div>
+                    <div className="duo-quest-label">⚔ Duo Quest ✦</div>
+                    <div className="duo-quest-subtitle">adventure in progress</div>
+                  </div>
                   <span className="duo-quest-days">{activeDuoQuest.days_completed}/{activeDuoQuest.total_days} days</span>
                 </div>
                 <div className="duo-quest-name">{activeDuoQuest.quest_name}</div>
@@ -1811,16 +1814,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   <div className="duo-quest-bar" style={{width:`${Math.round((activeDuoQuest.days_completed/activeDuoQuest.total_days)*100)}%`}}/>
                 </div>
                 {duoBothDone ? (
-                  <div className="duo-quest-celebration">✦ Both done! Day {activeDuoQuest.days_completed} complete! ✦</div>
+                  <div className="duo-quest-celebration">⚔ Both adventurers triumphed! Day {activeDuoQuest.days_completed} complete! ✦</div>
                 ) : myDoneToday ? (
-                  <div className="duo-quest-waiting">You're done ✦ Waiting for {partnerName}…</div>
+                  <div className="duo-quest-waiting">⚔ Your day is done. Awaiting {partnerName}…</div>
                 ) : partnerDoneToday ? (
                   <button className="duo-quest-btn" onClick={markDuoDone}>
-                    {partnerName} is done — your turn! ✦
+                    {partnerName} pressed on — now it's your turn! ✦
                   </button>
                 ) : (
                   <button className="duo-quest-btn" onClick={markDuoDone}>
-                    Mark done today ✦
+                    ✦ Complete today's challenge
                   </button>
                 )}
               </div>
@@ -1828,16 +1831,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
             if(activeDuoQuest && activeDuoQuest.status === "completed") return (
               <div className="duo-quest-card duo-quest-complete-card">
-                <div className="duo-quest-label">✦ Duo Quest Complete!</div>
+                <div className="duo-quest-label">⚔ Adventure Complete ✦</div>
                 <div className="duo-quest-name">{activeDuoQuest.quest_name}</div>
-                <div className="duo-quest-partner">with {partnerName} — {activeDuoQuest.total_days} days together ✦</div>
+                <div className="duo-quest-partner">with {partnerName} · {activeDuoQuest.total_days} days side by side ✦</div>
+                <div className="duo-quest-complete-msg">Your tale will be remembered.</div>
               </div>
             );
 
             if(pendingDuoIn) return (
               <div className="duo-quest-card duo-quest-pending-card">
-                <div className="duo-quest-label">✦ Duo Quest Invite</div>
-                <div className="duo-quest-name">{pendingDuoIn.quest_name}</div>
+                <div className="duo-quest-label">⚔ A Party Invite Awaits ✦</div>
+                <div className="duo-quest-subtitle">will you answer the call?</div>
+                <div className="duo-quest-name" style={{marginTop:6}}>{pendingDuoIn.quest_name}</div>
                 <div className="duo-quest-partner">from {(n=>(n||"").split(" ")[0]||(n||""))(pendingDuoIn.requester?.name)||pendingDuoIn.requester?.username||"a friend"} · {pendingDuoIn.total_days} days</div>
                 <div style={{display:"flex",gap:8,marginTop:10}}>
                   <button className="duo-quest-btn" onClick={acceptDuoFromDash} style={{flex:1}}>Accept ✦</button>
@@ -1849,8 +1854,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
             return (
               <div className="duo-quest-empty" onClick={()=>setShowDuoExplain(true)}>
-                <span className="duo-quest-label" style={{fontSize:9}}>✦ Duo Quest</span>
-                <span style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)"}}>Journey together with a friend →</span>
+                <div>
+                  <div className="duo-quest-label" style={{marginBottom:3}}>⚔ Duo Quest ✦</div>
+                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum)",fontWeight:600,marginBottom:2}}>Go on an adventure with a companion</div>
+                  <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>No party formed yet — begin your journey ✦</div>
+                </div>
+                <span style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--rose)"}}>→</span>
               </div>
             );
           })()}
@@ -2639,16 +2648,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {showDuoExplain && (
         <div className="coming-soon-overlay" onClick={()=>setShowDuoExplain(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
-            <div style={{fontSize:36,marginBottom:8}}>✦✦</div>
+            <div style={{fontSize:32,marginBottom:8,letterSpacing:4}}>⚔ ✦ ⚔</div>
             <h3 className="coming-soon-title">Duo Quest</h3>
             <p className="coming-soon-body" style={{lineHeight:1.9}}>
-              Journey side by side with a friend ✦<br/>
-              Choose a shared quest, set your days, and both must complete it on the same day for it to count.<br/>
-              <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)"}}>
-                Start one from your Friends tab ✦
+              Every great adventure is better shared.<br/>
+              Choose a quest, set your days, and venture forth together — both must complete it on the same day for it to count.<br/>
+              <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--plum-soft)"}}>
+                Miss a day and the streak is broken. Stand together or fall apart.
               </span>
             </p>
-            <button className="coming-soon-btn" onClick={()=>setShowDuoExplain(false)}>Got it ✦</button>
+            <p style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)",marginTop:8,marginBottom:16}}>
+              Start one from your Friends tab ✦
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowDuoExplain(false)}>Answer the Call ✦</button>
           </div>
         </div>
       )}

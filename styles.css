@@ -2637,20 +2637,25 @@ body{
 
 /* ── Duo Quest ───────────────────────────────────────────────── */
 .duo-quest-card{
-  background:#fff;
+  background:linear-gradient(135deg,#fff8fd 0%,#fff 100%);
   border:2px solid var(--rose);
   padding:12px 14px;
   margin-bottom:12px;
+  box-shadow:2px 2px 0 rgba(201,127,165,.18);
 }
-.duo-quest-complete-card{ border-color:var(--gold); background:#fffbef; }
-.duo-quest-pending-card{ border-color:var(--plum-soft); }
+.duo-quest-complete-card{ border-color:var(--gold); background:linear-gradient(135deg,#fffef0 0%,#fffbef 100%); }
+.duo-quest-pending-card{ border-color:var(--plum-soft); background:linear-gradient(135deg,#fdf8ff 0%,#fff 100%); }
 .duo-quest-header{
-  display:flex;justify-content:space-between;align-items:center;
+  display:flex;justify-content:space-between;align-items:flex-start;
   margin-bottom:4px;
 }
 .duo-quest-label{
   font-family:"Silkscreen",monospace;font-size:9px;
   color:var(--rose);text-transform:uppercase;letter-spacing:.06em;
+}
+.duo-quest-subtitle{
+  font-family:"Pixelify Sans",monospace;font-size:9px;
+  color:var(--plum-soft);margin-top:1px;letter-spacing:.02em;
 }
 .duo-quest-days{
   font-family:"Silkscreen",monospace;font-size:9px;color:var(--plum-soft);
@@ -2690,12 +2695,18 @@ body{
 @keyframes celebPulse{
   0%,100%{ opacity:1; } 50%{ opacity:.6; }
 }
+.duo-quest-complete-msg{
+  font-family:"Pixelify Sans",monospace;font-size:10px;
+  color:var(--gold);margin-top:6px;font-style:italic;
+}
 .duo-quest-empty{
   display:flex;justify-content:space-between;align-items:center;
-  background:rgba(255,255,255,.6);border:2px dashed var(--blush);
-  padding:10px 14px;margin-bottom:12px;cursor:pointer;
+  background:linear-gradient(135deg,rgba(255,248,253,.8) 0%,rgba(255,255,255,.6) 100%);
+  border:2px dashed var(--blush);
+  padding:12px 14px;margin-bottom:12px;cursor:pointer;
+  transition:border-color .15s,box-shadow .15s;
 }
-.duo-quest-empty:hover{ border-color:var(--rose); }
+.duo-quest-empty:hover{ border-color:var(--rose);border-style:solid;box-shadow:2px 2px 0 rgba(201,127,165,.18); }
 
 /* Duo request view */
 .duo-preset-list{
