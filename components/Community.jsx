@@ -17,6 +17,8 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const [noticeInput, setNoticeInput] = React.useState("");
   const [postingNotice, setPostingNotice] = React.useState(false);
   const [showNoticeCompose, setShowNoticeCompose] = React.useState(false);
+  const [editingNotice, setEditingNotice] = React.useState(null); // {id, content}
+  const [editingText, setEditingText] = React.useState("");
 
   const hashAnimal = (str) => {
     const animals = ["rat","ox","tiger","rabbit","dragon","snake","horse","goat","monkey","rooster","dog","pig"];
@@ -220,6 +222,15 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
     try { await window.SB.from("community_notices").delete().eq("id", id); } catch {}
   };
 
+  const saveEditedNotice = async () => {
+    if(!editingText.trim() || !editingNotice) return;
+    const id = editingNotice.id;
+    setNotices(prev => prev.map(n => n.id === id ? {...n, content: editingText.trim()} : n));
+    setEditingNotice(null);
+    setEditingText("");
+    try { await window.SB.from("community_notices").update({content: editingText.trim()}).eq("id", id); } catch {}
+  };
+
   const timeAgo = (ts) => {
     const diff = Date.now() - new Date(ts).getTime();
     const m = Math.floor(diff / 60000);
@@ -239,9 +250,29 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
           <div className="community-notice-label">✦ Notice Board ✦</div>
           {notices.map(n => (
             <div key={n.id} className="community-notice-item">
-              <div className="community-notice-text">{n.content}</div>
-              {isAdmin && (
-                <button onClick={()=>deleteNotice(n.id)} className="community-notice-del">✕</button>
+              {editingNotice?.id === n.id ? (
+                <React.Fragment>
+                  <textarea
+                    value={editingText}
+                    onChange={e=>setEditingText(e.target.value)}
+                    rows={3}
+                    className="community-notice-edit-area"
+                  />
+                  <div style={{display:"flex",gap:6,marginTop:6}}>
+                    <button onClick={saveEditedNotice} className="community-notice-save-btn">Save</button>
+                    <button onClick={()=>{setEditingNotice(null);setEditingText("");}} className="community-notice-cancel-btn">Cancel</button>
+                  </div>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <div className="community-notice-text">{n.content}</div>
+                  {isAdmin && (
+                    <div style={{display:"flex",gap:4,flexShrink:0}}>
+                      <button onClick={()=>{setEditingNotice(n);setEditingText(n.content);}} className="community-notice-edit-btn">✎</button>
+                      <button onClick={()=>deleteNotice(n.id)} className="community-notice-del">✕</button>
+                    </div>
+                  )}
+                </React.Fragment>
               )}
             </div>
           ))}

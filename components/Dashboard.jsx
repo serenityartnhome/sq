@@ -1913,16 +1913,22 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         const partDoneToday = (isReq ? q.addressee_done_date : q.requester_done_date) === today;
                         const bothDone      = duoBothDoneIds.has(q.id);
                         const pct           = Math.round((q.days_completed/q.total_days)*100);
+                        const tickDone      = myDoneToday || bothDone || q.status === "completed";
                         return (
                           <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
                             <div className="duo-quest-row-top">
+                              <span
+                                className={"duo-tick-box"+(tickDone?" done":"")}
+                                onClick={!tickDone ? ()=>markDuoDone(q.id) : undefined}
+                                style={{cursor:tickDone?"default":"pointer"}}
+                              />
                               <span className="duo-quest-row-name">{q.quest_name}</span>
                               <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
                               <button className="duo-quest-leave-btn"
                                 onClick={()=>setLeaveConfirm({questId:q.id, questName:q.quest_name, partnerName:pName})}
                                 title="Leave quest">✕</button>
                             </div>
-                            <div className="duo-quest-bar-wrap" style={{marginBottom:6}}>
+                            <div className="duo-quest-bar-wrap" style={{marginBottom:4}}>
                               <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
                             </div>
                             {q.status==="completed" ? (
@@ -1932,14 +1938,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                             ) : myDoneToday ? (
                               <div className="duo-quest-waiting" style={{fontSize:10}}>⚔ Done! Awaiting {pName}…</div>
                             ) : partDoneToday ? (
-                              <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>markDuoDone(q.id)}>
-                                {pName} is done — your turn! ✦
-                              </button>
-                            ) : (
-                              <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>markDuoDone(q.id)}>
-                                ✦ Complete today's challenge
-                              </button>
-                            )}
+                              <div style={{fontSize:10,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",padding:"2px 0"}}>{pName} is done — your turn! ✦</div>
+                            ) : null}
                           </div>
                         );
                       })}

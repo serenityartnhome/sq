@@ -945,6 +945,28 @@ body{
 .community-notice-del:hover{
   color:var(--rose);
 }
+.community-notice-edit-btn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(90,50,130,.35);
+  font-family:"Silkscreen",monospace;font-size:12px;
+  padding:0 2px;line-height:1;flex-shrink:0;margin-top:1px;
+}
+.community-notice-edit-btn:hover{ color:var(--plum); }
+.community-notice-edit-area{
+  width:100%;font-family:"Pixelify Sans",monospace;font-size:12px;
+  padding:6px 8px;border:2px solid rgba(150,100,200,.5);
+  background:rgba(255,255,255,.7);color:var(--plum);
+  resize:vertical;box-sizing:border-box;
+}
+.community-notice-save-btn{
+  background:rgba(150,100,200,.7);color:#fff;border:none;
+  font-family:"Silkscreen",monospace;font-size:9px;padding:4px 10px;cursor:pointer;
+}
+.community-notice-save-btn:hover{ background:rgba(120,70,180,.9); }
+.community-notice-cancel-btn{
+  background:none;color:rgba(90,50,130,.6);border:1px solid rgba(150,100,200,.4);
+  font-family:"Silkscreen",monospace;font-size:9px;padding:4px 10px;cursor:pointer;
+}
 @media(min-width:600px){
   .community-notice-board{
     max-width:540px;
@@ -2771,8 +2793,19 @@ body{
   border-top:1px solid var(--blush);margin-top:8px;
 }
 .duo-quest-row-top{
-  display:flex;justify-content:space-between;align-items:baseline;
+  display:flex;justify-content:space-between;align-items:center;
   gap:6px;margin-bottom:4px;
+}
+.duo-tick-box{
+  width:16px;height:16px;border:2px solid var(--gold);
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;
+}
+.duo-tick-box.done{background:var(--jade-deep);border-color:var(--plum);}
+.duo-tick-box.done::after{
+  content:"✓";color:#fff;font-family:"Silkscreen",monospace;
+  font-weight:700;font-size:10px;position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
 }
 .duo-quest-row-name{
   font-family:"Pixelify Sans",monospace;font-size:12px;
