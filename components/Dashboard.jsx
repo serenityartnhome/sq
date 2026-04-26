@@ -19,18 +19,30 @@ const DUO_PRESET_KINDS = {
 function duoIcon(q){
   if(q.quest_kind) return q.quest_kind;
   if(DUO_PRESET_KINDS[q.quest_name]) return DUO_PRESET_KINDS[q.quest_name];
-  // keyword fallback for slight label variations
   const n = (q.quest_name||"").toLowerCase();
-  if(n.includes("water"))                          return "water";
-  if(n.includes("walk")||n.includes("step"))       return "steps";
-  if(n.includes("journal"))                        return "journal";
-  if(n.includes("meditat"))                        return "meditate";
-  if(n.includes("screen"))                         return "screen";
-  if(n.includes("gratitude"))                      return "heart";
-  if(n.includes("read"))                           return "read";
-  if(n.includes("stretch")||n.includes("workout")||n.includes("morning")) return "workout";
-  if(n.includes("meal")||n.includes("diet")||n.includes("eat"))           return "diet";
-  if(n.includes("sleep"))                          return "sleep";
+  if(n.includes("water")||n.includes("drink"))               return "water";
+  if(n.includes("walk")||n.includes("step")||n.includes("run")||n.includes("jog")) return "steps";
+  if(n.includes("journal")||n.includes("diary")||n.includes("write")) return "journal";
+  if(n.includes("meditat")||n.includes("mindful")||n.includes("breathe")||n.includes("breath")) return "meditate";
+  if(n.includes("screen")||n.includes("phone")||n.includes("social media")) return "screen";
+  if(n.includes("gratitude")||n.includes("grateful"))        return "heart";
+  if(n.includes("read")||n.includes("book"))                 return "read";
+  if(n.includes("workout")||n.includes("exercise")||n.includes("stretch")||n.includes("gym")||n.includes("train")) return "workout";
+  if(n.includes("meal")||n.includes("diet")||n.includes("eat")||n.includes("food")||n.includes("cook")||n.includes("nourish")) return "diet";
+  if(n.includes("sleep")||n.includes("rest")||n.includes("nap")) return "sleep";
+  if(n.includes("wake")||n.includes("rise")||n.includes("early")) return "waking";
+  if(n.includes("bed")||n.includes("tidy")||n.includes("clean")||n.includes("organis")||n.includes("organiz")) return "bed";
+  if(n.includes("declutter"))                                return "declutter";
+  if(n.includes("tea")||n.includes("herbal"))                return "tea";
+  if(n.includes("protein")||n.includes("supplement"))        return "protein";
+  if(n.includes("nature")||n.includes("outside")||n.includes("fresh air")||n.includes("garden")) return "nature";
+  if(n.includes("sun")||n.includes("sunshine")||n.includes("sunlight")) return "sun";
+  if(n.includes("affirm"))                                   return "affirm";
+  if(n.includes("yoga")||n.includes("lotus"))                return "lotus";
+  if(n.includes("plan")||n.includes("schedul"))              return "planning";
+  if(n.includes("goal"))                                     return "goals";
+  if(n.includes("learn")||n.includes("study")||n.includes("practice")||n.includes("skill")) return "learning";
+  if(n.includes("work")||n.includes("focus")||n.includes("deep"))       return "work";
   return "sparkle";
 }
 
