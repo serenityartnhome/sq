@@ -1500,9 +1500,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         setShareStatus("already"); setShowGratShare(true); return;
       }
     }
-    // First-time rules
-    if(!localStorage.getItem("sq_wall_agreed")){
+    // First-time rules — check localStorage OR cloud flag
+    if(!localStorage.getItem("sq_wall_agreed") && !profileFlags?.wallAgreed){
       setShowWallRules(true); return;
+    }
+    // Backfill localStorage if cloud says agreed but local is missing
+    if(!localStorage.getItem("sq_wall_agreed") && profileFlags?.wallAgreed){
+      localStorage.setItem("sq_wall_agreed","1");
     }
     setShowGratShare(true);
   };
