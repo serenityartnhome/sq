@@ -1754,13 +1754,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div className="pet-col-spacer-top" style={{flex:1}}/>
             {/* Today's Energy sits above the pet */}
             <div className={"intention-side-box"+(intentShake?" intent-shake":"")} onClick={()=>{ showTip("intention"); setShowEnergyModal(true); }}>
-              <div className="intention-side-label">Today's Energy</div>
+              {!energyMode && <div className="intention-side-label">Today's Energy</div>}
               {energyMode ? (
                 <>
                   <div className="intention-side-word" style={{fontSize:13}}>
                     {energyMode.icon ? <img src={`assets/icon-${energyMode.icon}.png`} style={{width:14,height:14,imageRendering:"pixelated",verticalAlign:"middle",marginRight:3}}/> : energyMode.emoji+" "}{energyMode.name}
                   </div>
-                  <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4}}>
+                  <div style={{fontSize:9,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:2,lineHeight:1.4,whiteSpace:"nowrap"}}>
                     {energyMode.tags?.join(" · ")||energyMode.desc}
                   </div>
                 </>

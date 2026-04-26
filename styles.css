@@ -644,7 +644,7 @@ body{
 /* Today's Intention — left column beside the zodiac pet */
 .intention-side-box{
   width:auto;
-  max-width:clamp(160px,35%,220px);
+  max-width:clamp(180px,40%,300px);
   align-self:center;
   flex-shrink:0;
   display:flex;
@@ -2112,7 +2112,7 @@ body{
   .intention-side-box{
     align-self:center;
     flex-shrink:0;
-    max-width:140px;
+    max-width:180px;
   }
   .pet-energy-bar{ margin-top:0; }
 }
