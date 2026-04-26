@@ -166,8 +166,6 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [duoSent,         setDuoSent]         = React.useState(false);
   const [duoPendingIn,    setDuoPendingIn]    = React.useState([]);
 
-  const [shareCopied,  setShareCopied]  = React.useState(false);
-
   const [searchInput,  setSearchInput]  = React.useState("");
   const [searchResult, setSearchResult] = React.useState(null);
   const [addStatus,    setAddStatus]    = React.useState({});
@@ -891,27 +889,17 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
             <img src="assets/icon-friends.png?v=1" width={28} height={28}
                  style={{imageRendering:"pixelated"}} alt="settings"/>
           </button>
-          <button className="friends-icon-btn" style={{position:"relative"}} onClick={()=>{
-            const text = `Join me on Serenity Quest — a daily wellness journey ✦\nFind me as @${username}\nhttps://app.serenityartnhome.com`;
-            if(navigator.share) {
-              navigator.share({title:"Serenity Quest",text,url:"https://app.serenityartnhome.com"}).catch(()=>{});
-            } else {
-              navigator.clipboard?.writeText(text).then(()=>{
-                setShareCopied(true);
-                setTimeout(()=>setShareCopied(false), 2200);
-              }).catch(()=>{});
-            }
-          }} title="Invite friends">
+          <button className="friends-icon-btn" onClick={()=>{
+            const shareData = {
+              title:"Serenity Quest",
+              text:`Join me on Serenity Quest — a daily wellness journey ✦\nFind me as @${username}`,
+              url:"https://app.serenityartnhome.com"
+            };
+            if(navigator.share) navigator.share(shareData).catch(()=>{});
+            else { navigator.clipboard?.writeText(shareData.url+"  @"+username).catch(()=>{}); }
+          }} title="Share">
             <img src="assets/icon-share.png?v=1" width={28} height={28}
                  style={{imageRendering:"pixelated"}} alt="share"/>
-            {shareCopied && (
-              <span style={{
-                position:"absolute",bottom:-28,left:"50%",transform:"translateX(-50%)",
-                background:"var(--plum)",color:"#fff",fontFamily:"Pixelify Sans,monospace",
-                fontSize:10,padding:"3px 8px",whiteSpace:"nowrap",pointerEvents:"none",
-                boxShadow:"2px 2px 0 rgba(0,0,0,.3)"
-              }}>✓ Copied!</span>
-            )}
           </button>
         </div>
       </div>
