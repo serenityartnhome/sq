@@ -1947,6 +1947,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                                 onClick={tickDone ? (canUntick ? ()=>unmarkDuoDone(q.id) : undefined) : ()=>markDuoDone(q.id)}
                                 style={{cursor:(tickDone && !canUntick)?"default":"pointer"}}
                               />
+                              <img src={`assets/icon-account-${animal}.png?v=1`} width={16} height={16}
+                                style={{imageRendering:"pixelated",flexShrink:0,opacity:.8}}/>
                               <span className="duo-quest-row-name">{q.quest_name}</span>
                               <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
                               <button className="duo-quest-leave-btn"
@@ -1985,6 +1987,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                       {pending.map((q,i)=>(
                         <div key={q.id} className={"duo-quest-row"+((active.length+i)>0?" duo-quest-row-sep":"")}>
                           <div className="duo-quest-row-top">
+                            <img src={`assets/icon-account-${animal}.png?v=1`} width={16} height={16}
+                              style={{imageRendering:"pixelated",flexShrink:0,opacity:.8}}/>
                             <span className="duo-quest-row-name">{q.quest_name}</span>
                             <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.total_days}d</span>
                           </div>
