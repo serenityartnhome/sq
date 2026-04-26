@@ -176,7 +176,23 @@ function App(){
           } catch{}
         }
 
-        const { data:{ session } } = await window.SB.auth.getSession();
+        let { data:{ session } } = await window.SB.auth.getSession();
+        // Proactively refresh if token looks stale (> 55 min old)
+        if(session?.access_token && session?.refresh_token){
+          try {
+            const payload = JSON.parse(atob(session.access_token.split(".")[1]));
+            const expiresIn = (payload.exp * 1000) - Date.now();
+            if(expiresIn < 5 * 60 * 1000){ // less than 5 min left — refresh now
+              const r = await fetch("https://hplmgpxnbgmdmqmsuisz.supabase.co/auth/v1/token?grant_type=refresh_token", {
+                method:"POST",
+                headers:{"apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbG1ncHhuYmdtZG1xbXN1aXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2ODM3OTAsImV4cCI6MjA5MjI1OTc5MH0.eKh6KMxsyOls_3V9KoCE0b7TECFKmpbYEDCDJ4QN67A","Content-Type":"application/json"},
+                body: JSON.stringify({ refresh_token: session.refresh_token })
+              });
+              const d = await r.json();
+              if(d.access_token){ session = { ...session, ...d }; window.SB.auth.setSession(session); }
+            }
+          } catch{}
+        }
         if(!session) return;
         let user = session.user;
         if((!user || !user.email) && session.access_token){

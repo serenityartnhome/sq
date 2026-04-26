@@ -1744,10 +1744,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         </div>
       )}
 
-      {/* Incoming message walk-in — shown once per session on app open */}
-      {userId && window.FriendMessageNotif && (
-        <FriendMessageNotif userId={userId} onBoost={handleEnergyBoost}/>
-      )}
 
       {showSignOut && (
         <div className="coming-soon-overlay" onClick={()=>setShowSignOut(false)}>
@@ -1774,6 +1770,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
           {/* Single col: Intention at top, then centered pet */}
           <div className="zodiac-pet-col">
+            {/* Friend message notification — anchored next to pet */}
+            {userId && window.FriendMessageNotif && (
+              <FriendMessageNotif userId={userId} onBoost={handleEnergyBoost}/>
+            )}
             {/* Top spacer — pushes intention + monkey down to center */}
             <div className="pet-col-spacer-top" style={{flex:1}}/>
             {/* Today's Energy sits above the pet */}

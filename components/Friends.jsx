@@ -106,13 +106,18 @@ function FriendMessageNotif({ userId, onBoost }){
 
   if(!msg || phase === "idle") return null;
 
+  const senderName = firstName(msg.sender.name)||msg.sender.username||"A friend";
   return (
     <div className={"friend-notif-wrap "+(phase==="walkout"?"notif-out":phase==="walkin"?"notif-in":"notif-show")}
          onClick={dismiss}>
-      <FriendAvatar animal={msg.sender.animal} stage={msg.sender.pet_stage} size={56}/>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+        {phase === "showing" && (
+          <div className="friend-notif-sender-name">{senderName}</div>
+        )}
+        <FriendAvatar animal={msg.sender.animal} stage={msg.sender.pet_stage} size={56}/>
+      </div>
       {phase === "showing" && (
         <div className="friend-notif-bubble">
-          <div className="friend-notif-name">{firstName(msg.sender.name)||msg.sender.username||"A friend"}</div>
           <div className="friend-notif-text">{msg.text}</div>
           <div className="friend-notif-energy">+5 energy ✨</div>
         </div>
