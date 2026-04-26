@@ -1584,8 +1584,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const gratitudeDone = gratitude.some(x=>x.trim().length>0);
   const writingDone   = gratitudeDone || diaryEntry.trim().length > 0;
   const powerDone     = powerups.size > 0;
-  const habitsDone    = activeHabits.filter(h=>completed.has(h.id)).length;
-  const totalSlots = activeHabits.length + 2;
+  const mainHabits    = activeHabits.filter(h=>isMainQuest(h));
+  const habitsDone    = mainHabits.filter(h=>completed.has(h.id)).length;
+  const totalSlots = mainHabits.length + 2;
   const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
   const doneCountRef = React.useRef(doneCount);
   doneCountRef.current = doneCount;

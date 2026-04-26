@@ -165,6 +165,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [duoSending,      setDuoSending]      = React.useState(false);
   const [duoSent,         setDuoSent]         = React.useState(false);
   const [unfriendConfirm, setUnfriendConfirm] = React.useState(null); // friend object
+  const [friendPopup,    setFriendPopup]    = React.useState(null);  // friend object
   const [duoPendingIn,    setDuoPendingIn]    = React.useState([]);
 
   const [searchInput,  setSearchInput]  = React.useState("");
@@ -883,7 +884,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   // ── Main list view ──────────────────────────────────────────────────────────
   return (
-    <div className="friends-panel panel">
+    <div className="friends-panel panel" onClick={()=>friendPopup && setFriendPopup(null)}>
       {unfriendConfirm && (
         <div className="coming-soon-overlay" onClick={()=>setUnfriendConfirm(null)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%",textAlign:"center"}}>
@@ -1024,7 +1025,27 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
           ) : (
             friends.map(f=>(
               <div key={f.id} className="friends-card">
-                <FriendIcon animal={f.animal} size={48}/>
+                <div style={{position:"relative",flexShrink:0}}>
+                  <div style={{cursor:"pointer"}} onClick={()=>setFriendPopup(f)}>
+                    <FriendIcon animal={f.animal} size={48}/>
+                  </div>
+                  {friendPopup?.id === f.id && (
+                    <div className="friend-icon-popup" onClick={e=>e.stopPropagation()}>
+                      <button className="friend-icon-popup-btn"
+                        onClick={()=>{ setFriendPopup(null); setComposeTo(f); setView("compose"); }}>
+                        Message ✦
+                      </button>
+                      <button className="friend-icon-popup-btn"
+                        onClick={()=>{ setFriendPopup(null); setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedIds(new Set()); setView("duo-request"); }}>
+                        Duo ✦
+                      </button>
+                      <button className="friend-icon-popup-btn friend-icon-popup-remove"
+                        onClick={()=>{ setFriendPopup(null); setUnfriendConfirm(f); }}>
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="friends-card-info">
                   <div className="friends-card-name">{firstName(f.name)||f.username}</div>
                   <div className="friends-card-un">@{f.username}</div>
@@ -1042,15 +1063,11 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                 <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
                   <button className="friends-send-btn"
                           onClick={()=>{ setComposeTo(f); setView("compose"); }}>
-                    Send ✦
+                    Message ✦
                   </button>
-                  <button className="friends-send-btn" style={{fontSize:8,padding:"5px 10px",background:"var(--plum)"}}
+                  <button className="friends-send-btn"
                           onClick={()=>{ setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedIds(new Set()); setView("duo-request"); }}>
                     Duo ✦
-                  </button>
-                  <button className="friends-remove-btn"
-                          onClick={()=>setUnfriendConfirm(f)}>
-                    Remove
                   </button>
                 </div>
               </div>
