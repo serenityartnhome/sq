@@ -147,13 +147,15 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [editNameError,  setEditNameError]  = React.useState("");
   const [savingName,     setSavingName]     = React.useState(false);
 
-  const [duoTarget,    setDuoTarget]    = React.useState(null);
-  const [duoPreset,    setDuoPreset]    = React.useState(null);
-  const [duoCustom,    setDuoCustom]    = React.useState("");
-  const [duoDays,      setDuoDays]      = React.useState(7);
-  const [duoSending,   setDuoSending]   = React.useState(false);
-  const [duoSent,      setDuoSent]      = React.useState(false);
-  const [duoPendingIn, setDuoPendingIn] = React.useState([]);
+  const [duoTarget,       setDuoTarget]       = React.useState(null);
+  const [duoPreset,       setDuoPreset]       = React.useState(null);
+  const [duoCustom,       setDuoCustom]       = React.useState("");
+  const [duoDays,         setDuoDays]         = React.useState(7);
+  const [duoDaysCustom,   setDuoDaysCustom]   = React.useState(false);
+  const [duoReward,       setDuoReward]       = React.useState("");
+  const [duoSending,      setDuoSending]      = React.useState(false);
+  const [duoSent,         setDuoSent]         = React.useState(false);
+  const [duoPendingIn,    setDuoPendingIn]    = React.useState([]);
 
   const [searchInput,  setSearchInput]  = React.useState("");
   const [searchResult, setSearchResult] = React.useState(null);
@@ -321,11 +323,12 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
       addressee_id: duoTarget.id,
       quest_name: questName,
       total_days: duoDays,
+      reward: duoReward.trim() || null,
       status: "pending",
     });
     setDuoSending(false);
     setDuoSent(true);
-    setTimeout(() => { setDuoSent(false); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setView("list"); }, 2000);
+    setTimeout(() => { setDuoSent(false); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setDuoDaysCustom(false); setDuoReward(""); setView("list"); }, 2000);
   };
 
   const acceptDuoRequest = async (id) => {
@@ -573,7 +576,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     return (
       <div className="friends-panel panel">
         <div className="friends-header">
-          <button className="friends-back" onClick={()=>{ setView("list"); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); }}>← Back</button>
+          <button className="friends-back" onClick={()=>{ setView("list"); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setDuoDaysCustom(false); setDuoReward(""); }}>← Back</button>
           <span className="friends-header-title">Duo Quest</span>
           <span style={{width:48}}/>
         </div>
@@ -613,17 +616,41 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
             <div className="friends-settings-label" style={{marginTop:14,marginBottom:8}}>Number of days</div>
             <div className="duo-days-row">
-              {[7,14,21,30].map(d=>(
-                <button key={d} className={"duo-day-btn"+(duoDays===d?" selected":"")}
-                  onClick={()=>setDuoDays(d)}>
+              {[7,21,90].map(d=>(
+                <button key={d} className={"duo-day-btn"+((!duoDaysCustom && duoDays===d)?" selected":"")}
+                  onClick={()=>{ setDuoDays(d); setDuoDaysCustom(false); }}>
                   {d}
                 </button>
               ))}
+              <button className={"duo-day-btn"+(duoDaysCustom?" selected":"")}
+                onClick={()=>{ setDuoDaysCustom(true); setDuoDays(null); }}>
+                Custom
+              </button>
             </div>
+            {duoDaysCustom && (
+              <input
+                type="number" min={1} max={365}
+                className="friends-custom-input"
+                style={{marginTop:6,padding:"8px 12px",width:"100%",boxSizing:"border-box"}}
+                placeholder="How many days?"
+                value={duoDays || ""}
+                onChange={e=>{ const v=parseInt(e.target.value); setDuoDays(v>0?v:null); }}
+              />
+            )}
+
+            <div className="friends-settings-label" style={{marginTop:14,marginBottom:6}}>Reward (optional)</div>
+            <textarea
+              className="friends-custom-input"
+              value={duoReward}
+              onChange={e=>setDuoReward(e.target.value.slice(0,80))}
+              placeholder="What do you both get for finishing? ✦"
+              rows={2}
+              disabled={duoSending}
+            />
 
             <button className="friends-btn-primary"
               onClick={sendDuoRequest}
-              disabled={duoSending || (!duoPreset && !duoCustom.trim())}
+              disabled={duoSending || (!duoPreset && !duoCustom.trim()) || !duoDays}
               style={{marginTop:20,width:"100%"}}>
               {duoSending ? "Sending…" : "Send Quest Request ✦"}
             </button>
