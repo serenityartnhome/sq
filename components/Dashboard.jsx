@@ -2607,7 +2607,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         setPetNameInput("");
                         setShowNamePrompt(true);
                       }, 800);
-                    }, 1400);
+                    }, 2800);
                   }}
                 />
               )}
