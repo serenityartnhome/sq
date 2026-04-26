@@ -130,6 +130,7 @@ function App(){
                 petStage:         data.pet_stage || null,
                 stageXP:          data.stage_xp  || 0,
                 petName:          data.pet_name  || null,
+                wallAgreed:       !!data.wall_agreed,
               },
               todayData: dayData || null,
             };

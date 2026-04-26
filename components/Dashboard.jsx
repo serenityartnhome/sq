@@ -1123,6 +1123,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(profileFlags.petStage){ setPetStage(profileFlags.petStage); localStorage.setItem("sq_pet_stage", profileFlags.petStage); }
     if(profileFlags.stageXP > 0){ setStageXP(profileFlags.stageXP); localStorage.setItem("sq_stage_xp", String(profileFlags.stageXP)); }
     if(profileFlags.petName){ setPetName(profileFlags.petName); localStorage.setItem("sq_pet_name", profileFlags.petName); }
+    if(profileFlags.wallAgreed) localStorage.setItem("sq_wall_agreed","1");
   }, [profileFlags]);
 
   // Admin always gets everything unlocked, even if cloud flags say otherwise
@@ -1601,6 +1602,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     setShowCustomEnergy(false);
     setCustomEnergyName(""); setCustomEnergyTags("");
     localStorage.setItem("sq_energy_today", JSON.stringify({ date: today, mode }));
+    if(userId && window.SB) window.SB.from("daily_data")
+      .upsert({user_id:userId, date:today, energy_mode:mode},{onConflict:"user_id,date"});
   };
   const confirmCustomEnergy = () => {
     const name = customEnergyName.trim();
@@ -3300,6 +3303,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <button
                 onClick={()=>{
                   localStorage.setItem("sq_wall_agreed","1");
+                  if(userId && window.SB) window.SB.from("profiles").update({wall_agreed:true}).eq("id",userId);
                   setShowWallRules(false); setWallRulesChecked(false); setShowGratShare(true);
                 }}
                 disabled={!wallRulesChecked}
