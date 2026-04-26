@@ -1796,12 +1796,32 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="panel dash-quest-panel">
           <h2 style={{textAlign:"center",fontSize:20,marginBottom:8}}>✦ Daily Quest ✦</h2>
 
-          {/* ── Duo Quest section ── */}
-          {(()=>{
+          {/* Why section */}
+          <div className="why-box">
+            {editingWhy ? (
+              <div className="why-edit-row">
+                <textarea className="why-textarea" autoFocus value={whyDraft}
+                  onChange={e=>setWhyDraft(e.target.value.slice(0,150))}
+                  onKeyDown={e=>{if(e.key==="Escape") setEditingWhy(false);}}
+                  placeholder="Why are you on this quest?"/>
+                <div className="why-edit-btns">
+                  <button className="chip active" onClick={saveWhy}>Save</button>
+                  <button className="chip" onClick={()=>setEditingWhy(false)}>✕</button>
+                </div>
+              </div>
+            ) : (
+              <div className="why-display" onClick={()=>{setWhyDraft(why);setEditingWhy(true);}}>
+                <span className="why-label">My Why</span>
+                <span className="why-text">{why || "Tap to add your why…"}</span>
+                <span className="why-edit-icon">✎</span>
+              </div>
+            )}
+          </div>
+
+          {/* ── Duo Quest section (after Why, hidden when empty) ── */}
+          {(activeDuoQuests.length > 0 || pendingDuosIn.length > 0) && (()=>{
             const today = appDay();
             const fn = n => (n||"").split(" ")[0] || (n||"");
-
-            // Group active quests by partner
             const activeGroups = [];
             const seenPartner = {};
             activeDuoQuests.forEach(q=>{
@@ -1809,8 +1829,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               if(!seenPartner[pid]){ seenPartner[pid]=activeGroups.length; activeGroups.push({partner:q.partner,quests:[]}); }
               activeGroups[seenPartner[pid]].quests.push(q);
             });
-
-            // Group pending invites by requester
             const pendingGroups = [];
             const seenReq = {};
             pendingDuosIn.forEach(q=>{
@@ -1818,8 +1836,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               if(!seenReq[rid]){ seenReq[rid]=pendingGroups.length; pendingGroups.push({requester:q.requester,quests:[]}); }
               pendingGroups[seenReq[rid]].quests.push(q);
             });
-
-            const hasAny = activeGroups.length > 0 || pendingGroups.length > 0;
             return (
               <React.Fragment>
                 {activeGroups.map(({partner, quests})=>{
@@ -1874,7 +1890,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     </div>
                   );
                 })}
-
                 {pendingGroups.map(({requester, quests})=>{
                   const fromName = fn(requester?.name) || requester?.username || "a friend";
                   const animal   = requester?.animal || "rat";
@@ -1904,42 +1919,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     </div>
                   );
                 })}
-
-                {!hasAny && (
-                  <div className="duo-quest-empty" onClick={()=>setShowDuoExplain(true)}>
-                    <div>
-                      <div className="duo-quest-label" style={{marginBottom:3}}>⚔ Duo Quest ✦</div>
-                      <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum)",fontWeight:600,marginBottom:2}}>Go on an adventure with a companion</div>
-                      <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>No party formed yet — begin your journey ✦</div>
-                    </div>
-                    <span style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--rose)"}}>→</span>
-                  </div>
-                )}
               </React.Fragment>
             );
           })()}
-
-          {/* Why section */}
-          <div className="why-box">
-            {editingWhy ? (
-              <div className="why-edit-row">
-                <textarea className="why-textarea" autoFocus value={whyDraft}
-                  onChange={e=>setWhyDraft(e.target.value.slice(0,150))}
-                  onKeyDown={e=>{if(e.key==="Escape") setEditingWhy(false);}}
-                  placeholder="Why are you on this quest?"/>
-                <div className="why-edit-btns">
-                  <button className="chip active" onClick={saveWhy}>Save</button>
-                  <button className="chip" onClick={()=>setEditingWhy(false)}>✕</button>
-                </div>
-              </div>
-            ) : (
-              <div className="why-display" onClick={()=>{setWhyDraft(why);setEditingWhy(true);}}>
-                <span className="why-label">My Why</span>
-                <span className="why-text">{why || "Tap to add your why…"}</span>
-                <span className="why-edit-icon">✎</span>
-              </div>
-            )}
-          </div>
 
           <div>
             {/* Special Quests */}

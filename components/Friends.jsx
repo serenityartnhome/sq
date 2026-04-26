@@ -180,6 +180,12 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   React.useEffect(()=>{ if(userId && window.SB && localUsername) load(); },[userId, localUsername]);
 
+  React.useEffect(()=>{
+    if(!userId || !window.SB) return;
+    window.SB.from("profiles").select("share_mood,share_gratitude").eq("id",userId).single()
+      .then(({data})=>{ if(data){ setShareMood(data.share_mood!==false); setShareGrat(!!data.share_gratitude); } });
+  },[userId]);
+
   const load = async () => {
     setLoading(true);
     setLoadError(false);
@@ -922,6 +928,17 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
       )}
 
       {!loading && <>
+        {/* Duo Quest promo */}
+        <div className="duo-quest-empty" style={{marginBottom:10}}
+          onClick={()=>{ if(friends.length>0) setView("list"); }}>
+          <div>
+            <div className="duo-quest-label" style={{marginBottom:3}}>⚔ Duo Quest ✦</div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum)",fontWeight:600,marginBottom:2}}>Go on an adventure with a companion</div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>Tap Duo ✦ on any friend to begin your journey</div>
+          </div>
+          <span style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--rose)"}}>⚔</span>
+        </div>
+
         {/* Pending duo quest requests */}
         {duoPendingIn.length > 0 && (
           <div className="friends-section">
