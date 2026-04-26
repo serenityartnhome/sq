@@ -2565,14 +2565,13 @@ body{
   display:flex;flex-direction:column;align-items:center;
   gap:0;position:relative;
 }
-.hatch-overlay-pet{
-  position:absolute;bottom:20px;
-  opacity:.55;
-  z-index:0;
-  pointer-events:none;
+.hatch-stage{
+  position:relative;
+  width:256px;height:256px;
+  flex-shrink:0;
 }
 .egg-shake-sprite{
-  position:relative;z-index:1;
+  position:absolute;top:0;left:0;z-index:1;
   width:256px;height:256px;
   background-image:url('assets/egg-hatch-sheet.png?v=1');
   background-repeat:no-repeat;
@@ -2606,7 +2605,7 @@ body{
 }
 
 .egg-hatch-sprite{
-  position:relative;z-index:1;
+  position:absolute;top:0;left:0;z-index:1;
   width:256px;height:256px;
   background-image:url('assets/egg-hatch-sheet.png?v=1');
   background-repeat:no-repeat;
@@ -2619,7 +2618,9 @@ body{
   to{   background-position:-2560px 0; }
 }
 .hatch-overlay-reveal{
-  position:relative;z-index:1;
+  position:absolute;top:0;left:0;z-index:1;
+  width:256px;height:256px;
+  display:flex;align-items:center;justify-content:center;
   animation:babyPop .65s cubic-bezier(.175,.885,.32,1.275) forwards;
 }
 .hatch-overlay-text{

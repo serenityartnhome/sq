@@ -2573,44 +2573,42 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {showHatchOverlay && (
         <div className={"hatch-overlay"+(hatchPhase==="fading"?" hatch-overlay-fade":"")}>
           <div className="hatch-overlay-inner">
-            {/* Baby pet peeking behind */}
-            <div className="hatch-overlay-pet">
-              <BabyPet animal={animal} happy={false} size={96}/>
-            </div>
-            {/* Pre-hatch shake */}
-            {hatchPhase === "shaking" && (
-              <div className="egg-shake-sprite"
-                onAnimationEnd={()=>setHatchPhase("hatching")}/>
-            )}
-
-            {/* Sprite sheet on top */}
-            {hatchPhase === "hatching" && (
-              <div className="egg-hatch-sprite"
-                onAnimationEnd={()=>{
-                  setHatchPhase("revealing");
-                  setTimeout(()=>{
-                    setHatchPhase("fading");
+            {/* Fixed-size stage — all sprites pinned to same spot */}
+            <div className="hatch-stage">
+              {/* Pre-hatch shake — frame 1 only */}
+              {hatchPhase === "shaking" && (
+                <div className="egg-shake-sprite"
+                  onAnimationEnd={()=>setHatchPhase("hatching")}/>
+              )}
+              {/* Sprite sheet */}
+              {hatchPhase === "hatching" && (
+                <div className="egg-hatch-sprite"
+                  onAnimationEnd={()=>{
+                    setHatchPhase("revealing");
                     setTimeout(()=>{
-                      setShowHatchOverlay(false);
-                      setHatchPhase("hatching");
-                      // complete the hatch
-                      localStorage.setItem("sq_hatched","1");
-                      setHatched(true);
-                      setJustHatched(true);
-                      setTimeout(()=>setJustHatched(false), 1000);
-                      if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{});
-                      setPetNameInput("");
-                      setShowNamePrompt(true);
-                    }, 800);
-                  }, 1400);
-                }}
-              />
-            )}
-            {hatchPhase !== "hatching" && (
-              <div className="hatch-overlay-reveal">
-                <BabyPet animal={animal} happy={true} size={96} className="baby-pop"/>
-              </div>
-            )}
+                      setHatchPhase("fading");
+                      setTimeout(()=>{
+                        setShowHatchOverlay(false);
+                        setHatchPhase("shaking");
+                        localStorage.setItem("sq_hatched","1");
+                        setHatched(true);
+                        setJustHatched(true);
+                        setTimeout(()=>setJustHatched(false), 1000);
+                        if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{});
+                        setPetNameInput("");
+                        setShowNamePrompt(true);
+                      }, 800);
+                    }, 1400);
+                  }}
+                />
+              )}
+              {/* Reveal: baby pet pops in after shell is gone */}
+              {(hatchPhase === "revealing" || hatchPhase === "fading") && (
+                <div className="hatch-overlay-reveal">
+                  <BabyPet animal={animal} happy={true} size={156} className="baby-pop"/>
+                </div>
+              )}
+            </div>
             <div className="hatch-overlay-text">
               {hatchPhase === "shaking"  ? "Something is stirring…" :
                hatchPhase === "hatching" ? "Your companion is hatching…" :
