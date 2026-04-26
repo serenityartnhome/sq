@@ -689,15 +689,47 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [showComingSoon, setShowComingSoon] = React.useState(false);
   const [showFriendsSoon, setShowFriendsSoon] = React.useState(false);
   const [friendsNotif, setFriendsNotif] = React.useState(0);
+  const [activeDuoQuest,  setActiveDuoQuest]  = React.useState(null);
+  const [duoPartner,      setDuoPartner]      = React.useState(null);
+  const [duoBothDone,     setDuoBothDone]     = React.useState(false);
+  const [showDuoExplain,  setShowDuoExplain]  = React.useState(false);
+  const [pendingDuoIn,    setPendingDuoIn]    = React.useState(null);
 
   React.useEffect(()=>{
     if(!userId || !window.SB) return;
     (async()=>{
-      const [{ data: msgs }, { data: reqs }] = await Promise.all([
+      const [{ data: msgs }, { data: reqs }, { data: duoReqs }] = await Promise.all([
         window.SB.from("messages").select("id").eq("receiver_id",userId).eq("read",false).limit(99),
         window.SB.from("friends").select("id").eq("addressee_id",userId).eq("status","pending").limit(99),
+        window.SB.from("duo_quests").select("id").eq("addressee_id",userId).eq("status","pending").limit(99),
       ]);
-      setFriendsNotif((msgs?.length||0) + (reqs?.length||0));
+      setFriendsNotif((msgs?.length||0) + (reqs?.length||0) + (duoReqs?.length||0));
+    })();
+  },[userId]);
+
+  React.useEffect(()=>{
+    if(!userId || !window.SB) return;
+    (async()=>{
+      const { data } = await window.SB.from("duo_quests")
+        .select("*")
+        .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+        .order("created_at",{ascending:false})
+        .limit(10);
+      if(!data?.length) return;
+      const active = data.find(d => d.status === "active");
+      const pending = data.find(d => d.status === "pending" && d.addressee_id === userId);
+      if(active){
+        setActiveDuoQuest(active);
+        const partnerId = active.requester_id === userId ? active.addressee_id : active.requester_id;
+        const { data: p } = await window.SB.from("profiles")
+          .select("id, name, username, animal").eq("id", partnerId).single();
+        setDuoPartner(p||null);
+      }
+      if(pending){
+        const { data: sender } = await window.SB.from("profiles")
+          .select("id, name, username, animal").eq("id", pending.requester_id).single();
+        setPendingDuoIn({...pending, requester: sender||null});
+      }
     })();
   },[userId]);
 
@@ -840,6 +872,43 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     }
     if(onUpdateProfile) onUpdateProfile(updates);
     setShowProfileEdit(false);
+  };
+
+  const markDuoDone = async () => {
+    if(!activeDuoQuest || !userId) return;
+    const today = appDay();
+    const isReq = activeDuoQuest.requester_id === userId;
+    const myField      = isReq ? "requester_done_date" : "addressee_done_date";
+    const partnerField = isReq ? "addressee_done_date" : "requester_done_date";
+    const { data: rows } = await window.SB.from("duo_quests")
+      .update({[myField]: today}).eq("id", activeDuoQuest.id);
+    const fresh = Array.isArray(rows) ? rows[0] : rows;
+    if(!fresh) return;
+    setActiveDuoQuest(fresh);
+    if(fresh[partnerField] === today && fresh.last_counted_date !== today){
+      const newDays = (fresh.days_completed||0) + 1;
+      const done = newDays >= fresh.total_days;
+      await window.SB.from("duo_quests")
+        .update({days_completed: newDays, last_counted_date: today, status: done ? "completed" : "active"})
+        .eq("id", fresh.id);
+      setActiveDuoQuest(q=>({...q, days_completed: newDays, last_counted_date: today, status: done?"completed":"active"}));
+      setDuoBothDone(true);
+    }
+  };
+
+  const acceptDuoFromDash = async () => {
+    if(!pendingDuoIn) return;
+    await window.SB.from("duo_quests").update({status:"active"}).eq("id", pendingDuoIn.id);
+    const active = {...pendingDuoIn, status:"active"};
+    setActiveDuoQuest(active);
+    setDuoPartner(pendingDuoIn.requester||null);
+    setPendingDuoIn(null);
+  };
+
+  const declineDuoFromDash = async () => {
+    if(!pendingDuoIn) return;
+    await window.SB.from("duo_quests").delete().eq("id", pendingDuoIn.id);
+    setPendingDuoIn(null);
   };
 
   const saveWhy = () => {
@@ -1711,6 +1780,74 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="panel dash-quest-panel">
           <h2 style={{textAlign:"center",fontSize:20,marginBottom:8}}>✦ Daily Quest ✦</h2>
 
+          {/* ── Duo Quest section ── */}
+          {(()=>{
+            const today = appDay();
+            const isReq = activeDuoQuest?.requester_id === userId;
+            const myDoneToday = activeDuoQuest
+              ? (isReq ? activeDuoQuest.requester_done_date : activeDuoQuest.addressee_done_date) === today
+              : false;
+            const partnerDoneToday = activeDuoQuest
+              ? (isReq ? activeDuoQuest.addressee_done_date : activeDuoQuest.requester_done_date) === today
+              : false;
+            const partnerName = (n => (n||"").split(" ")[0]||(n||""))(duoPartner?.name) || duoPartner?.username || "your friend";
+
+            if(activeDuoQuest && activeDuoQuest.status === "active") return (
+              <div className="duo-quest-card">
+                <div className="duo-quest-header">
+                  <span className="duo-quest-label">✦ Duo Quest</span>
+                  <span className="duo-quest-days">{activeDuoQuest.days_completed}/{activeDuoQuest.total_days} days</span>
+                </div>
+                <div className="duo-quest-name">{activeDuoQuest.quest_name}</div>
+                <div className="duo-quest-partner">with {partnerName}</div>
+                <div className="duo-quest-bar-wrap">
+                  <div className="duo-quest-bar" style={{width:`${Math.round((activeDuoQuest.days_completed/activeDuoQuest.total_days)*100)}%`}}/>
+                </div>
+                {duoBothDone ? (
+                  <div className="duo-quest-celebration">✦ Both done! Day {activeDuoQuest.days_completed} complete! ✦</div>
+                ) : myDoneToday ? (
+                  <div className="duo-quest-waiting">You're done ✦ Waiting for {partnerName}…</div>
+                ) : partnerDoneToday ? (
+                  <button className="duo-quest-btn" onClick={markDuoDone}>
+                    {partnerName} is done — your turn! ✦
+                  </button>
+                ) : (
+                  <button className="duo-quest-btn" onClick={markDuoDone}>
+                    Mark done today ✦
+                  </button>
+                )}
+              </div>
+            );
+
+            if(activeDuoQuest && activeDuoQuest.status === "completed") return (
+              <div className="duo-quest-card duo-quest-complete-card">
+                <div className="duo-quest-label">✦ Duo Quest Complete!</div>
+                <div className="duo-quest-name">{activeDuoQuest.quest_name}</div>
+                <div className="duo-quest-partner">with {partnerName} — {activeDuoQuest.total_days} days together ✦</div>
+              </div>
+            );
+
+            if(pendingDuoIn) return (
+              <div className="duo-quest-card duo-quest-pending-card">
+                <div className="duo-quest-label">✦ Duo Quest Invite</div>
+                <div className="duo-quest-name">{pendingDuoIn.quest_name}</div>
+                <div className="duo-quest-partner">from {(n=>(n||"").split(" ")[0]||(n||""))(pendingDuoIn.requester?.name)||pendingDuoIn.requester?.username||"a friend"} · {pendingDuoIn.total_days} days</div>
+                <div style={{display:"flex",gap:8,marginTop:10}}>
+                  <button className="duo-quest-btn" onClick={acceptDuoFromDash} style={{flex:1}}>Accept ✦</button>
+                  <button className="duo-quest-btn" onClick={declineDuoFromDash}
+                    style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)"}}>Decline</button>
+                </div>
+              </div>
+            );
+
+            return (
+              <div className="duo-quest-empty" onClick={()=>setShowDuoExplain(true)}>
+                <span className="duo-quest-label" style={{fontSize:9}}>✦ Duo Quest</span>
+                <span style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,color:"var(--plum-soft)"}}>Journey together with a friend →</span>
+              </div>
+            );
+          })()}
+
           {/* Why section */}
           <div className="why-box">
             {editingWhy ? (
@@ -2439,6 +2576,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryAnnounce(false)}>Write something ✦</button>
+          </div>
+        </div>
+      )}
+
+      {showDuoExplain && (
+        <div className="coming-soon-overlay" onClick={()=>setShowDuoExplain(false)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:320,textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:8}}>✦✦</div>
+            <h3 className="coming-soon-title">Duo Quest</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.9}}>
+              Journey side by side with a friend ✦<br/>
+              Choose a shared quest, set your days, and both must complete it on the same day for it to count.<br/>
+              <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--rose)"}}>
+                Start one from your Friends tab ✦
+              </span>
+            </p>
+            <button className="coming-soon-btn" onClick={()=>setShowDuoExplain(false)}>Got it ✦</button>
           </div>
         </div>
       )}
