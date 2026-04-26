@@ -897,15 +897,15 @@ body{
    COMMUNITY NOTICE BOARD
    ============================================================ */
 .community-notice-board{
-  background:linear-gradient(135deg,#e8d8f5 0%,#d8c4ee 100%);
-  border-bottom:3px solid rgba(180,140,220,.4);
+  background:linear-gradient(135deg,#fce8ef 0%,#f5d0de 100%);
+  border-bottom:3px solid rgba(201,127,165,.4);
   padding:14px 16px 12px;
   margin-bottom:0;
 }
 .community-notice-label{
   font-family:"Silkscreen",monospace;
   font-size:10px;
-  color:rgba(90,50,130,.65);
+  color:rgba(140,60,90,.65);
   letter-spacing:.1em;
   text-transform:uppercase;
   margin-bottom:10px;
@@ -915,8 +915,8 @@ body{
   align-items:flex-start;
   gap:8px;
   padding:10px 12px;
-  background:rgba(255,255,255,.45);
-  border:1px solid rgba(180,140,220,.4);
+  background:rgba(255,255,255,.5);
+  border:1px solid rgba(201,127,165,.4);
   margin-bottom:6px;
   position:relative;
 }
@@ -927,14 +927,14 @@ body{
   flex:1;
   font-family:"Pixelify Sans",monospace;
   font-size:13px;
-  color:#3a1a55;
+  color:var(--plum);
   line-height:1.55;
 }
 .community-notice-del{
   background:none;
   border:none;
   cursor:pointer;
-  color:rgba(90,50,130,.35);
+  color:rgba(140,60,90,.35);
   font-family:"Silkscreen",monospace;
   font-size:11px;
   padding:0 2px;
@@ -947,7 +947,7 @@ body{
 }
 .community-notice-edit-btn{
   background:none;border:none;cursor:pointer;
-  color:rgba(90,50,130,.35);
+  color:rgba(140,60,90,.35);
   font-family:"Silkscreen",monospace;font-size:12px;
   padding:0 2px;line-height:1;flex-shrink:0;margin-top:1px;
 }

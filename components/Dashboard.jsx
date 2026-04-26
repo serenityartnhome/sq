@@ -954,6 +954,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     }
   };
 
+  const unmarkDuoDone = async (questId) => {
+    if(!userId) return;
+    const quest = activeDuoQuests.find(q => q.id === questId);
+    if(!quest) return;
+    const isReq   = quest.requester_id === userId;
+    const myField = isReq ? "requester_done_date" : "addressee_done_date";
+    await window.SB.from("duo_quests").update({[myField]: null}).eq("id", questId);
+    setActiveDuoQuests(prev => prev.map(q => q.id === questId ? {...q, [myField]: null} : q));
+    setDuoBothDoneIds(prev => { const n = new Set(prev); n.delete(questId); return n; });
+  };
+
   const acceptDuoFromDash = async (questId) => {
     const quest = pendingDuosIn.find(q => q.id === questId);
     if(!quest) return;
@@ -983,6 +994,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       s.profile = {...s.profile, why:t};
       localStorage.setItem(key, JSON.stringify(s));
     } catch{}
+    if(userId && window.SB) window.SB.from("profiles").update({why:t}).eq("id", userId);
   };
   const DEFAULT_ACTIVE = ["charm","sun","lotus","affirm"];
   const [activePowerupIds, setActivePowerupIds] = React.useState(()=>profileFlags?.activePowerupIds || DEFAULT_ACTIVE);
@@ -1914,13 +1926,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         const bothDone      = duoBothDoneIds.has(q.id);
                         const pct           = Math.round((q.days_completed/q.total_days)*100);
                         const tickDone      = myDoneToday || bothDone || q.status === "completed";
+                        const canUntick     = myDoneToday && !bothDone && q.status !== "completed";
                         return (
                           <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
                             <div className="duo-quest-row-top">
                               <span
                                 className={"duo-tick-box"+(tickDone?" done":"")}
-                                onClick={!tickDone ? ()=>markDuoDone(q.id) : undefined}
-                                style={{cursor:tickDone?"default":"pointer"}}
+                                onClick={tickDone ? (canUntick ? ()=>unmarkDuoDone(q.id) : undefined) : ()=>markDuoDone(q.id)}
+                                style={{cursor:(tickDone && !canUntick)?"default":"pointer"}}
                               />
                               <span className="duo-quest-row-name">{q.quest_name}</span>
                               <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
