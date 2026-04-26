@@ -2720,6 +2720,13 @@ body{
 .duo-quest-btn-sm{
   padding:5px 8px !important;font-size:8px !important;
 }
+.duo-quest-leave-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--plum-soft);padding:0 0 0 6px;flex-shrink:0;
+  line-height:1;opacity:.6;transition:opacity .1s;
+}
+.duo-quest-leave-btn:hover{ opacity:1;color:var(--rose); }
 .duo-quest-empty{
   display:flex;justify-content:space-between;align-items:center;
   background:linear-gradient(135deg,rgba(255,248,253,.8) 0%,rgba(255,255,255,.6) 100%);

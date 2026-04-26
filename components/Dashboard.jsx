@@ -695,6 +695,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [pendingDuosIn,   setPendingDuosIn]   = React.useState([]);
   const [duoBothDoneIds,  setDuoBothDoneIds]  = React.useState(new Set());
   const [showDuoExplain,  setShowDuoExplain]  = React.useState(false);
+  const [leaveConfirm,    setLeaveConfirm]    = React.useState(null); // {questId, questName, partnerName}
 
   React.useEffect(()=>{
     if(!userId || !window.SB) return;
@@ -913,6 +914,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const declineDuoFromDash = async (questId) => {
     await window.SB.from("duo_quests").delete().eq("id", questId);
     setPendingDuosIn(prev => prev.filter(q => q.id !== questId));
+  };
+
+  const leaveDuoQuest = async (questId) => {
+    await window.SB.from("duo_quests").delete().eq("id", questId);
+    setActiveDuoQuests(prev => prev.filter(q => q.id !== questId));
+    setLeaveConfirm(null);
   };
 
   const saveWhy = () => {
@@ -1839,6 +1846,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                             <div className="duo-quest-row-top">
                               <span className="duo-quest-row-name">{q.quest_name}</span>
                               <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
+                              <button className="duo-quest-leave-btn"
+                                onClick={()=>setLeaveConfirm({questId:q.id, questName:q.quest_name, partnerName:pName})}
+                                title="Leave quest">✕</button>
                             </div>
                             <div className="duo-quest-bar-wrap" style={{marginBottom:6}}>
                               <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
@@ -2686,6 +2696,31 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryAnnounce(false)}>Write something ✦</button>
+          </div>
+        </div>
+      )}
+
+      {leaveConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setLeaveConfirm(null)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,textAlign:"center"}}>
+            <div style={{fontSize:28,marginBottom:8}}>⚔</div>
+            <h3 className="coming-soon-title">Leave Quest?</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.8}}>
+              You're about to leave <span style={{color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",fontWeight:700}}>{leaveConfirm.questName}</span> with {leaveConfirm.partnerName}.<br/>
+              <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--plum-soft)"}}>
+                Your progress will be lost and the adventure will end.
+              </span>
+            </p>
+            <div style={{display:"flex",gap:8,marginTop:16}}>
+              <button onClick={()=>leaveDuoQuest(leaveConfirm.questId)}
+                style={{flex:1,background:"var(--rose)",color:"#fff",border:"none",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
+                Leave ✦
+              </button>
+              <button onClick={()=>setLeaveConfirm(null)}
+                style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
+                Stay
+              </button>
+            </div>
           </div>
         </div>
       )}
