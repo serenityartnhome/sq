@@ -552,41 +552,6 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
               </div>
             )}
           </div>
-          <div className="friends-un-display" style={{marginBottom:12}}>
-            <span className="friends-settings-label">Your name</span>
-            {editingName ? (
-              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%",marginTop:6}}>
-                <div style={{display:"flex",gap:8}}>
-                  <input className="friends-un-input" style={{flex:1,maxWidth:"100%",boxSizing:"border-box"}}
-                    value={editFirstInput}
-                    onChange={e=>{ setEditFirstInput(e.target.value); setEditNameError(""); }}
-                    placeholder="First name" maxLength={24}/>
-                  <input className="friends-un-input" style={{flex:1,maxWidth:"100%",boxSizing:"border-box"}}
-                    value={editLastInput}
-                    onChange={e=>setEditLastInput(e.target.value)}
-                    placeholder="Last name" maxLength={24}/>
-                </div>
-                {editNameError && <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--rose)"}}>{editNameError}</span>}
-                <div style={{display:"flex",gap:8}}>
-                  <button className="friends-btn-primary" onClick={saveEditName} disabled={savingName} style={{padding:"8px 16px"}}>
-                    {savingName?"Saving…":"Save ✦"}
-                  </button>
-                  <button className="friends-btn-cancel" onClick={()=>{ setEditingName(false); setEditNameError(""); }}>Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}>
-                <span className="friends-un-badge">{profile.name||"—"}</span>
-                <button className="friends-btn-edit" onClick={()=>{
-                  const parts = (profile.name||"").split(" ");
-                  setEditFirstInput(parts[0]||"");
-                  setEditLastInput(parts.slice(1).join(" ")||"");
-                  setEditingName(true);
-                }}>Edit</button>
-              </div>
-            )}
-          </div>
-
           <div className="friends-toggle-row">
             <div>
               <div className="friends-settings-label">Share mood</div>

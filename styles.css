@@ -2148,7 +2148,7 @@ body{
 /* ── Friend card ─────────────────────────────────────────────── */
 .friends-card{
   display:flex;align-items:center;gap:10px;
-  background:var(--parchment);
+  background:#ffffff;
   border:2px solid var(--blush);
   padding:10px 12px;
   margin-bottom:8px;

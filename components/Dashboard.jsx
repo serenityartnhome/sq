@@ -795,7 +795,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     return { d: d ? String(parseInt(d)) : "", m: m ? String(parseInt(m)) : "", y: y||"" };
   };
   const [showProfileEdit, setShowProfileEdit] = React.useState(false);
-  const [editName, setEditName]     = React.useState(profile.name||"");
+  const [editName, setEditName]         = React.useState(()=>(profile.name||"").split(" ")[0]||"");
+  const [editLastName, setEditLastName] = React.useState(()=>(profile.name||"").split(" ").slice(1).join(" ")||"");
   const [editLoc,  setEditLoc]      = React.useState(profile.loc||"");
   const [editBdayDay,   setEditBdayDay]   = React.useState(()=>parseBday(profile.bday).d);
   const [editBdayMonth, setEditBdayMonth] = React.useState(()=>parseBday(profile.bday).m);
@@ -824,7 +825,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const saveProfileEdit = () => {
     const newBday = editBdayYear && editBdayMonth && editBdayDay
       ? `${editBdayYear}-${editBdayMonth.padStart(2,"0")}-${editBdayDay.padStart(2,"0")}` : profile.bday||"";
-    const updates = { name: editName.trim()||profile.name, bday: newBday, loc: editLoc.trim() };
+    const fullName = [editName.trim(), editLastName.trim()].filter(Boolean).join(" ") || profile.name;
+    const updates = { name: fullName, bday: newBday, loc: editLoc.trim() };
     try {
       const s = JSON.parse(localStorage.getItem("serenity-quest:v1")||"{}");
       s.profile = { ...s.profile, ...updates };
@@ -971,19 +973,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     syncedFlags.current = true;
     // Set OR clear each flag to match the loaded profile exactly
     setHatched(!!profileFlags.hatched);
-    if(profileFlags.hatched) localStorage.setItem("sq_hatched","1"); else localStorage.removeItem("sq_hatched");
+    if(profileFlags.hatched) localStorage.setItem("sq_hatched","1");
     const _adult = isAdmin || !!profileFlags.adultUnlocked;
     setAdultUnlocked(_adult);
-    if(_adult) localStorage.setItem("sq_adult","1"); else localStorage.removeItem("sq_adult");
+    if(_adult) localStorage.setItem("sq_adult","1");
     const _diary = isAdmin || !!profileFlags.diaryUnlocked;
     setDiaryUnlocked(_diary);
-    if(_diary) localStorage.setItem("sq_diary_unlocked","1"); else localStorage.removeItem("sq_diary_unlocked");
+    if(_diary) localStorage.setItem("sq_diary_unlocked","1");
     const _photo = isAdmin || !!profileFlags.photoUnlocked;
     setPhotoUnlocked(_photo);
-    if(_photo) localStorage.setItem("sq_photo_unlocked","1"); else localStorage.removeItem("sq_photo_unlocked");
+    if(_photo) localStorage.setItem("sq_photo_unlocked","1");
     const _pu = isAdmin || !!profileFlags.powerupsUnlocked;
     setPowerupsUnlocked(_pu);
-    if(_pu) localStorage.setItem("sq_powerups_unlocked","1"); else localStorage.removeItem("sq_powerups_unlocked");
+    if(_pu) localStorage.setItem("sq_powerups_unlocked","1");
     if(profileFlags.customEnergy)     { setSavedCustomEnergy(profileFlags.customEnergy); localStorage.setItem("sq_custom_energy", JSON.stringify(profileFlags.customEnergy)); }
     if(profileFlags.activePowerupIds) setActivePowerupIds(profileFlags.activePowerupIds);
     if(profileFlags.customPowerups?.length) setCustomPowerups(profileFlags.customPowerups);
@@ -1264,7 +1266,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     let changed = false;
     if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>setIsHatching(true), 400); }
     if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
-    if(petStageState !== "egg" && !localStorage.getItem("sq_diary_announce_shown")){ localStorage.setItem("sq_diary_announce_shown","1"); setTimeout(()=>setShowDiaryAnnounce(true), 800); }
+    if(changed && petStageState !== "egg"){ setTimeout(()=>setShowDiaryAnnounce(true), 800); }
     if(petStageState === "adult" && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
     if(petStageState === "adult" && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
     if(changed && userId && window.SB){
@@ -1663,9 +1665,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                           className={justHatched?"baby-pop":""}/>
                       </div>
                     );
+                  const eggSz = Math.round(sz * 0.7);
                   return <img src={eggSrc(mood||"neutral")} alt="egg"
                     className={isHatching ? "egg-hatching" : "egg-idle"}
-                    style={{width:sz,height:sz,imageRendering:"pixelated",display:"block"}}
+                    style={{width:eggSz,height:eggSz,imageRendering:"pixelated",display:"block"}}
                     onAnimationEnd={()=>{ if(isHatching){ localStorage.setItem("sq_hatched","1"); setHatched(true); setIsHatching(false); setJustHatched(true); setTimeout(()=>setJustHatched(false), 1000); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{}); setPetNameInput(""); setShowNamePrompt(true); } }}
                   />;
                 })()}
@@ -2618,7 +2621,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {/* Buttons */}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <button className="acct-btn" onClick={()=>{
-                setEditName(profile.name||""); setEditLoc(profile.loc||"");
+                const nameParts = (profile.name||"").split(" ");
+                setEditName(nameParts[0]||""); setEditLastName(nameParts.slice(1).join(" ")||"");
+                setEditLoc(profile.loc||"");
                 const bd=parseBday(profile.bday); setEditBdayDay(bd.d); setEditBdayMonth(bd.m); setEditBdayYear(bd.y);
                 setShowPetMenu(false); setShowProfileEdit(true);
               }}>Edit Profile</button>
@@ -2880,7 +2885,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <h3 className="coming-soon-title">✦ Edit Profile ✦</h3>
             <div className="field" style={{marginBottom:10}}>
               <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Name</label>
-              <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={32} placeholder="Your name…"/>
+              <div style={{display:"flex",gap:8}}>
+                <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={24} placeholder="First name…" style={{flex:1}}/>
+                <input value={editLastName} onChange={e=>setEditLastName(e.target.value)} maxLength={24} placeholder="Last name…" style={{flex:1}}/>
+              </div>
             </div>
             <div className="field" style={{marginBottom:10}}>
               <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Birthday <span style={{fontSize:9,color:"var(--plum-soft)",fontFamily:"Pixelify Sans,monospace",textTransform:"none",letterSpacing:0}}>shapes your zodiac companion ✦</span></label>

@@ -8,7 +8,9 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const [loading, setLoading]     = React.useState(true);
   const [err, setErr]             = React.useState(null);
   const [flagged, setFlagged]       = React.useState([]);
+  const [shopMessages, setShopMessages] = React.useState([]);
   const [showAdmin, setShowAdmin]   = React.useState(()=> pendingReports > 0);
+  const [showShopMessages, setShowShopMessages] = React.useState(false);
   const [adminLoading, setAdminLoading] = React.useState(false);
   const [adminStats, setAdminStats] = React.useState(null);
 
@@ -81,14 +83,16 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
     try {
       const _t = new Date(new Date().getTime() - 3*60*60*1000);
       const today = _t.toLocaleDateString("en-CA");
-      const [{ data: modData }, { data: profileData }, { data: postsData }, { data: activeData }, { data: newData }] = await Promise.all([
+      const [{ data: modData }, { data: profileData }, { data: postsData }, { data: activeData }, { data: newData }, { data: feedbackData }] = await Promise.all([
         window.SB.from("moderation_log").select("*").order("created_at", {ascending:false}),
         window.SB.from("profiles").select("id"),
         window.SB.from("gratitude_posts").select("id"),
         window.SB.from("daily_data").select("user_id").eq("date", today),
         window.SB.from("profiles").select("id").gte("created_at", today+"T00:00:00").lt("created_at", today+"T23:59:59"),
+        window.SB.from("feedback").select("id, display_name, message, created_at").order("created_at", {ascending:false}).limit(50),
       ]);
       setFlagged(modData || []);
+      setShopMessages(feedbackData || []);
       setAdminStats({
         users:   (profileData || []).length,
         posts:   (postsData   || []).length,
@@ -269,6 +273,45 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
                     </div>
                   </div>
                 ))}
+              </div>
+            )
+          )}
+
+          {/* Shop messages */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12,borderTop:"1px solid rgba(201,127,165,.3)",paddingTop:10}}>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)",display:"flex",alignItems:"center",gap:8}}>
+              Shop Messages
+              {shopMessages.length > 0 && (
+                <span style={{background:"var(--rose)",color:"#fff",padding:"1px 7px",fontSize:10}}>
+                  {shopMessages.length}
+                </span>
+              )}
+            </div>
+            <button onClick={()=>setShowShopMessages(v=>!v)}
+              style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--rose)",textDecoration:"underline"}}>
+              {showShopMessages ? "Hide" : "View"}
+            </button>
+          </div>
+          {showShopMessages && (
+            shopMessages.length === 0 ? (
+              <div style={{fontSize:12,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",marginTop:6}}>No messages yet ✦</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:8}}>
+                {shopMessages.map(m => {
+                  const d = new Date(m.created_at);
+                  const ds = d.toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"});
+                  return (
+                    <div key={m.id} style={{background:"#fff8ec",border:"2px solid #e9c98a",padding:"8px 10px"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                        <span style={{fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum)"}}>{m.display_name||"Adventurer"}</span>
+                        <span style={{fontFamily:"Pixelify Sans,monospace",fontSize:10,color:"var(--plum-soft)"}}>{ds}</span>
+                      </div>
+                      <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",lineHeight:1.5}}>
+                        {m.message}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )
           )}
