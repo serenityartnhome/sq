@@ -164,6 +164,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [duoReward,       setDuoReward]       = React.useState("");
   const [duoSending,      setDuoSending]      = React.useState(false);
   const [duoSent,         setDuoSent]         = React.useState(false);
+  const [unfriendConfirm, setUnfriendConfirm] = React.useState(null); // friend object
   const [duoPendingIn,    setDuoPendingIn]    = React.useState([]);
 
   const [searchInput,  setSearchInput]  = React.useState("");
@@ -399,6 +400,15 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     const { error } = await window.SB.from("friends")
       .insert({requester_id:userId, addressee_id:toId, status:"pending"});
     setAddStatus(s=>({...s,[toId]: error?(error.message||"error"):"sent"}));
+  };
+
+  const unfriend = async (friend) => {
+    setUnfriendConfirm(null);
+    setFriends(prev => prev.filter(f => f.id !== friend.id));
+    try {
+      await window.SB.from("friends").delete()
+        .or(`and(requester_id.eq.${userId},addressee_id.eq.${friend.id}),and(requester_id.eq.${friend.id},addressee_id.eq.${userId})`);
+    } catch {}
   };
 
   const sendMessage = async (preset, customText) => {
@@ -874,6 +884,30 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   // ── Main list view ──────────────────────────────────────────────────────────
   return (
     <div className="friends-panel panel">
+      {unfriendConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setUnfriendConfirm(null)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%",textAlign:"center"}}>
+            <h3 className="coming-soon-title" style={{fontSize:13,marginBottom:8}}>Remove friend?</h3>
+            <p style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",marginBottom:20}}>
+              Remove {(unfriendConfirm.name||unfriendConfirm.username||"").split(" ")[0]} from your circle?
+            </p>
+            <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+              <button onClick={()=>unfriend(unfriendConfirm)}
+                style={{background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
+                        textTransform:"uppercase",boxShadow:"none"}}>
+                Remove
+              </button>
+              <button onClick={()=>setUnfriendConfirm(null)}
+                style={{background:"#fff8ec",color:"#5c2a35",border:"2px solid #e9c98a",
+                        fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
+                        textTransform:"uppercase",boxShadow:"none"}}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="friends-header">
         <div>
           <div className="friends-title">Friends</div>
@@ -1005,7 +1039,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                     </div>
                   )}
                 </div>
-                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
                   <button className="friends-send-btn"
                           onClick={()=>{ setComposeTo(f); setView("compose"); }}>
                     Send ✦
@@ -1013,6 +1047,10 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                   <button className="friends-send-btn" style={{fontSize:8,padding:"5px 10px",background:"var(--plum)"}}
                           onClick={()=>{ setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedIds(new Set()); setView("duo-request"); }}>
                     Duo ✦
+                  </button>
+                  <button className="friends-remove-btn"
+                          onClick={()=>setUnfriendConfirm(f)}>
+                    Remove
                   </button>
                 </div>
               </div>

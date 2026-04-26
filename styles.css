@@ -2269,6 +2269,14 @@ body{
   flex-shrink:0;
 }
 .friends-send-btn:hover{ opacity:.85; }
+.friends-remove-btn{
+  font-family:"Silkscreen",monospace;font-size:7px;
+  color:var(--plum-soft);background:none;
+  border:1px solid rgba(92,42,53,.25);
+  padding:4px 8px;cursor:pointer;white-space:nowrap;
+  flex-shrink:0;
+}
+.friends-remove-btn:hover{ color:var(--rose);border-color:var(--rose); }
 
 /* ── Friend request card ─────────────────────────────────────── */
 .friends-request-card{
