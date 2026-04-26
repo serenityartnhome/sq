@@ -1793,67 +1793,104 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           {(()=>{
             const today = appDay();
             const fn = n => (n||"").split(" ")[0] || (n||"");
-            const hasAny = activeDuoQuests.length > 0 || pendingDuosIn.length > 0;
+
+            // Group active quests by partner
+            const activeGroups = [];
+            const seenPartner = {};
+            activeDuoQuests.forEach(q=>{
+              const pid = q.partner?.id || (q.requester_id===userId ? q.addressee_id : q.requester_id);
+              if(!seenPartner[pid]){ seenPartner[pid]=activeGroups.length; activeGroups.push({partner:q.partner,quests:[]}); }
+              activeGroups[seenPartner[pid]].quests.push(q);
+            });
+
+            // Group pending invites by requester
+            const pendingGroups = [];
+            const seenReq = {};
+            pendingDuosIn.forEach(q=>{
+              const rid = q.requester?.id || q.requester_id;
+              if(!seenReq[rid]){ seenReq[rid]=pendingGroups.length; pendingGroups.push({requester:q.requester,quests:[]}); }
+              pendingGroups[seenReq[rid]].quests.push(q);
+            });
+
+            const hasAny = activeGroups.length > 0 || pendingGroups.length > 0;
             return (
               <React.Fragment>
-                {activeDuoQuests.map(q=>{
-                  const isReq         = q.requester_id === userId;
-                  const myDoneToday   = (isReq ? q.requester_done_date : q.addressee_done_date) === today;
-                  const partDoneToday = (isReq ? q.addressee_done_date : q.requester_done_date) === today;
-                  const bothDone      = duoBothDoneIds.has(q.id);
-                  const partnerName   = fn(q.partner?.name) || q.partner?.username || "your friend";
-                  if(q.status === "completed") return (
-                    <div key={q.id} className="duo-quest-card duo-quest-complete-card">
-                      <div className="duo-quest-label">⚔ Adventure Complete ✦</div>
-                      <div className="duo-quest-name">{q.quest_name}</div>
-                      <div className="duo-quest-partner">with {partnerName} · {q.total_days} days side by side ✦</div>
-                      <div className="duo-quest-complete-msg">Your tale will be remembered.</div>
-                    </div>
-                  );
+                {activeGroups.map(({partner, quests})=>{
+                  const pName = fn(partner?.name) || partner?.username || "your friend";
+                  const animal = partner?.animal || "rat";
                   return (
-                    <div key={q.id} className="duo-quest-card">
-                      <div className="duo-quest-header">
+                    <div key={partner?.id||"g"} className="duo-quest-card">
+                      <div className="duo-quest-party-header">
+                        <img src={`assets/icon-account-${animal}.png?v=1`} width={22} height={22}
+                          style={{imageRendering:"pixelated",flexShrink:0}}/>
                         <div>
                           <div className="duo-quest-label">⚔ Duo Quest ✦</div>
-                          <div className="duo-quest-subtitle">adventure in progress</div>
+                          <div className="duo-quest-subtitle">with {pName}</div>
                         </div>
-                        <span className="duo-quest-days">{q.days_completed}/{q.total_days} days</span>
                       </div>
-                      <div className="duo-quest-name">{q.quest_name}</div>
-                      <div className="duo-quest-partner">with {partnerName}</div>
-                      <div className="duo-quest-bar-wrap">
-                        <div className="duo-quest-bar" style={{width:`${Math.round((q.days_completed/q.total_days)*100)}%`}}/>
-                      </div>
-                      {bothDone ? (
-                        <div className="duo-quest-celebration">⚔ Both adventurers triumphed! Day {q.days_completed} complete! ✦</div>
-                      ) : myDoneToday ? (
-                        <div className="duo-quest-waiting">⚔ Your day is done. Awaiting {partnerName}…</div>
-                      ) : partDoneToday ? (
-                        <button className="duo-quest-btn" onClick={()=>markDuoDone(q.id)}>
-                          {partnerName} pressed on — now it's your turn! ✦
-                        </button>
-                      ) : (
-                        <button className="duo-quest-btn" onClick={()=>markDuoDone(q.id)}>
-                          ✦ Complete today's challenge
-                        </button>
-                      )}
+                      {quests.map((q,i)=>{
+                        const isReq         = q.requester_id === userId;
+                        const myDoneToday   = (isReq ? q.requester_done_date : q.addressee_done_date) === today;
+                        const partDoneToday = (isReq ? q.addressee_done_date : q.requester_done_date) === today;
+                        const bothDone      = duoBothDoneIds.has(q.id);
+                        const pct           = Math.round((q.days_completed/q.total_days)*100);
+                        return (
+                          <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
+                            <div className="duo-quest-row-top">
+                              <span className="duo-quest-row-name">{q.quest_name}</span>
+                              <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
+                            </div>
+                            <div className="duo-quest-bar-wrap" style={{marginBottom:6}}>
+                              <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
+                            </div>
+                            {q.status==="completed" ? (
+                              <div className="duo-quest-complete-msg" style={{margin:0}}>Adventure complete ✦</div>
+                            ) : bothDone ? (
+                              <div className="duo-quest-celebration" style={{fontSize:8,padding:"2px 0"}}>⚔ Day {q.days_completed} complete! ✦</div>
+                            ) : myDoneToday ? (
+                              <div className="duo-quest-waiting" style={{fontSize:10}}>⚔ Done! Awaiting {pName}…</div>
+                            ) : partDoneToday ? (
+                              <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>markDuoDone(q.id)}>
+                                {pName} is done — your turn! ✦
+                              </button>
+                            ) : (
+                              <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>markDuoDone(q.id)}>
+                                ✦ Complete today's challenge
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
 
-                {pendingDuosIn.map(q=>{
-                  const fromName = fn(q.requester?.name) || q.requester?.username || "a friend";
+                {pendingGroups.map(({requester, quests})=>{
+                  const fromName = fn(requester?.name) || requester?.username || "a friend";
+                  const animal   = requester?.animal || "rat";
                   return (
-                    <div key={q.id} className="duo-quest-card duo-quest-pending-card">
-                      <div className="duo-quest-label">⚔ A Party Invite Awaits ✦</div>
-                      <div className="duo-quest-subtitle">will you answer the call?</div>
-                      <div className="duo-quest-name" style={{marginTop:6}}>{q.quest_name}</div>
-                      <div className="duo-quest-partner">from {fromName} · {q.total_days} days</div>
-                      <div style={{display:"flex",gap:8,marginTop:10}}>
-                        <button className="duo-quest-btn" onClick={()=>acceptDuoFromDash(q.id)} style={{flex:1}}>Accept ✦</button>
-                        <button className="duo-quest-btn" onClick={()=>declineDuoFromDash(q.id)}
-                          style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)"}}>Decline</button>
+                    <div key={requester?.id||"pg"} className="duo-quest-card duo-quest-pending-card">
+                      <div className="duo-quest-party-header">
+                        <img src={`assets/icon-account-${animal}.png?v=1`} width={22} height={22}
+                          style={{imageRendering:"pixelated",flexShrink:0}}/>
+                        <div>
+                          <div className="duo-quest-label">⚔ Party Invite ✦</div>
+                          <div className="duo-quest-subtitle">from {fromName}</div>
+                        </div>
                       </div>
+                      {quests.map((q,i)=>(
+                        <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
+                          <div className="duo-quest-row-top">
+                            <span className="duo-quest-row-name">{q.quest_name}</span>
+                            <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.total_days}d</span>
+                          </div>
+                          <div style={{display:"flex",gap:6,marginTop:4}}>
+                            <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>acceptDuoFromDash(q.id)} style={{flex:1}}>Accept ✦</button>
+                            <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>declineDuoFromDash(q.id)}
+                              style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)"}}>Decline</button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   );
                 })}
