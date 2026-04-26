@@ -122,6 +122,8 @@ function App(){
                 diaryUnlocked:    !!data.diary_unlocked,
                 photoUnlocked:    !!data.photo_unlocked,
                 powerupsUnlocked: !!data.powerups_unlocked,
+                diaryAnnounced:   !!data.diary_announced,
+                puAnnounced:      !!data.pu_announced,
                 customEnergy:     data.custom_energy || null,
                 activePowerupIds: data.active_powerup_ids || null,
                 customPowerups:   data.custom_powerups || null,

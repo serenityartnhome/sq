@@ -1,4 +1,4 @@
-const CACHE = "serenity-quest-v223";
+const CACHE = "serenity-quest-v224";
 const ASSETS = [
   "/",
   "/index.html",

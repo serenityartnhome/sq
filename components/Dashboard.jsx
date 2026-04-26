@@ -679,7 +679,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [petBubble, setPetBubble] = React.useState("Hi… I've been waiting for you ✨");
   const [celebrate, setCelebrate] = React.useState(false);
   const [isHatching, setIsHatching] = React.useState(false);
-  const [hatched, setHatched] = React.useState(()=>!!localStorage.getItem("sq_hatched"));
+  const [hatched, setHatched] = React.useState(()=>!!profileFlags?.hatched || !!localStorage.getItem("sq_hatched"));
   const [justHatched, setJustHatched] = React.useState(false);
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_diary_unlocked"));
   const [photoUnlocked, setPhotoUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_photo_unlocked"));
@@ -1236,9 +1236,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         setPowerupsUnlocked(true);
         if(userId && window.SB) window.SB.from("profiles").upsert({ id:userId, powerups_unlocked:true },{onConflict:"id"}).then(()=>{});
       }
-      if(!localStorage.getItem("sq_pu_announce_shown")){
+      if(!localStorage.getItem("sq_pu_announce_shown") && !profileFlags?.puAnnounced){
         localStorage.setItem("sq_pu_announce_shown","1");
         setTimeout(()=>setShowPowerupsAnnounce(true), 800);
+        if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,pu_announced:true},{onConflict:"id"}).then(()=>{});
       }
     } catch{}
   }, []);
@@ -1266,7 +1267,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     let changed = false;
     if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>setIsHatching(true), 400); }
     if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
-    if(changed && petStageState !== "egg"){ setTimeout(()=>setShowDiaryAnnounce(true), 800); }
+    if(changed && petStageState !== "egg" && !profileFlags?.diaryAnnounced){
+      setTimeout(()=>setShowDiaryAnnounce(true), 800);
+      if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,diary_announced:true},{onConflict:"id"}).then(()=>{});
+    }
     if(petStageState === "adult" && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
     if(petStageState === "adult" && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
     if(changed && userId && window.SB){
