@@ -2605,7 +2605,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               {/* Reveal: baby pet pops in after shell is gone */}
               {(hatchPhase === "revealing" || hatchPhase === "fading") && (
                 <div className="hatch-overlay-reveal">
-                  <BabyPet animal={animal} happy={true} size={156} className="baby-pop"/>
+                  <BabyPet animal={animal} happy={true} size={Math.round(Math.min(180,window.innerHeight*0.18)*0.3)} className="baby-pop"/>
                 </div>
               )}
             </div>
