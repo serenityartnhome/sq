@@ -154,7 +154,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   const [duoTarget,       setDuoTarget]       = React.useState(null);
   const [duoQuests,       setDuoQuests]       = React.useState(()=>DUO_PRESETS.map(q=>({...q})));
-  const [duoSelectedId,   setDuoSelectedId]   = React.useState(null);
+  const [duoSelectedIds,  setDuoSelectedIds]  = React.useState(new Set());
   const [duoEditIconFor,  setDuoEditIconFor]  = React.useState(null);
   const [duoCustomDraft,  setDuoCustomDraft]  = React.useState("");
   const [duoCustomKind,   setDuoCustomKind]   = React.useState("sparkle");
@@ -324,24 +324,25 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   };
 
   const resetDuoForm = () => {
-    setDuoTarget(null); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedId(null);
+    setDuoTarget(null); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedIds(new Set());
     setDuoEditIconFor(null); setDuoCustomDraft(""); setDuoCustomKind("sparkle"); setDuoShowCustom(false);
     setDuoDays(7); setDuoDaysCustom(false); setDuoReward("");
   };
 
   const sendDuoRequest = async () => {
-    const selectedQuest = duoQuests.find(q=>q.id===duoSelectedId);
-    const questName = selectedQuest?.label || "";
-    if(!questName || !duoTarget) return;
+    if(!duoSelectedIds.size || !duoTarget || !duoDays) return;
     setDuoSending(true);
-    await window.SB.from("duo_quests").insert({
-      requester_id: userId,
-      addressee_id: duoTarget.id,
-      quest_name: questName,
-      total_days: duoDays,
-      reward: duoReward.trim() || null,
-      status: "pending",
-    });
+    const rows = duoQuests
+      .filter(q => duoSelectedIds.has(q.id))
+      .map(q => ({
+        requester_id: userId,
+        addressee_id: duoTarget.id,
+        quest_name: q.label,
+        total_days: duoDays,
+        reward: duoReward.trim() || null,
+        status: "pending",
+      }));
+    await window.SB.from("duo_quests").insert(rows);
     setDuoSending(false);
     setDuoSent(true);
     setTimeout(() => { setDuoSent(false); resetDuoForm(); setView("list"); }, 2000);
@@ -614,13 +615,13 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
             <div className="habit-pick-grid" style={{gridTemplateColumns:"repeat(2,1fr)",marginBottom:0}}>
               {duoQuests.map(q=>{
-                const isSel = duoSelectedId === q.id;
+                const isSel = duoSelectedIds.has(q.id);
                 const isEditing = duoEditIconFor === q.id;
                 return (
                   <div key={q.id}
                     className={"habit-card"+(isSel?" active":"")+(isEditing?" icon-editing":"")}
                     style={{position:"relative",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"8px 4px",gap:4}}
-                    onClick={()=>{ setDuoSelectedId(q.id); setDuoEditIconFor(null); }}>
+                    onClick={()=>{ setDuoSelectedIds(prev=>{ const n=new Set(prev); n.has(q.id)?n.delete(q.id):n.add(q.id); return n; }); setDuoEditIconFor(null); }}>
                     <span className="habit-card-icon" title="Change icon"
                       onClick={e=>{ e.stopPropagation(); setDuoEditIconFor(duoEditIconFor===q.id?null:q.id); }}>
                       <HabitIcon kind={q.kind} size={28}/>
@@ -725,9 +726,9 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
             <button className="friends-btn-primary"
               onClick={sendDuoRequest}
-              disabled={duoSending || !duoSelectedId || !duoDays}
+              disabled={duoSending || !duoSelectedIds.size || !duoDays}
               style={{marginTop:20,width:"100%"}}>
-              {duoSending ? "Sending…" : "Send Quest Request ✦"}
+              {duoSending ? "Sending…" : `Send ${duoSelectedIds.size||""} Quest${duoSelectedIds.size!==1?"s":""} ✦`}
             </button>
           </>}
         </div>
@@ -993,7 +994,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                     Send ✦
                   </button>
                   <button className="friends-send-btn" style={{fontSize:8,padding:"5px 10px",background:"var(--plum)"}}
-                          onClick={()=>{ setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedId(null); setView("duo-request"); }}>
+                          onClick={()=>{ setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedIds(new Set()); setView("duo-request"); }}>
                     Duo ✦
                   </button>
                 </div>
