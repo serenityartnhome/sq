@@ -2578,7 +2578,6 @@ body{
   background-repeat:no-repeat;
   background-position:0 0;
   background-size:2560px 256px;
-  image-rendering:pixelated;
   animation:eggHatchSprite 1.6s steps(10) forwards;
 }
 @keyframes eggHatchSprite{
