@@ -2258,7 +2258,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                           onClick={()=>togglePower(p.id)}>
                     <HabitIcon kind={p.kind||"sparkle"} size={32}/>
                     <span className="name">{p.name}</span>
-                    <span className="xp">+{p.xp} XP</span>
                   </button>
                 ))}
                 <button className="power pu-edit-tile" onClick={()=>setShowPowerupPicker(v=>!v)}>
