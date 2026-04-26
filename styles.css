@@ -2566,31 +2566,31 @@ body{
   gap:0;position:relative;
 }
 .hatch-overlay-pet{
-  position:absolute;bottom:44px;
+  position:absolute;bottom:20px;
   opacity:.55;
   z-index:0;
+  pointer-events:none;
 }
 .egg-hatch-sprite{
   position:relative;z-index:1;
-  width:64px;height:64px;
+  width:256px;height:256px;
   background-image:url('assets/egg-hatch-sheet.png?v=1');
   background-repeat:no-repeat;
   background-position:0 0;
+  background-size:2560px 256px;
   image-rendering:pixelated;
-  transform:scale(4);
-  transform-origin:center bottom;
   animation:eggHatchSprite 1.6s steps(10) forwards;
 }
 @keyframes eggHatchSprite{
-  from{ background-position-x:0px; }
-  to{   background-position-x:-640px; }
+  from{ background-position:0 0; }
+  to{   background-position:-2560px 0; }
 }
 .hatch-overlay-reveal{
   position:relative;z-index:1;
   animation:babyPop .65s cubic-bezier(.175,.885,.32,1.275) forwards;
 }
 .hatch-overlay-text{
-  margin-top:180px;
+  margin-top:24px;
   font-family:"Silkscreen",monospace;font-size:10px;
   color:rgba(255,220,230,.9);letter-spacing:.08em;
   text-align:center;
