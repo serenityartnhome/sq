@@ -2389,7 +2389,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div style={{marginBottom:18,display:"flex",justifyContent:"center",
                          filter:"brightness(.75) saturate(.6)"}}>
               {petStage==="egg"
-                ? <span style={{fontSize:36}}>🥚</span>
+                ? <BabyPet animal={animal} happy={false} size={26}/>
                 : petStage==="baby"
                 ? <BabyPet animal={animal} happy={false} size={26}/>
                 : <ZodiacPet animal={animal} mood="tired" size={80}/>}
@@ -2610,7 +2610,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               )}
             </div>
             <div className="hatch-overlay-text">
-              {hatchPhase === "shaking"  ? "Something is stirring…" :
+              {hatchPhase === "shaking"  ? "shh... a little one is waking up ♡" :
                hatchPhase === "hatching" ? "Your companion is hatching…" :
                "A new companion! ✦"}
             </div>
