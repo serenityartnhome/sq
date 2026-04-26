@@ -894,6 +894,68 @@ body{
 }
 
 /* ============================================================
+   COMMUNITY NOTICE BOARD
+   ============================================================ */
+.community-notice-board{
+  background:linear-gradient(135deg,#3a0a5a 0%,#1a0030 100%);
+  border-bottom:3px solid rgba(201,127,165,.5);
+  padding:14px 16px 12px;
+  margin-bottom:0;
+}
+.community-notice-label{
+  font-family:"Silkscreen",monospace;
+  font-size:10px;
+  color:rgba(255,255,255,.65);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.community-notice-item{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  margin-bottom:6px;
+  position:relative;
+}
+.community-notice-item:last-child{
+  margin-bottom:0;
+}
+.community-notice-text{
+  flex:1;
+  font-family:"Pixelify Sans",monospace;
+  font-size:13px;
+  color:#fff;
+  line-height:1.55;
+}
+.community-notice-del{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:rgba(255,255,255,.4);
+  font-family:"Silkscreen",monospace;
+  font-size:11px;
+  padding:0 2px;
+  line-height:1;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.community-notice-del:hover{
+  color:var(--rose);
+}
+@media(min-width:600px){
+  .community-notice-board{
+    max-width:540px;
+    margin-left:auto;
+    margin-right:auto;
+    margin-bottom:8px;
+    border:2px solid rgba(201,127,165,.4);
+  }
+}
+
+/* ============================================================
    GRATITUDE WALL
    ============================================================ */
 .grat-wall{
