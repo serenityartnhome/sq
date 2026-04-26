@@ -69,6 +69,11 @@ function App(){
     setTimeout(()=>setShowSplash(false), 500);
   },[today]);
   React.useEffect(()=>{
+    const el = document.getElementById("pre-load");
+    if(el) el.style.display = "none";
+  },[]);
+
+  React.useEffect(()=>{
     const c = saved?.profile?.cursor;
     applyCursor(c||null);
   },[saved]);

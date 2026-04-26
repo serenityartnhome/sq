@@ -19,6 +19,11 @@
 </head>
 <body>
 <div id="root"></div>
+<div id="pre-load" style="position:fixed;inset:0;background:#2a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999">
+  <img src="assets/icon-512.png" width="96" height="96" style="image-rendering:pixelated;animation:sq-spin 1s linear infinite">
+  <div style="font-family:monospace;font-size:11px;color:#e8c5cc;letter-spacing:.08em">Loading your quest…</div>
+</div>
+<style>@keyframes sq-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 
 
 <script src="supabase-client.js?v=1777000000009"></script>
