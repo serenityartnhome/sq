@@ -774,10 +774,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       let profiles = [];
       if(partnerIds.length){
         const { data: p } = await window.SB.from("profiles")
-          .select("id, name, username, animal").in("id", partnerIds);
+          .select("id, name, username, animal, bday").in("id", partnerIds);
         profiles = p || [];
       }
-      const findP = id => profiles.find(p => p.id === id) || null;
+      const findP = id => {
+        const p = profiles.find(p => p.id === id);
+        if(!p) return null;
+        return {...p, animal: p.animal || zodiacForBirthday(p.bday)};
+      };
       setActiveDuoQuests(actives.map(d => ({...d, partner: findP(d.requester_id === userId ? d.addressee_id : d.requester_id)})));
       setPendingDuosIn(pendings.map(d => ({...d, requester: findP(d.requester_id)})));
     })();
@@ -1869,36 +1873,38 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
           {(activeDuoQuests.length > 0 || pendingDuosIn.length > 0) && (()=>{
             const today = appDay();
             const fn = n => (n||"").split(" ")[0] || (n||"");
-            const activeGroups = [];
-            const seenPartner = {};
+            // Merge active + pending into one group per partner
+            const groupMap = {};
             activeDuoQuests.forEach(q=>{
               const pid = q.partner?.id || (q.requester_id===userId ? q.addressee_id : q.requester_id);
-              if(!seenPartner[pid]){ seenPartner[pid]=activeGroups.length; activeGroups.push({partner:q.partner,quests:[]}); }
-              activeGroups[seenPartner[pid]].quests.push(q);
+              if(!groupMap[pid]) groupMap[pid] = {partner: q.partner, active:[], pending:[]};
+              groupMap[pid].active.push(q);
             });
-            const pendingGroups = [];
-            const seenReq = {};
             pendingDuosIn.forEach(q=>{
-              const rid = q.requester?.id || q.requester_id;
-              if(!seenReq[rid]){ seenReq[rid]=pendingGroups.length; pendingGroups.push({requester:q.requester,quests:[]}); }
-              pendingGroups[seenReq[rid]].quests.push(q);
+              const pid = q.requester?.id || q.requester_id;
+              if(!groupMap[pid]) groupMap[pid] = {partner: q.requester, active:[], pending:[]};
+              else if(!groupMap[pid].partner) groupMap[pid].partner = q.requester;
+              groupMap[pid].pending.push(q);
             });
+            const groups = Object.values(groupMap);
             return (
               <React.Fragment>
-                {activeGroups.map(({partner, quests})=>{
-                  const pName = fn(partner?.name) || partner?.username || "your friend";
+                {groups.map(({partner, active, pending})=>{
+                  const pName  = fn(partner?.name) || partner?.username || "your friend";
                   const animal = partner?.animal || "rat";
+                  const hasPending = pending.length > 0;
+                  const hasActive  = active.length > 0;
                   return (
-                    <div key={partner?.id||"g"} className="duo-quest-card">
+                    <div key={partner?.id||"g"} className={"duo-quest-card"+(hasPending&&!hasActive?" duo-quest-pending-card":"")}>
                       <div className="duo-quest-party-header">
                         <img src={`assets/icon-account-${animal}.png?v=1`} width={22} height={22}
                           style={{imageRendering:"pixelated",flexShrink:0}}/>
                         <div>
-                          <div className="duo-quest-label">⚔ Duo Quest ✦</div>
-                          <div className="duo-quest-subtitle">with {pName}</div>
+                          <div className="duo-quest-label">{hasActive ? "⚔ Duo Quest ✦" : "⚔ Party Invite ✦"}</div>
+                          <div className="duo-quest-subtitle">{hasActive ? "with" : "from"} {pName}</div>
                         </div>
                       </div>
-                      {quests.map((q,i)=>{
+                      {active.map((q,i)=>{
                         const isReq         = q.requester_id === userId;
                         const myDoneToday   = (isReq ? q.requester_done_date : q.addressee_done_date) === today;
                         const partDoneToday = (isReq ? q.addressee_done_date : q.requester_done_date) === today;
@@ -1934,24 +1940,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                           </div>
                         );
                       })}
-                    </div>
-                  );
-                })}
-                {pendingGroups.map(({requester, quests})=>{
-                  const fromName = fn(requester?.name) || requester?.username || "a friend";
-                  const animal   = requester?.animal || "rat";
-                  return (
-                    <div key={requester?.id||"pg"} className="duo-quest-card duo-quest-pending-card">
-                      <div className="duo-quest-party-header">
-                        <img src={`assets/icon-account-${animal}.png?v=1`} width={22} height={22}
-                          style={{imageRendering:"pixelated",flexShrink:0}}/>
-                        <div>
-                          <div className="duo-quest-label">⚔ Party Invite ✦</div>
-                          <div className="duo-quest-subtitle">from {fromName}</div>
-                        </div>
-                      </div>
-                      {quests.map((q,i)=>(
-                        <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
+                      {pending.map((q,i)=>(
+                        <div key={q.id} className={"duo-quest-row"+((active.length+i)>0?" duo-quest-row-sep":"")}>
                           <div className="duo-quest-row-top">
                             <span className="duo-quest-row-name">{q.quest_name}</span>
                             <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.total_days}d</span>
