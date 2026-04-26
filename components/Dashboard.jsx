@@ -1336,7 +1336,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   React.useEffect(()=>{
     if(isAdmin) return;
     let changed = false;
-    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>{ setHatchPhase("hatching"); setShowHatchOverlay(true); }, 400); }
+    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>{ setHatchPhase("shaking"); setShowHatchOverlay(true); }, 400); }
     if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
     if(changed && petStageState !== "egg" && !profileFlags?.diaryAnnounced){
       setTimeout(()=>setShowDiaryAnnounce(true), 800);
@@ -1355,7 +1355,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   }, [petStageState]);
 
   React.useEffect(()=>{
-    window.testHatch = ()=>{ setHatchPhase("hatching"); setShowHatchOverlay(true); };
+    window.testHatch = ()=>{ setHatchPhase("shaking"); setShowHatchOverlay(true); };
     return ()=>{ delete window.testHatch; };
   }, []);
 
@@ -2577,6 +2577,12 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <div className="hatch-overlay-pet">
               <BabyPet animal={animal} happy={false} size={96}/>
             </div>
+            {/* Pre-hatch shake */}
+            {hatchPhase === "shaking" && (
+              <div className="egg-shake-sprite"
+                onAnimationEnd={()=>setHatchPhase("hatching")}/>
+            )}
+
             {/* Sprite sheet on top */}
             {hatchPhase === "hatching" && (
               <div className="egg-hatch-sprite"
@@ -2606,7 +2612,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </div>
             )}
             <div className="hatch-overlay-text">
-              {hatchPhase === "hatching" ? "Your companion is hatching…" : "A new companion! ✦"}
+              {hatchPhase === "shaking"  ? "Something is stirring…" :
+               hatchPhase === "hatching" ? "Your companion is hatching…" :
+               "A new companion! ✦"}
             </div>
           </div>
         </div>

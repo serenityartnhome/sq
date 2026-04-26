@@ -2571,6 +2571,40 @@ body{
   z-index:0;
   pointer-events:none;
 }
+.egg-shake-sprite{
+  position:relative;z-index:1;
+  width:256px;height:256px;
+  background-image:url('assets/egg-hatch-sheet.png?v=1');
+  background-repeat:no-repeat;
+  background-position:0 0;
+  background-size:2560px 256px;
+  transform-origin:center bottom;
+  animation:eggPreHatch 3s ease-in forwards;
+}
+@keyframes eggPreHatch{
+  0%   { transform:translateX(0) rotate(0deg); }
+  6%   { transform:translateX(-3px) rotate(-1deg); }
+  12%  { transform:translateX(3px) rotate(1deg); }
+  18%  { transform:translateX(0); }
+  30%  { transform:translateX(0); }
+  36%  { transform:translateX(-5px) rotate(-2deg); }
+  42%  { transform:translateX(5px) rotate(2deg); }
+  48%  { transform:translateX(-5px) rotate(-2deg); }
+  54%  { transform:translateX(0); }
+  62%  { transform:translateX(0); }
+  66%  { transform:translateX(-9px) rotate(-4deg); }
+  70%  { transform:translateX(9px) rotate(4deg); }
+  74%  { transform:translateX(-9px) rotate(-4deg); }
+  78%  { transform:translateX(9px) rotate(4deg); }
+  82%  { transform:translateX(-13px) rotate(-6deg); }
+  86%  { transform:translateX(13px) rotate(6deg); }
+  89%  { transform:translateX(-16px) rotate(-8deg); }
+  92%  { transform:translateX(16px) rotate(8deg); }
+  95%  { transform:translateX(-18px) rotate(-9deg); }
+  98%  { transform:translateX(18px) rotate(9deg); }
+  100% { transform:translateX(0) rotate(0deg); }
+}
+
 .egg-hatch-sprite{
   position:relative;z-index:1;
   width:256px;height:256px;
@@ -2578,7 +2612,7 @@ body{
   background-repeat:no-repeat;
   background-position:0 0;
   background-size:2560px 256px;
-  animation:eggHatchSprite 1.6s steps(10) forwards;
+  animation:eggHatchSprite 2.4s steps(10) forwards;
 }
 @keyframes eggHatchSprite{
   from{ background-position:0 0; }
