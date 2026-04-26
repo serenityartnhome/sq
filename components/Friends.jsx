@@ -1,17 +1,22 @@
 // Friends — social features: friends list, messaging, privacy
 
 const DUO_PRESETS = [
-  "Drink 8 glasses of water",
-  "10-minute walk outside",
-  "Write in your journal",
-  "5-minute meditation",
-  "No screens 1hr before bed",
-  "Share one gratitude",
-  "Read for 20 minutes",
-  "Morning stretch",
-  "Eat a nourishing meal",
-  "Go to bed before midnight",
+  { id:"dp-water",    label:"Drink 8 glasses of water",  kind:"water"    },
+  { id:"dp-steps",    label:"10-min walk outside",       kind:"steps"    },
+  { id:"dp-journal",  label:"Write in your journal",     kind:"journal"  },
+  { id:"dp-meditate", label:"Meditate 5 minutes",        kind:"meditate" },
+  { id:"dp-screen",   label:"No screens before bed",     kind:"screen"   },
+  { id:"dp-gratitude",label:"Share one gratitude",       kind:"heart"    },
+  { id:"dp-read",     label:"Read for 20 minutes",       kind:"read"     },
+  { id:"dp-workout",  label:"Morning stretch",           kind:"workout"  },
+  { id:"dp-diet",     label:"Eat a nourishing meal",     kind:"diet"     },
+  { id:"dp-sleep",    label:"Sleep before midnight",     kind:"sleep"    },
 ];
+
+const DUO_ALL_ICONS = ["affirm","bed","bowl","cake","charm","clean","declutter","diary",
+  "diet","energy-heart","flame","focus","goals","heart","journal","learning","lotus","lotus-bud",
+  "meditate","nature","network","planning","protein","read","screen","selfaff","skills",
+  "sleep","sparkle","steps","sun","tea","treat","water","work","workout"];
 
 const PRESET_MESSAGES = [
   { key:"thinking",   text:"Thinking of you 🌸" },
@@ -148,8 +153,12 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const [savingName,     setSavingName]     = React.useState(false);
 
   const [duoTarget,       setDuoTarget]       = React.useState(null);
-  const [duoPreset,       setDuoPreset]       = React.useState(null);
-  const [duoCustom,       setDuoCustom]       = React.useState("");
+  const [duoQuests,       setDuoQuests]       = React.useState(()=>DUO_PRESETS.map(q=>({...q})));
+  const [duoSelectedId,   setDuoSelectedId]   = React.useState(null);
+  const [duoEditIconFor,  setDuoEditIconFor]  = React.useState(null);
+  const [duoCustomDraft,  setDuoCustomDraft]  = React.useState("");
+  const [duoCustomKind,   setDuoCustomKind]   = React.useState("sparkle");
+  const [duoShowCustom,   setDuoShowCustom]   = React.useState(false);
   const [duoDays,         setDuoDays]         = React.useState(7);
   const [duoDaysCustom,   setDuoDaysCustom]   = React.useState(false);
   const [duoReward,       setDuoReward]       = React.useState("");
@@ -314,8 +323,15 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     })));
   };
 
+  const resetDuoForm = () => {
+    setDuoTarget(null); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedId(null);
+    setDuoEditIconFor(null); setDuoCustomDraft(""); setDuoCustomKind("sparkle"); setDuoShowCustom(false);
+    setDuoDays(7); setDuoDaysCustom(false); setDuoReward("");
+  };
+
   const sendDuoRequest = async () => {
-    const questName = duoPreset || duoCustom.trim();
+    const selectedQuest = duoQuests.find(q=>q.id===duoSelectedId);
+    const questName = selectedQuest?.label || "";
     if(!questName || !duoTarget) return;
     setDuoSending(true);
     await window.SB.from("duo_quests").insert({
@@ -328,7 +344,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     });
     setDuoSending(false);
     setDuoSent(true);
-    setTimeout(() => { setDuoSent(false); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setDuoDaysCustom(false); setDuoReward(""); setView("list"); }, 2000);
+    setTimeout(() => { setDuoSent(false); resetDuoForm(); setView("list"); }, 2000);
   };
 
   const acceptDuoRequest = async (id) => {
@@ -576,7 +592,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     return (
       <div className="friends-panel panel">
         <div className="friends-header">
-          <button className="friends-back" onClick={()=>{ setView("list"); setDuoTarget(null); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setDuoDaysCustom(false); setDuoReward(""); }}>← Back</button>
+          <button className="friends-back" onClick={()=>{ resetDuoForm(); setView("list"); }}>← Back</button>
           <span className="friends-header-title">Duo Quest</span>
           <span style={{width:48}}/>
         </div>
@@ -594,25 +610,87 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
               Quest request sent! ✦
             </div>
           ) : <>
-            <div className="friends-settings-label" style={{marginBottom:8}}>Choose a quest</div>
-            <div className="duo-preset-list">
-              {DUO_PRESETS.map(p=>(
-                <button key={p} className={"duo-preset-btn"+(duoPreset===p?" selected":"")}
-                  onClick={()=>{ setDuoPreset(p); setDuoCustom(""); }}>
-                  {p}
-                </button>
-              ))}
+            <div className="friends-settings-label" style={{marginBottom:8}}>✦ Select Your Quest</div>
+
+            <div className="habit-pick-grid" style={{gridTemplateColumns:"repeat(2,1fr)",marginBottom:0}}>
+              {duoQuests.map(q=>{
+                const isSel = duoSelectedId === q.id;
+                const isEditing = duoEditIconFor === q.id;
+                return (
+                  <div key={q.id}
+                    className={"habit-card"+(isSel?" active":"")+(isEditing?" icon-editing":"")}
+                    style={{position:"relative",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"8px 4px",gap:4}}
+                    onClick={()=>{ setDuoSelectedId(q.id); setDuoEditIconFor(null); }}>
+                    <span className="habit-card-icon" title="Change icon"
+                      onClick={e=>{ e.stopPropagation(); setDuoEditIconFor(duoEditIconFor===q.id?null:q.id); }}>
+                      <HabitIcon kind={q.kind} size={28}/>
+                    </span>
+                    <span style={{overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",fontSize:11,lineHeight:1.3,width:"100%"}}>{q.label}</span>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="friends-settings-label" style={{marginTop:14,marginBottom:6}}>Or write your own</div>
-            <textarea
-              className="friends-custom-input"
-              value={duoCustom}
-              onChange={e=>{ setDuoCustom(e.target.value.slice(0,80)); setDuoPreset(null); }}
-              placeholder="Custom quest… (80 chars)"
-              rows={2}
-              disabled={duoSending}
-            />
+            {duoEditIconFor && (
+              <div className="pu-picker-panel" style={{marginBottom:8,marginTop:8}}>
+                <div className="pu-picker-title">
+                  Change icon
+                  <button onClick={()=>setDuoEditIconFor(null)} style={{float:"right",background:"none",border:"none",cursor:"pointer",color:"var(--plum-soft)"}}>✕</button>
+                </div>
+                <div className="pu-icon-grid">
+                  {DUO_ALL_ICONS.map(ic=>(
+                    <button key={ic} title={ic}
+                      className={"pu-icon-btn"+(duoQuests.find(q=>q.id===duoEditIconFor)?.kind===ic?" on":"")}
+                      onClick={()=>{ setDuoQuests(prev=>prev.map(q=>q.id===duoEditIconFor?{...q,kind:ic}:q)); }}>
+                      <img src={`assets/icon-${ic}.png?v=5`} alt={ic}
+                        style={{width:28,height:28,imageRendering:"pixelated"}}
+                        onError={e=>{e.currentTarget.src="assets/icon-sparkle.png";e.currentTarget.onerror=null;}}/>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!duoShowCustom ? (
+              <button className="add-custom" style={{marginTop:8,marginBottom:4}}
+                onClick={()=>setDuoShowCustom(true)}>
+                + Add Custom Quest
+              </button>
+            ) : (
+              <div className="pu-picker-panel" style={{marginTop:8,marginBottom:4}}>
+                <div className="pu-custom-row" style={{marginBottom:8}}>
+                  <HabitIcon kind={duoCustomKind} size={28}/>
+                  <input autoFocus value={duoCustomDraft}
+                    onChange={e=>setDuoCustomDraft(e.target.value.slice(0,40))}
+                    onKeyDown={e=>{
+                      if(e.key==="Enter"&&duoCustomDraft.trim()){
+                        setDuoQuests(prev=>[...prev,{id:"custom-"+Date.now(),label:duoCustomDraft.trim(),kind:duoCustomKind}]);
+                        setDuoCustomDraft(""); setDuoShowCustom(false); setDuoCustomKind("sparkle");
+                      }
+                      if(e.key==="Escape"){setDuoShowCustom(false);setDuoCustomDraft("");}
+                    }}
+                    placeholder="e.g. Evening yoga…" maxLength={40}
+                    className="pu-add-input" style={{flex:1}}/>
+                  <button className="chip" onClick={()=>{
+                    if(!duoCustomDraft.trim()) return;
+                    setDuoQuests(prev=>[...prev,{id:"custom-"+Date.now(),label:duoCustomDraft.trim(),kind:duoCustomKind}]);
+                    setDuoCustomDraft(""); setDuoShowCustom(false); setDuoCustomKind("sparkle");
+                  }}>Add</button>
+                  <button className="chip" onClick={()=>{setDuoShowCustom(false);setDuoCustomDraft("");setDuoCustomKind("sparkle");}}>✕</button>
+                </div>
+                <div className="pu-icon-grid">
+                  {DUO_ALL_ICONS.map(ic=>(
+                    <button key={ic} title={ic}
+                      className={"pu-icon-btn"+(duoCustomKind===ic?" on":"")}
+                      onClick={()=>setDuoCustomKind(ic)}>
+                      <img src={`assets/icon-${ic}.png?v=5`} alt={ic}
+                        style={{width:28,height:28,imageRendering:"pixelated"}}
+                        onError={e=>{e.currentTarget.src="assets/icon-sparkle.png";e.currentTarget.onerror=null;}}/>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="friends-settings-label" style={{marginTop:14,marginBottom:8}}>Number of days</div>
             <div className="duo-days-row">
@@ -628,8 +706,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
               </button>
             </div>
             {duoDaysCustom && (
-              <input
-                type="number" min={1} max={365}
+              <input type="number" min={1} max={365}
                 className="friends-custom-input"
                 style={{marginTop:6,padding:"8px 12px",width:"100%",boxSizing:"border-box"}}
                 placeholder="How many days?"
@@ -639,18 +716,16 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
             )}
 
             <div className="friends-settings-label" style={{marginTop:14,marginBottom:6}}>Reward (optional)</div>
-            <textarea
-              className="friends-custom-input"
+            <textarea className="friends-custom-input"
               value={duoReward}
               onChange={e=>setDuoReward(e.target.value.slice(0,80))}
               placeholder="What do you both get for finishing? ✦"
-              rows={2}
-              disabled={duoSending}
+              rows={2} disabled={duoSending}
             />
 
             <button className="friends-btn-primary"
               onClick={sendDuoRequest}
-              disabled={duoSending || (!duoPreset && !duoCustom.trim()) || !duoDays}
+              disabled={duoSending || !duoSelectedId || !duoDays}
               style={{marginTop:20,width:"100%"}}>
               {duoSending ? "Sending…" : "Send Quest Request ✦"}
             </button>
@@ -918,7 +993,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
                     Send ✦
                   </button>
                   <button className="friends-send-btn" style={{fontSize:8,padding:"5px 10px",background:"var(--plum)"}}
-                          onClick={()=>{ setDuoTarget(f); setDuoPreset(null); setDuoCustom(""); setDuoDays(7); setView("duo-request"); }}>
+                          onClick={()=>{ setDuoTarget(f); setDuoQuests(DUO_PRESETS.map(q=>({...q}))); setDuoSelectedId(null); setView("duo-request"); }}>
                     Duo ✦
                   </button>
                 </div>
