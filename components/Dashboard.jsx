@@ -1855,7 +1855,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {editingWhy ? (
               <div className="why-edit-row">
                 <textarea className="why-textarea" autoFocus value={whyDraft}
-                  onChange={e=>setWhyDraft(e.target.value.slice(0,150))}
+                  onChange={e=>setWhyDraft(e.target.value.slice(0,300))}
                   onKeyDown={e=>{if(e.key==="Escape") setEditingWhy(false);}}
                   placeholder="Why are you on this quest?"/>
                 <div className="why-edit-btns">
