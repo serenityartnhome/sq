@@ -105,7 +105,9 @@ function pickGreeting(daysInFlow){
     : daysInFlow===1 ? DAILY_GREETINGS.day1
     : daysInFlow<7  ? DAILY_GREETINGS.building
     : DAILY_GREETINGS.streak;
-  return pool[Math.floor(Math.random()*pool.length)];
+  // Seed by date so the message is stable for the whole day
+  const seed = parseInt(appDay().replace(/-/g,""), 10);
+  return pool[seed % pool.length];
 }
 
 const ZODIAC_GOODNIGHT = {
