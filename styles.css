@@ -2845,15 +2845,20 @@ body{
   gap:8px;
 }
 .duo-tick-box{
-  width:20px;height:20px;border:2px solid var(--gold);
+  width:clamp(16px,2.5vh,32px);height:clamp(16px,2.5vh,32px);
+  border:2px solid var(--gold);
   background:#fff;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;position:relative;margin-top:1px;
 }
 .duo-tick-box.done{background:var(--jade-deep);border-color:var(--plum);}
 .duo-tick-box.done::after{
   content:"✓";color:#fff;font-family:"Silkscreen",monospace;
-  font-weight:700;font-size:11px;position:absolute;
+  font-weight:700;font-size:clamp(9px,1.5vh,14px);position:absolute;
   top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.duo-quest-habit-icon{
+  width:clamp(16px,2.5vh,32px);height:clamp(16px,2.5vh,32px);
+  image-rendering:pixelated;flex-shrink:0;display:block;
 }
 .duo-quest-row-name{
   font-family:"Pixelify Sans",monospace;font-size:clamp(11px,1.6vh,15px);

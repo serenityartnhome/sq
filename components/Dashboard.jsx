@@ -3,6 +3,21 @@ function appDay(d){
   return t.toLocaleDateString("en-CA");
 }
 
+// Fallback map so preset duo quests show the right icon even before quest_kind DB column exists
+const DUO_PRESET_KINDS = {
+  "Drink 8 glasses of water":"water",
+  "10-min walk outside":"steps",
+  "Write in your journal":"journal",
+  "Meditate 5 minutes":"meditate",
+  "No screens before bed":"screen",
+  "Share one gratitude":"heart",
+  "Read for 20 minutes":"read",
+  "Morning stretch":"workout",
+  "Eat a nourishing meal":"diet",
+  "Sleep before midnight":"sleep",
+};
+function duoIcon(q){ return q.quest_kind || DUO_PRESET_KINDS[q.quest_name] || "sparkle"; }
+
 const STAGE_THRESHOLDS = { egg:300, baby:500, child:600, teen:700 };
 const STAGE_ORDER      = ["egg","baby","child","teen","adult"];
 const STAGE_LABELS     = { egg:"Egg", baby:"Baby", child:"Child", teen:"Teen", adult:"Adult ✦" };
@@ -1992,9 +2007,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                                 onClick={tickDone ? (canUntick ? ()=>unmarkDuoDone(q.id) : undefined) : ()=>markDuoDone(q.id)}
                                 style={{cursor:(tickDone && !canUntick)?"default":"pointer",flexShrink:0}}
                               />
-                              <img src={`assets/icon-${q.quest_kind||"sparkle"}.png`}
-                                width={20} height={20}
-                                style={{imageRendering:"pixelated",flexShrink:0,display:"block"}}
+                              <img src={`assets/icon-${duoIcon(q)}.png`}
+                                className="duo-quest-habit-icon"
                                 onError={e=>{e.currentTarget.src="assets/icon-sparkle.png";e.currentTarget.onerror=null;}}
                               />
                               <div style={{flex:1,minWidth:0}}>
