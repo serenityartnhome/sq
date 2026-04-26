@@ -351,6 +351,7 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         requester_id: userId,
         addressee_id: duoTarget.id,
         quest_name: q.label,
+        quest_kind: q.kind || null,
         total_days: duoDays,
         reward: duoReward.trim() || null,
         status: "pending",

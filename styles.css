@@ -2856,7 +2856,7 @@ body{
   top:50%;left:50%;transform:translate(-50%,-50%);
 }
 .duo-quest-row-name{
-  font-family:"Pixelify Sans",monospace;font-size:12px;
+  font-family:"Pixelify Sans",monospace;font-size:clamp(11px,1.6vh,15px);
   color:var(--plum);font-weight:600;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
 }
