@@ -740,7 +740,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [friendsNotif, setFriendsNotif] = React.useState(0);
   const [activeDuoQuests, setActiveDuoQuests] = React.useState([]);
   const [pendingDuosIn,   setPendingDuosIn]   = React.useState([]);
-  const [duoBothDoneIds,  setDuoBothDoneIds]  = React.useState(new Set());
+
   const [showDuoExplain,  setShowDuoExplain]  = React.useState(false);
   const [leaveConfirm,    setLeaveConfirm]    = React.useState(null); // {questId, questName, partnerName}
 
@@ -950,7 +950,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       setActiveDuoQuests(prev => prev.map(q => q.id === questId
         ? {...q, days_completed: newDays, last_counted_date: today, status: done?"completed":"active"}
         : q));
-      setDuoBothDoneIds(prev => new Set([...prev, questId]));
     }
   };
 
@@ -962,7 +961,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const myField = isReq ? "requester_done_date" : "addressee_done_date";
     await window.SB.from("duo_quests").update({[myField]: null}).eq("id", questId);
     setActiveDuoQuests(prev => prev.map(q => q.id === questId ? {...q, [myField]: null} : q));
-    setDuoBothDoneIds(prev => { const n = new Set(prev); n.delete(questId); return n; });
   };
 
   const acceptDuoFromDash = async (questId) => {
@@ -1923,7 +1921,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         const isReq         = q.requester_id === userId;
                         const myDoneToday   = (isReq ? q.requester_done_date : q.addressee_done_date) === today;
                         const partDoneToday = (isReq ? q.addressee_done_date : q.requester_done_date) === today;
-                        const bothDone      = duoBothDoneIds.has(q.id);
+                        const bothDone      = myDoneToday && partDoneToday;
                         const pct           = Math.round((q.days_completed/q.total_days)*100);
                         const tickDone      = myDoneToday || bothDone || q.status === "completed";
                         const canUntick     = myDoneToday && !bothDone && q.status !== "completed";
