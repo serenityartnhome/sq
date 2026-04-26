@@ -350,7 +350,7 @@ function App(){
           : sessionLoading && !saved
             ? (
               <div style={{position:"fixed",inset:0,background:"#2a0e1a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:20}}>
-                <img src="assets/icon-512.png" alt="" style={{width:96,height:96,imageRendering:"pixelated",animation:"pulse 1.6s ease-in-out infinite"}}/>
+                <img src="assets/icon-512.png" alt="" style={{width:96,height:96,imageRendering:"pixelated",animation:"spin 1s linear infinite"}}/>
                 <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#e8c5cc",letterSpacing:".08em"}}>Loading your quest…</div>
               </div>
             )
