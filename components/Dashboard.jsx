@@ -678,7 +678,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [intentShake, setIntentShake] = React.useState(false);
   const [petBubble, setPetBubble] = React.useState("Hi… I've been waiting for you ✨");
   const [celebrate, setCelebrate] = React.useState(false);
-  const [isHatching, setIsHatching] = React.useState(false);
+  const [isHatching,        setIsHatching]        = React.useState(false);
+  const [showHatchOverlay,  setShowHatchOverlay]  = React.useState(false);
+  const [hatchPhase,        setHatchPhase]        = React.useState("hatching"); // hatching|revealing|fading
   const [hatched, setHatched] = React.useState(()=>!!profileFlags?.hatched || !!localStorage.getItem("sq_hatched"));
   const [justHatched, setJustHatched] = React.useState(false);
   const [diaryUnlocked, setDiaryUnlocked] = React.useState(()=>isAdmin||!!localStorage.getItem("sq_diary_unlocked"));
@@ -1334,7 +1336,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   React.useEffect(()=>{
     if(isAdmin) return;
     let changed = false;
-    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>setIsHatching(true), 400); }
+    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>{ setHatchPhase("hatching"); setShowHatchOverlay(true); }, 400); }
     if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
     if(changed && petStageState !== "egg" && !profileFlags?.diaryAnnounced){
       setTimeout(()=>setShowDiaryAnnounce(true), 800);
@@ -1351,6 +1353,11 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       },{onConflict:"id"}).then(()=>{});
     }
   }, [petStageState]);
+
+  React.useEffect(()=>{
+    window.testHatch = ()=>{ setHatchPhase("hatching"); setShowHatchOverlay(true); };
+    return ()=>{ delete window.testHatch; };
+  }, []);
 
   const puSyncRef = React.useRef(false);
   React.useEffect(()=>{
@@ -2558,6 +2565,49 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowPowerupsAnnounce(false)}>Let's go ✦</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Egg hatching overlay ── */}
+      {showHatchOverlay && (
+        <div className={"hatch-overlay"+(hatchPhase==="fading"?" hatch-overlay-fade":"")}>
+          <div className="hatch-overlay-inner">
+            {/* Baby pet peeking behind */}
+            <div className="hatch-overlay-pet">
+              <BabyPet animal={animal} happy={false} size={96}/>
+            </div>
+            {/* Sprite sheet on top */}
+            {hatchPhase === "hatching" && (
+              <div className="egg-hatch-sprite"
+                onAnimationEnd={()=>{
+                  setHatchPhase("revealing");
+                  setTimeout(()=>{
+                    setHatchPhase("fading");
+                    setTimeout(()=>{
+                      setShowHatchOverlay(false);
+                      setHatchPhase("hatching");
+                      // complete the hatch
+                      localStorage.setItem("sq_hatched","1");
+                      setHatched(true);
+                      setJustHatched(true);
+                      setTimeout(()=>setJustHatched(false), 1000);
+                      if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,hatched:true},{onConflict:"id"}).then(()=>{});
+                      setPetNameInput("");
+                      setShowNamePrompt(true);
+                    }, 800);
+                  }, 1400);
+                }}
+              />
+            )}
+            {hatchPhase !== "hatching" && (
+              <div className="hatch-overlay-reveal">
+                <BabyPet animal={animal} happy={true} size={96} className="baby-pop"/>
+              </div>
+            )}
+            <div className="hatch-overlay-text">
+              {hatchPhase === "hatching" ? "Your companion is hatching…" : "A new companion! ✦"}
+            </div>
           </div>
         </div>
       )}

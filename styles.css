@@ -2553,6 +2553,53 @@ body{
   }
 }
 
+/* ── Egg Hatch Overlay ───────────────────────────────────────── */
+.hatch-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(20,8,30,.75);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .8s ease;
+}
+.hatch-overlay-fade{ opacity:0; pointer-events:none; }
+.hatch-overlay-inner{
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;position:relative;
+}
+.hatch-overlay-pet{
+  position:absolute;bottom:44px;
+  opacity:.55;
+  z-index:0;
+}
+.egg-hatch-sprite{
+  position:relative;z-index:1;
+  width:64px;height:64px;
+  background-image:url('assets/egg-hatch-sheet.png?v=1');
+  background-repeat:no-repeat;
+  background-position:0 0;
+  image-rendering:pixelated;
+  transform:scale(4);
+  transform-origin:center bottom;
+  animation:eggHatchSprite 1.6s steps(10) forwards;
+}
+@keyframes eggHatchSprite{
+  from{ background-position-x:0px; }
+  to{   background-position-x:-640px; }
+}
+.hatch-overlay-reveal{
+  position:relative;z-index:1;
+  animation:babyPop .65s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+.hatch-overlay-text{
+  margin-top:180px;
+  font-family:"Silkscreen",monospace;font-size:10px;
+  color:rgba(255,220,230,.9);letter-spacing:.08em;
+  text-align:center;
+  animation:textFade 1s ease-in-out infinite alternate;
+}
+@keyframes textFade{
+  from{ opacity:.6; } to{ opacity:1; }
+}
+
 /* ── Duo Quest ───────────────────────────────────────────────── */
 .duo-quest-card{
   background:#fff;
