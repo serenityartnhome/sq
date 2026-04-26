@@ -131,6 +131,7 @@ function App(){
                 stageXP:          data.stage_xp  || 0,
                 petName:          data.pet_name  || null,
                 wallAgreed:       !!data.wall_agreed,
+                activeHabitIds:   data.active_habit_ids || null,
               },
               todayData: dayData || null,
             };

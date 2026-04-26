@@ -646,6 +646,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const today = appDay();
   const isAdmin = userEmail === "serenityartnhome@gmail.com";
 
+  const appShellRef = React.useRef(null);
+  const pullStartY  = React.useRef(null);
+  const [pullDelta, setPullDelta] = React.useState(0);
+  const PULL_THRESHOLD = 64;
+  const handleTouchStart = React.useCallback((e)=>{
+    if(!appShellRef.current || appShellRef.current.scrollTop > 2) return;
+    pullStartY.current = e.touches[0].clientY;
+  },[]);
+  const handleTouchMove = React.useCallback((e)=>{
+    if(pullStartY.current === null) return;
+    const delta = e.touches[0].clientY - pullStartY.current;
+    if(delta > 0) setPullDelta(Math.min(delta, 90));
+    else { pullStartY.current = null; setPullDelta(0); }
+  },[]);
+  const handleTouchEnd = React.useCallback(()=>{
+    if(pullDelta >= PULL_THRESHOLD){ window.location.reload(); return; }
+    setPullDelta(0); pullStartY.current = null;
+  },[pullDelta]);
+
   const [activeTip, setActiveTip] = React.useState(null);
   const afterDismissRef = React.useRef(null);
   const shownTips = React.useRef(new Set([
@@ -701,7 +720,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const [activeHabitIds, setActiveHabitIds] = React.useState(()=>{
     try {
       const s = localStorage.getItem("sq_active_habits");
-      return s ? JSON.parse(s) : habits.map(h=>h.id);
+      if(s) return JSON.parse(s);
+      if(profileFlags?.activeHabitIds?.length) return profileFlags.activeHabitIds;
+      return habits.map(h=>h.id);
     } catch{ return habits.map(h=>h.id); }
   });
   const [showHabitPicker, setShowHabitPicker] = React.useState(false);
@@ -1136,6 +1157,10 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     if(profileFlags.stageXP > 0){ setStageXP(profileFlags.stageXP); localStorage.setItem("sq_stage_xp", String(profileFlags.stageXP)); }
     if(profileFlags.petName){ setPetName(profileFlags.petName); localStorage.setItem("sq_pet_name", profileFlags.petName); }
     if(profileFlags.wallAgreed) localStorage.setItem("sq_wall_agreed","1");
+    if(profileFlags.activeHabitIds?.length){
+      setActiveHabitIds(profileFlags.activeHabitIds);
+      localStorage.setItem("sq_active_habits", JSON.stringify(profileFlags.activeHabitIds));
+    }
   }, [profileFlags]);
 
   // Admin always gets everything unlocked, even if cloud flags say otherwise
@@ -1183,6 +1208,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const toggleActiveHabit = (id) => setActiveHabitIds(prev=>{
     const next = prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id];
     localStorage.setItem("sq_active_habits", JSON.stringify(next));
+    if(userId && window.SB) window.SB.from("profiles").upsert({id:userId, active_habit_ids:next},{onConflict:"id"}).then(()=>{});
     return next;
   });
   const addCustomHabit = () => {
@@ -1190,7 +1216,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const h = {id:"ch_"+Date.now(), label:t, kind:newHabitKind, custom:true};
     const next = [...customHabits, h];
     setCustomHabits(next);
-    setActiveHabitIds(ids=>{ const n=[...ids,h.id]; localStorage.setItem("sq_active_habits",JSON.stringify(n)); return n; });
+    setActiveHabitIds(ids=>{ const n=[...ids,h.id]; localStorage.setItem("sq_active_habits",JSON.stringify(n)); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,active_habit_ids:n},{onConflict:"id"}).then(()=>{}); return n; });
     localStorage.setItem("sq_custom_habits", JSON.stringify(next));
     setNewHabitName(""); setNewHabitKind("sparkle");
   };
@@ -1198,7 +1224,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     const next = customHabits.filter(h=>h.id!==id);
     setCustomHabits(next);
     localStorage.setItem("sq_custom_habits", JSON.stringify(next));
-    setActiveHabitIds(ids=>{ const n=ids.filter(x=>x!==id); localStorage.setItem("sq_active_habits",JSON.stringify(n)); return n; });
+    setActiveHabitIds(ids=>{ const n=ids.filter(x=>x!==id); localStorage.setItem("sq_active_habits",JSON.stringify(n)); if(userId&&window.SB) window.SB.from("profiles").upsert({id:userId,active_habit_ids:n},{onConflict:"id"}).then(()=>{}); return n; });
   };
 
   const supabasePushTimer = React.useRef(null);
@@ -1588,8 +1614,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const powerDone     = powerups.size > 0;
   const mainHabits    = activeHabits.filter(h=>isMainQuest(h));
   const habitsDone    = mainHabits.filter(h=>completed.has(h.id)).length;
-  const totalSlots = mainHabits.length + 2;
-  const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0);
+  const activeDuoDisplay = activeDuoQuests.filter(q => q.status === "active");
+  const duoDoneDisplay   = activeDuoDisplay.filter(q => {
+    const isReq = q.requester_id === userId;
+    return (isReq ? q.requester_done_date : q.addressee_done_date) === today;
+  }).length;
+  const totalSlots = mainHabits.length + 2 + activeDuoDisplay.length;
+  const doneCount  = habitsDone + (writingDone?1:0) + (powerDone?1:0) + duoDoneDisplay;
   const doneCountRef = React.useRef(doneCount);
   doneCountRef.current = doneCount;
   const moodRef = React.useRef(mood);
@@ -1641,8 +1672,22 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   };
 
   return (
-    <div className="app-shell">
-      <div className={"scene-img "+(tab==="calendar"?"scene-calendar":"scene-dashboard")}/>
+    <div className="app-shell" ref={appShellRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {pullDelta > 8 && (
+        <div style={{position:"absolute",top:0,left:0,right:0,height:pullDelta,
+          display:"flex",alignItems:"center",justifyContent:"center",zIndex:10,pointerEvents:"none"}}>
+          <img src="assets/icon-512.png" alt="" style={{
+            width:28,height:28,imageRendering:"pixelated",
+            opacity:Math.min(1, pullDelta/PULL_THRESHOLD),
+            transform:`rotate(${pullDelta*3}deg) scale(${0.6+(pullDelta/90)*0.4})`,
+          }}/>
+        </div>
+      )}
+      <div className={"scene-img "+((tab==="friends"||tab==="community")?"scene-calendar":"scene-dashboard")}/>
       <div className="scene-veil"/>
 
       <div className="top-bar">
