@@ -2556,7 +2556,7 @@ body{
 /* ── Egg Hatch Overlay ───────────────────────────────────────── */
 .hatch-overlay{
   position:fixed;inset:0;z-index:9999;
-  background:rgba(20,8,30,.75);
+  background:rgba(8,2,16,.94);
   display:flex;align-items:center;justify-content:center;
   transition:opacity .8s ease;
 }

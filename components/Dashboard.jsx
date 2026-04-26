@@ -2864,7 +2864,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       {showNamePrompt && (
         <div className="coming-soon-overlay">
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:280,width:"88%",textAlign:"center"}}>
-            <div style={{fontSize:32,marginBottom:8}}>🐣</div>
+            <div style={{display:"flex",justifyContent:"center",marginBottom:8}}>
+              <BabyPet animal={animal} happy={true} size={56}/>
+            </div>
             <h3 className="coming-soon-title" style={{fontSize:14,marginBottom:8}}>It hatched!</h3>
             <p style={{fontFamily:"Pixelify Sans,monospace",fontSize:13,color:"var(--plum-soft)",marginBottom:16,lineHeight:1.5}}>
               Your companion is here. What would you like to name it?
