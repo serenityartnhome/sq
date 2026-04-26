@@ -1950,7 +1950,21 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                               <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
                             </div>
                             {q.status==="completed" ? (
-                              <div className="duo-quest-complete-msg" style={{margin:0}}>Adventure complete ✦</div>
+                              <div className="duo-quest-summary">
+                                <div className="duo-quest-summary-score">
+                                  {q.quest_name} — {q.days_completed}/{q.total_days} days
+                                </div>
+                                {q.days_completed >= q.total_days ? (
+                                  <React.Fragment>
+                                    <div className="duo-quest-summary-congrats">✦ Adventure complete! ✦</div>
+                                    {q.reward && <div className="duo-quest-summary-reward">🎁 {q.reward}</div>}
+                                  </React.Fragment>
+                                ) : (
+                                  <div className="duo-quest-summary-tryagain">
+                                    {q.days_completed}/{q.total_days} days — it's ok, every step counts ✦ Want to try again?
+                                  </div>
+                                )}
+                              </div>
                             ) : bothDone ? (
                               <div className="duo-quest-celebration" style={{fontSize:8,padding:"2px 0"}}>⚔ Day {q.days_completed} complete! ✦</div>
                             ) : myDoneToday ? (

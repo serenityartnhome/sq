@@ -2787,6 +2787,26 @@ body{
   font-family:"Pixelify Sans",monospace;font-size:10px;
   color:var(--gold);margin-top:6px;font-style:italic;
 }
+.duo-quest-summary{
+  margin-top:6px;padding:8px 10px;
+  background:rgba(255,248,236,.8);border:1px solid var(--gold-soft);
+}
+.duo-quest-summary-score{
+  font-family:"Pixelify Sans",monospace;font-size:11px;
+  color:var(--plum-soft);margin-bottom:4px;
+}
+.duo-quest-summary-congrats{
+  font-family:"Silkscreen",monospace;font-size:9px;
+  color:var(--gold);letter-spacing:.05em;margin-bottom:4px;
+}
+.duo-quest-summary-reward{
+  font-family:"Pixelify Sans",monospace;font-size:12px;
+  color:var(--plum);font-weight:600;
+}
+.duo-quest-summary-tryagain{
+  font-family:"Pixelify Sans",monospace;font-size:11px;
+  color:var(--plum-soft);font-style:italic;
+}
 .duo-quest-party-header{
   display:flex;align-items:center;gap:8px;margin-bottom:8px;
 }
