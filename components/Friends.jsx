@@ -356,7 +356,11 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
         reward: duoReward.trim() || null,
         status: "pending",
       }));
-    await window.SB.from("duo_quests").insert(rows);
+    let { error } = await window.SB.from("duo_quests").insert(rows);
+    if(error?.message?.includes("quest_kind")){
+      const fallback = rows.map(({quest_kind,...r})=>r);
+      await window.SB.from("duo_quests").insert(fallback);
+    }
     setDuoSending(false);
     setDuoSent(true);
     setTimeout(() => { setDuoSent(false); resetDuoForm(); setView("list"); }, 2000);

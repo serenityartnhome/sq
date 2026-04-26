@@ -16,7 +16,23 @@ const DUO_PRESET_KINDS = {
   "Eat a nourishing meal":"diet",
   "Sleep before midnight":"sleep",
 };
-function duoIcon(q){ return q.quest_kind || DUO_PRESET_KINDS[q.quest_name] || "sparkle"; }
+function duoIcon(q){
+  if(q.quest_kind) return q.quest_kind;
+  if(DUO_PRESET_KINDS[q.quest_name]) return DUO_PRESET_KINDS[q.quest_name];
+  // keyword fallback for slight label variations
+  const n = (q.quest_name||"").toLowerCase();
+  if(n.includes("water"))                          return "water";
+  if(n.includes("walk")||n.includes("step"))       return "steps";
+  if(n.includes("journal"))                        return "journal";
+  if(n.includes("meditat"))                        return "meditate";
+  if(n.includes("screen"))                         return "screen";
+  if(n.includes("gratitude"))                      return "heart";
+  if(n.includes("read"))                           return "read";
+  if(n.includes("stretch")||n.includes("workout")||n.includes("morning")) return "workout";
+  if(n.includes("meal")||n.includes("diet")||n.includes("eat"))           return "diet";
+  if(n.includes("sleep"))                          return "sleep";
+  return "sparkle";
+}
 
 const STAGE_THRESHOLDS = { egg:300, baby:500, child:600, teen:700 };
 const STAGE_ORDER      = ["egg","baby","child","teen","adult"];
