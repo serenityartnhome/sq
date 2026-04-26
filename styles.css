@@ -2781,7 +2781,7 @@ body{
   color:var(--plum-soft);margin-bottom:8px;
 }
 .duo-quest-bar-wrap{
-  height:6px;background:var(--blush);margin-bottom:10px;
+  height:6px;background:var(--blush);margin-bottom:4px;
 }
 .duo-quest-bar{
   height:100%;background:var(--rose);transition:width .4s ease;
@@ -2841,18 +2841,18 @@ body{
   border-top:1px solid var(--blush);margin-top:8px;
 }
 .duo-quest-row-top{
-  display:flex;justify-content:space-between;align-items:center;
-  gap:6px;margin-bottom:4px;
+  display:flex;align-items:flex-start;
+  gap:8px;
 }
 .duo-tick-box{
-  width:16px;height:16px;border:2px solid var(--gold);
+  width:20px;height:20px;border:2px solid var(--gold);
   background:#fff;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;position:relative;
+  flex-shrink:0;position:relative;margin-top:1px;
 }
 .duo-tick-box.done{background:var(--jade-deep);border-color:var(--plum);}
 .duo-tick-box.done::after{
   content:"✓";color:#fff;font-family:"Silkscreen",monospace;
-  font-weight:700;font-size:10px;position:absolute;
+  font-weight:700;font-size:11px;position:absolute;
   top:50%;left:50%;transform:translate(-50%,-50%);
 }
 .duo-quest-row-name{

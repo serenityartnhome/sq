@@ -1990,55 +1990,71 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                               <span
                                 className={"duo-tick-box"+(tickDone?" done":"")}
                                 onClick={tickDone ? (canUntick ? ()=>unmarkDuoDone(q.id) : undefined) : ()=>markDuoDone(q.id)}
-                                style={{cursor:(tickDone && !canUntick)?"default":"pointer"}}
+                                style={{cursor:(tickDone && !canUntick)?"default":"pointer",flexShrink:0}}
                               />
-                              <HabitIcon kind={q.quest_kind||"sparkle"} size={18}/>
-                              <span className="duo-quest-row-name">{q.quest_name}</span>
-                              <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
-                              <button className="duo-quest-leave-btn"
-                                onClick={()=>setLeaveConfirm({questId:q.id, questName:q.quest_name, partnerName:pName})}
-                                title="Leave quest">✕</button>
-                            </div>
-                            <div className="duo-quest-bar-wrap" style={{marginBottom:4}}>
-                              <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
-                            </div>
-                            {q.status==="completed" ? (
-                              <div className="duo-quest-summary">
-                                <div className="duo-quest-summary-score">
-                                  {q.quest_name} — {q.days_completed}/{q.total_days} days
+                              <img src={`assets/icon-${q.quest_kind||"sparkle"}.png`}
+                                width={20} height={20}
+                                style={{imageRendering:"pixelated",flexShrink:0,display:"block"}}
+                                onError={e=>{e.currentTarget.src="assets/icon-sparkle.png";e.currentTarget.onerror=null;}}
+                              />
+                              <div style={{flex:1,minWidth:0}}>
+                                <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}>
+                                  <span className="duo-quest-row-name">{q.quest_name}</span>
+                                  <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
+                                  <button className="duo-quest-leave-btn"
+                                    onClick={()=>setLeaveConfirm({questId:q.id, questName:q.quest_name, partnerName:pName})}
+                                    title="Leave quest">✕</button>
                                 </div>
-                                {q.days_completed >= q.total_days ? (
-                                  <React.Fragment>
-                                    <div className="duo-quest-summary-congrats">✦ Adventure complete! ✦</div>
-                                    {q.reward && <div className="duo-quest-summary-reward">🎁 {q.reward}</div>}
-                                  </React.Fragment>
-                                ) : (
-                                  <div className="duo-quest-summary-tryagain">
-                                    {q.days_completed}/{q.total_days} days — it's ok, every step counts ✦ Want to try again?
+                                <div className="duo-quest-bar-wrap">
+                                  <div className="duo-quest-bar" style={{width:`${pct}%`}}/>
+                                </div>
+                                {q.status==="completed" ? (
+                                  <div className="duo-quest-summary">
+                                    <div className="duo-quest-summary-score">
+                                      {q.quest_name} — {q.days_completed}/{q.total_days} days
+                                    </div>
+                                    {q.days_completed >= q.total_days ? (
+                                      <React.Fragment>
+                                        <div className="duo-quest-summary-congrats">✦ Adventure complete! ✦</div>
+                                        {q.reward && <div className="duo-quest-summary-reward">🎁 {q.reward}</div>}
+                                      </React.Fragment>
+                                    ) : (
+                                      <div className="duo-quest-summary-tryagain">
+                                        {q.days_completed}/{q.total_days} days — it's ok, every step counts ✦ Want to try again?
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                ) : bothDone ? (
+                                  <div className="duo-quest-celebration" style={{fontSize:8,padding:"2px 0"}}>⚔ Day {q.days_completed} complete! ✦</div>
+                                ) : myDoneToday ? (
+                                  <div className="duo-quest-waiting" style={{fontSize:10}}>⚔ Done! Awaiting {pName}…</div>
+                                ) : partDoneToday ? (
+                                  <div style={{fontSize:10,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",padding:"2px 0"}}>{pName} is done — your turn! ✦</div>
+                                ) : null}
                               </div>
-                            ) : bothDone ? (
-                              <div className="duo-quest-celebration" style={{fontSize:8,padding:"2px 0"}}>⚔ Day {q.days_completed} complete! ✦</div>
-                            ) : myDoneToday ? (
-                              <div className="duo-quest-waiting" style={{fontSize:10}}>⚔ Done! Awaiting {pName}…</div>
-                            ) : partDoneToday ? (
-                              <div style={{fontSize:10,fontFamily:"Pixelify Sans,monospace",color:"var(--plum-soft)",padding:"2px 0"}}>{pName} is done — your turn! ✦</div>
-                            ) : null}
+                            </div>
                           </div>
                         );
                       })}
                       {pending.map((q,i)=>(
                         <div key={q.id} className={"duo-quest-row"+((active.length+i)>0?" duo-quest-row-sep":"")}>
                           <div className="duo-quest-row-top">
-                            <HabitIcon kind={q.quest_kind||"sparkle"} size={18}/>
-                            <span className="duo-quest-row-name">{q.quest_name}</span>
-                            <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.total_days}d</span>
-                          </div>
-                          <div style={{display:"flex",gap:6,marginTop:4}}>
-                            <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>acceptDuoFromDash(q.id)} style={{flex:1}}>Accept ✦</button>
-                            <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>declineDuoFromDash(q.id)}
-                              style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)"}}>Decline</button>
+                            <img src={`assets/icon-${q.quest_kind||"sparkle"}.png`}
+                              width={20} height={20}
+                              style={{imageRendering:"pixelated",flexShrink:0,display:"block"}}
+                              onError={e=>{e.currentTarget.src="assets/icon-sparkle.png";e.currentTarget.onerror=null;}}
+                            />
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}>
+                                <span className="duo-quest-row-name">{q.quest_name}</span>
+                                <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.total_days}d</span>
+                              </div>
+                              <div style={{display:"flex",gap:6}}>
+                                <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>acceptDuoFromDash(q.id)} style={{flex:1}}>Accept ✦</button>
+                                <button className="duo-quest-btn duo-quest-btn-sm" onClick={()=>declineDuoFromDash(q.id)}
+                                  style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)"}}>Decline</button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
