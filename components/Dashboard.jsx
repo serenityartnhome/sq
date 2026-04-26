@@ -1219,12 +1219,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const computeDailyXP = () => {
     // Non-negotiable = onboarding habits with required !== false
-    const activeNonNeg = habits.filter(h => activeHabitIds.includes(h.id) && h.required !== false);
-    const coreSlots    = Math.max(1, activeNonNeg.length) + 1 + (powerupsUnlocked ? 1 : 0);
-    const slotXP       = 100 / coreSlots;
+    const activeNonNeg  = habits.filter(h => activeHabitIds.includes(h.id) && h.required !== false);
+    const activeDuoOnly = activeDuoQuests.filter(q => q.status === "active");
+    const coreSlots     = Math.max(1, activeNonNeg.length) + 1 + (powerupsUnlocked ? 1 : 0) + activeDuoOnly.length;
+    const slotXP        = 100 / coreSlots;
     let earned = activeNonNeg.filter(h => completed.has(h.id)).length * slotXP;
     earned += writingDone ? slotXP : 0;
     if(powerupsUnlocked && powerups.size > 0) earned += slotXP + 5;
+    // Duo quests done today by the current user
+    const duoDoneToday = activeDuoOnly.filter(q => {
+      const isReq = q.requester_id === userId;
+      return (isReq ? q.requester_done_date : q.addressee_done_date) === today;
+    }).length;
+    earned += duoDoneToday * slotXP;
     // Optional = onboarding habits marked required:false + all custom habits
     const activeOptional = [
       ...habits.filter(h => activeHabitIds.includes(h.id) && h.required === false),
