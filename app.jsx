@@ -69,9 +69,10 @@ function App(){
     setTimeout(()=>setShowSplash(false), 500);
   },[today]);
   React.useEffect(()=>{
+    if(sessionLoading) return;
     const el = document.getElementById("pre-load");
     if(el) el.style.display = "none";
-  },[]);
+  },[sessionLoading]);
 
   React.useEffect(()=>{
     const c = saved?.profile?.cursor;
@@ -352,14 +353,7 @@ function App(){
         ? <ResetPassword accessToken={recoveryToken} onDone={()=>{ window.location.hash=""; setRecoveryToken(null); }}/>
         : showConfirmed
           ? <EmailConfirmed onContinue={()=>setShowConfirmed(false)}/>
-          : sessionLoading && !saved
-            ? (
-              <div style={{position:"fixed",inset:0,background:"#2a0e1a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:20}}>
-                <img src="assets/icon-512.png" alt="" style={{width:96,height:96,imageRendering:"pixelated",animation:"spin 1s linear infinite"}}/>
-                <div style={{fontFamily:"Silkscreen,monospace",fontSize:11,color:"#e8c5cc",letterSpacing:".08em"}}>Loading your quest…</div>
-              </div>
-            )
-            : !saved
+          : !saved
             ? <Onboarding onComplete={completeOnboarding} onLogin={handleLogin} authUser={authUser} onSignOut={signOut}/>
             : <Dashboard profile={saved.profile} habits={saved.habits}
                          onReset={reset} userId={userId} isGuest={!authUser} onSignOut={signOut}
