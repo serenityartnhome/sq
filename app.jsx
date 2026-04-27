@@ -118,7 +118,7 @@ function App(){
           }
           if(data && data.name){
             const p = {
-              profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null },
+              profile:{ name:data.name, bday:data.bday||"", loc:data.loc||"", why:data.why||"", cursor:data.cursor||null, username:data.username||null },
               habits: data.habits||[],
               seenTips: data.seen_tips ? JSON.parse(data.seen_tips) : [],
               flags: {

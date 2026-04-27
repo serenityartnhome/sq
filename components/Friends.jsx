@@ -185,6 +185,14 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
 
   const username = localUsername;
 
+  // Restore username from profile when it loads after mount (e.g. post-login session restore)
+  React.useEffect(()=>{
+    if(profile.username && !localUsername){
+      setLocalUsername(profile.username);
+      localStorage.setItem("sq_username", profile.username);
+    }
+  },[profile.username]);
+
   React.useEffect(()=>{ if(userId && window.SB && localUsername) load(); },[userId, localUsername]);
 
   React.useEffect(()=>{
