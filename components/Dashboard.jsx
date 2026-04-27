@@ -809,6 +809,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
 
   const [showDuoExplain,  setShowDuoExplain]  = React.useState(false);
   const [leaveConfirm,    setLeaveConfirm]    = React.useState(null); // {questId, questName, partnerName}
+  const [resetConfirm,    setResetConfirm]    = React.useState(null); // {questId, questName}
 
   React.useEffect(()=>{
     if(!userId || !window.SB) return;
@@ -1046,6 +1047,16 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     await window.SB.from("duo_quests").delete().eq("id", questId);
     setActiveDuoQuests(prev => prev.filter(q => q.id !== questId));
     setLeaveConfirm(null);
+  };
+
+  const resetDuoQuest = async (questId) => {
+    await window.SB.from("duo_quests")
+      .update({ days_completed: 0, requester_done_date: null, addressee_done_date: null, last_counted_date: null, status: "active" })
+      .eq("id", questId);
+    setActiveDuoQuests(prev => prev.map(q => q.id === questId
+      ? {...q, days_completed: 0, requester_done_date: null, addressee_done_date: null, last_counted_date: null, status: "active"}
+      : q));
+    setResetConfirm(null);
   };
 
   const saveWhy = () => {
@@ -2029,6 +2040,17 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         const canUntick     = myDoneToday && !bothDone && q.status !== "completed";
                         return (
                           <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
+                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                              <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--plum-soft)",letterSpacing:".04em"}}>
+                                Day {q.days_completed} of {q.total_days}
+                              </span>
+                              <button
+                                onClick={()=>setResetConfirm({questId:q.id, questName:q.quest_name})}
+                                title="Reset quest"
+                                style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)",padding:"0 2px",lineHeight:1}}>
+                                ↺
+                              </button>
+                            </div>
                             <div className="duo-quest-row-top">
                               <span
                                 className={"duo-tick-box"+(tickDone?" done":"")}
@@ -2884,6 +2906,31 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <button onClick={()=>setLeaveConfirm(null)}
                 style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
                 Stay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetConfirm && (
+        <div className="coming-soon-overlay" onClick={()=>setResetConfirm(null)}>
+          <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,textAlign:"center"}}>
+            <div style={{fontSize:28,marginBottom:8}}>↺</div>
+            <h3 className="coming-soon-title">Reset Quest?</h3>
+            <p className="coming-soon-body" style={{lineHeight:1.8}}>
+              Reset <span style={{color:"var(--plum)",fontFamily:"Pixelify Sans,monospace",fontWeight:700}}>{resetConfirm.questName}</span> back to Day 0?<br/>
+              <span style={{fontFamily:"Silkscreen,monospace",fontSize:9,color:"var(--plum-soft)"}}>
+                Your days will reset to 0. The first day counts from tomorrow.
+              </span>
+            </p>
+            <div style={{display:"flex",gap:8,marginTop:16}}>
+              <button onClick={()=>resetDuoQuest(resetConfirm.questId)}
+                style={{flex:1,background:"var(--plum)",color:"#fff",border:"none",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
+                Reset ↺
+              </button>
+              <button onClick={()=>setResetConfirm(null)}
+                style={{flex:1,background:"var(--cream)",color:"var(--plum)",border:"2px solid var(--blush)",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
+                Cancel
               </button>
             </div>
           </div>
