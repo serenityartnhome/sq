@@ -1049,11 +1049,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     setLeaveConfirm(null);
   };
 
-  const resetDuoQuest = async (questId) => {
-    await window.SB.from("duo_quests")
-      .update({ days_completed: 0, requester_done_date: null, addressee_done_date: null, last_counted_date: null, status: "active" })
-      .eq("id", questId);
-    setActiveDuoQuests(prev => prev.map(q => q.id === questId
+  const resetDuoQuest = async (questIds) => {
+    const ids = Array.isArray(questIds) ? questIds : [questIds];
+    await Promise.all(ids.map(id =>
+      window.SB.from("duo_quests")
+        .update({ days_completed: 0, requester_done_date: null, addressee_done_date: null, last_counted_date: null, status: "active" })
+        .eq("id", id)
+    ));
+    setActiveDuoQuests(prev => prev.map(q => ids.includes(q.id)
       ? {...q, days_completed: 0, requester_done_date: null, addressee_done_date: null, last_counted_date: null, status: "active"}
       : q));
     setResetConfirm(null);
@@ -1456,12 +1459,13 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     run();
   }, []);
 
-  // Power-ups unlock on day 2 OPEN (before completing quests) — check on mount
+  // Power-ups unlock when any previous day has been completed — check on mount
   React.useEffect(()=>{
     try {
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-      const yd = new Date(); yd.setDate(yd.getDate()-1);
-      if(!hist[appDay(yd)]?.done) return; // yesterday not done — still day 1
+      const todayKey = appDay();
+      const anyPrevDone = Object.keys(hist).some(k => k < todayKey && hist[k]?.done);
+      if(!anyPrevDone) return;
       if(!localStorage.getItem("sq_powerups_unlocked")){
         localStorage.setItem("sq_powerups_unlocked","1");
         setPowerupsUnlocked(true);
@@ -2025,10 +2029,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                       <div className="duo-quest-party-header">
                         <img src={`assets/icon-account-${animal}.png?v=1`} width={22} height={22}
                           style={{imageRendering:"pixelated",flexShrink:0}}/>
-                        <div>
+                        <div style={{flex:1}}>
                           <div className="duo-quest-label">{hasActive ? "⚔ Duo Quest ✦" : "⚔ Party Invite ✦"}</div>
                           <div className="duo-quest-subtitle">{hasActive ? "with" : "from"} {pName}</div>
+                          {hasActive && active[0] && (
+                            <div style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--plum-soft)",letterSpacing:".04em",marginTop:2}}>
+                              Day {active[0].days_completed} of {active[0].total_days}
+                            </div>
+                          )}
                         </div>
+                        {hasActive && (
+                          <button
+                            onClick={()=>setResetConfirm({questIds:active.map(q=>q.id), questName:active.length===1?active[0].quest_name:`all quests with ${pName}`})}
+                            title="Reset quest"
+                            style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:13,color:"var(--plum-soft)",padding:"0 4px",lineHeight:1,flexShrink:0}}>
+                            ↺
+                          </button>
+                        )}
                       </div>
                       {active.map((q,i)=>{
                         const isReq         = q.requester_id === userId;
@@ -2040,17 +2057,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                         const canUntick     = myDoneToday && !bothDone && q.status !== "completed";
                         return (
                           <div key={q.id} className={"duo-quest-row"+(i>0?" duo-quest-row-sep":"")}>
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                              <span style={{fontFamily:"Silkscreen,monospace",fontSize:8,color:"var(--plum-soft)",letterSpacing:".04em"}}>
-                                Day {q.days_completed} of {q.total_days}
-                              </span>
-                              <button
-                                onClick={()=>setResetConfirm({questId:q.id, questName:q.quest_name})}
-                                title="Reset quest"
-                                style={{background:"none",border:"none",cursor:"pointer",fontFamily:"Silkscreen,monospace",fontSize:10,color:"var(--plum-soft)",padding:"0 2px",lineHeight:1}}>
-                                ↺
-                              </button>
-                            </div>
                             <div className="duo-quest-row-top">
                               <span
                                 className={"duo-tick-box"+(tickDone?" done":"")}
@@ -2064,7 +2070,6 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                               <div style={{flex:1,minWidth:0}}>
                                 <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}>
                                   <span className="duo-quest-row-name">{q.quest_name}</span>
-                                  <span className="duo-quest-days" style={{whiteSpace:"nowrap"}}>{q.days_completed}/{q.total_days}d</span>
                                   <button className="duo-quest-leave-btn"
                                     onClick={()=>setLeaveConfirm({questId:q.id, questName:q.quest_name, partnerName:pName})}
                                     title="Leave quest">✕</button>
@@ -2924,7 +2929,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               </span>
             </p>
             <div style={{display:"flex",gap:8,marginTop:16}}>
-              <button onClick={()=>resetDuoQuest(resetConfirm.questId)}
+              <button onClick={()=>resetDuoQuest(resetConfirm.questIds)}
                 style={{flex:1,background:"var(--plum)",color:"#fff",border:"none",fontFamily:"Silkscreen,monospace",fontSize:9,padding:"10px 8px",cursor:"pointer",letterSpacing:".04em"}}>
                 Reset ↺
               </button>
