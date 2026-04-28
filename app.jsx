@@ -63,6 +63,11 @@ function App(){
   const today = new Date(Date.now() - 3*60*60*1000).toLocaleDateString("en-CA");
   const [showSplash, setShowSplash] = React.useState(()=>localStorage.getItem("sq_splash_date") !== today);
   const [splashFading, setSplashFading] = React.useState(false);
+  const [showRelogin, setShowRelogin] = React.useState(false);
+  const [reloginEmail, setReloginEmail] = React.useState("");
+  const [reloginPw, setReloginPw] = React.useState("");
+  const [reloginErr, setReloginErr] = React.useState("");
+  const [reloginBusy, setReloginBusy] = React.useState(false);
   const dismissSplash = React.useCallback(()=>{
     localStorage.setItem("sq_splash_date", today);
     setSplashFading(true);
@@ -79,6 +84,27 @@ function App(){
     applyCursor(c||null);
   },[saved]);
 
+  // Listen for session being cleared by _fetch (expired token + failed refresh)
+  React.useEffect(()=>{
+    if(!window.SB) return;
+    const { data:{ subscription } } = window.SB.auth.onAuthStateChange((event)=>{
+      if(event === "SIGNED_OUT"){
+        // Only prompt re-login if this was NOT an intentional sign-out
+        // (intentional sign-out clears sq_was_logged_in via clearAllLocalData first)
+        const wasLoggedIn = localStorage.getItem("sq_was_logged_in");
+        setAuthUser(prev=>{ if(prev && wasLoggedIn) setShowRelogin(true); return null; });
+      }
+    });
+    return ()=>subscription.unsubscribe();
+  },[]);
+
+  // Page-reload case: session was cleared while app was closed
+  React.useEffect(()=>{
+    if(sessionLoading) return;
+    if(!authUser && saved?.profile?.name && localStorage.getItem("sq_was_logged_in") && !localStorage.getItem("sq_sb_session")){
+      setShowRelogin(true);
+    }
+  },[sessionLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restore Supabase session in background — doesn't block rendering
   React.useEffect(()=>{
@@ -161,6 +187,7 @@ function App(){
             if(user.id){
               const session = { access_token: hash.access_token, refresh_token: hash.refresh_token||"", user };
               window.SB.auth.setSession(session);
+              localStorage.setItem("sq_was_logged_in","1");
               setAuthUser(user);
               const found = await loadProfile(user.id);
               const local = load();
@@ -218,6 +245,7 @@ function App(){
           } catch{}
         }
         if(!user) return;
+        localStorage.setItem("sq_was_logged_in","1");
         setAuthUser(user);
         const found = await loadProfile(user.id);
         if(!found){
@@ -270,6 +298,7 @@ function App(){
         if(!signInErr && signInData?.user) user = signInData.user;
       }
       if(user){
+        localStorage.setItem("sq_was_logged_in","1");
         setAuthUser(user);
         await window.SB.from("profiles").upsert({
           id:user.id, name:data.profile.name, bday:data.profile.bday||"",
@@ -287,7 +316,7 @@ function App(){
      "sq_wall_last_date","sq_wall_last_post_id","sq_share_loc","sq_sb_session",
      "sq_test_stage","sq_energy_today","sq_custom_energy","sq_sleep_date",
      "sq_pu_announce_shown","sq_diary_announce_shown",
-     "sq_pet_stage","sq_stage_xp","sq_last_visit","sq_xp_committed_date","sq_today_xp","sq_pet_name"]
+     "sq_pet_stage","sq_stage_xp","sq_last_visit","sq_xp_committed_date","sq_today_xp","sq_pet_name","sq_was_logged_in"]
       .forEach(k=>localStorage.removeItem(k));
     // Clear all tip-seen flags
     Object.keys(localStorage).filter(k=>k.startsWith("sq_tip_")).forEach(k=>localStorage.removeItem(k));
@@ -309,6 +338,7 @@ function App(){
   };
 
   const handleLogin = async (user)=>{
+    localStorage.setItem("sq_was_logged_in","1");
     setAuthUser(user);
     if(window.SB){
       try {
@@ -335,6 +365,22 @@ function App(){
       save(next);
       return next;
     });
+  };
+
+  const handleRelogin = async ()=>{
+    if(!reloginEmail.trim()){ setReloginErr("Please enter your email"); return; }
+    if(!reloginPw){ setReloginErr("Please enter your password"); return; }
+    setReloginBusy(true); setReloginErr("");
+    try {
+      const { data, error } = await window.SB.auth.signInWithPassword({ email: reloginEmail.trim(), password: reloginPw });
+      if(error) throw error;
+      if(data.user){
+        await handleLogin(data.user);
+        setShowRelogin(false);
+        setReloginEmail(""); setReloginPw("");
+      }
+    } catch(e){ setReloginErr(e.message||"Sign in failed"); }
+    setReloginBusy(false);
   };
 
   const signOut = async ()=>{
@@ -393,6 +439,58 @@ function App(){
         </div>
       )}
       {showPwaPrompt && <PwaPrompt onDone={()=>{ localStorage.setItem("sq_pwa_shown","1"); setShowPwaPrompt(false); }}/>}
+      {showRelogin && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,14,46,.92)",zIndex:9998,
+                     display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div style={{background:"#2a1a3e",border:"3px solid #f5c9cc",borderRadius:0,
+                       boxShadow:"6px 6px 0 rgba(0,0,0,.4)",maxWidth:360,width:"100%",
+                       textAlign:"center",padding:"28px 24px"}}>
+            <div style={{fontSize:36,marginBottom:10}}>🔒</div>
+            <div style={{fontFamily:"Silkscreen,monospace",fontSize:13,color:"#f5c9cc",
+                         marginBottom:8,letterSpacing:".04em"}}>Session Expired</div>
+            <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,
+                         color:"rgba(255,255,255,.7)",marginBottom:20,lineHeight:1.6}}>
+              Sign in again to keep syncing your quest.
+            </div>
+            {reloginErr && (
+              <div style={{color:"#f5a0a0",fontFamily:"Pixelify Sans,monospace",
+                           fontSize:11,marginBottom:12}}>{reloginErr}</div>
+            )}
+            <input type="email" placeholder="Email" value={reloginEmail}
+              onChange={e=>setReloginEmail(e.target.value)}
+              style={{width:"100%",background:"rgba(255,255,255,.08)",border:"2px solid #a87ca0",
+                      color:"#f5c9cc",padding:"10px 12px",fontFamily:"Pixelify Sans,monospace",
+                      fontSize:13,marginBottom:10,boxSizing:"border-box",outline:"none"}}/>
+            <input type="password" placeholder="Password" value={reloginPw}
+              onChange={e=>setReloginPw(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleRelogin()}
+              style={{width:"100%",background:"rgba(255,255,255,.08)",border:"2px solid #a87ca0",
+                      color:"#f5c9cc",padding:"10px 12px",fontFamily:"Pixelify Sans,monospace",
+                      fontSize:13,marginBottom:14,boxSizing:"border-box",outline:"none"}}/>
+            <button onClick={handleRelogin} disabled={reloginBusy}
+              style={{width:"100%",background:"#f5c9cc",color:"#5c2a35",border:"2px solid #e39aa0",
+                      fontFamily:"Silkscreen,monospace",fontSize:11,padding:"11px",
+                      cursor:"pointer",textTransform:"uppercase",letterSpacing:".05em",
+                      boxShadow:"3px 3px 0 rgba(0,0,0,.3)",marginBottom:10,
+                      opacity:reloginBusy?".6":"1"}}>
+              {reloginBusy ? "Signing in…" : "✦ Sign In ✦"}
+            </button>
+            <button onClick={()=>{ if(window.SB) window.SB.auth.signInWithGoogle(); }}
+              style={{width:"100%",background:"transparent",color:"#f5c9cc",
+                      border:"2px solid #a87ca0",fontFamily:"Silkscreen,monospace",
+                      fontSize:11,padding:"11px",cursor:"pointer",
+                      textTransform:"uppercase",letterSpacing:".05em",marginBottom:10}}>
+              Continue with Google
+            </button>
+            <button onClick={()=>setShowRelogin(false)}
+              style={{background:"transparent",color:"rgba(255,255,255,.45)",
+                      border:"none",fontFamily:"Pixelify Sans,monospace",fontSize:12,
+                      cursor:"pointer",padding:"4px 8px"}}>
+              Continue offline
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
