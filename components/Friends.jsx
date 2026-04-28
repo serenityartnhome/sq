@@ -276,9 +276,10 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
   const saveUsername = async () => {
     const u = usernameInput.trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
     if(!u || u.length < 3){ setUsernameError("3+ characters. Letters, numbers, underscore only."); return; }
+    if(!userId){ setUsernameError("Sign in to set a username."); return; }
     setSavingUn(true); setUsernameError("");
     try {
-      const { error } = await window.SB.from("profiles").update({username:u}).eq("id",userId);
+      const { error } = await window.SB.from("profiles").upsert({id:userId, username:u},{onConflict:"id"});
       if(error){
         const msg = error.message||"";
         setUsernameError(
@@ -296,9 +297,10 @@ function Friends({ userId, profile, animal, petStage, onEnergyBoost }){
     const u = editUnInput.trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
     if(!u || u.length < 3){ setEditUnError("3+ characters. Letters, numbers, underscore only."); return; }
     if(u === localUsername){ setEditingUn(false); return; }
+    if(!userId){ setEditUnError("Sign in to change your username."); return; }
     setSavingEditUn(true); setEditUnError("");
     try {
-      const { error } = await window.SB.from("profiles").update({username:u}).eq("id",userId);
+      const { error } = await window.SB.from("profiles").upsert({id:userId, username:u},{onConflict:"id"});
       if(error){
         const msg = error.message||"";
         setEditUnError(
