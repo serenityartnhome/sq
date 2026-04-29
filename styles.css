@@ -2595,12 +2595,10 @@ body{
 }
 .friend-notif-wrap{
   position:absolute;
-  bottom:30%;left:50%;
-  transform:translateX(-50%);
+  bottom:18%;left:8px;
   z-index:800;
-  display:flex;align-items:flex-end;gap:10px;
+  display:flex;align-items:flex-end;gap:8px;
   cursor:pointer;
-  white-space:nowrap;
 }
 .friend-notif-wrap.notif-in{
   animation:friendWalkIn .9s cubic-bezier(.2,.8,.4,1) both;
@@ -2615,10 +2613,13 @@ body{
   background:var(--cream);
   border:2px solid var(--gold);
   padding:10px 12px;
-  max-width:200px;
+  max-width:140px;
   box-shadow:3px 3px 0 rgba(92,42,53,.2);
   animation:slideUpFade .3s ease both;
   position:relative;
+}
+@media (min-width: 769px){
+  .friend-notif-bubble{ max-width:220px; }
 }
 .friend-notif-bubble::before{
   content:"";

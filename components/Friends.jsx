@@ -63,6 +63,16 @@ function FriendMessageNotif({ userId, onBoost }){
   const checkedRef = React.useRef(false);
   const timerRef   = React.useRef(null);
 
+  // Match the dashboard pet's sizing exactly: same base sz + same per-stage multipliers
+  const [petBaseSize, setPetBaseSize] = React.useState(()=>
+    Math.round(Math.min(180, (typeof window!=="undefined"?window.innerHeight:600)*0.18))
+  );
+  React.useEffect(()=>{
+    const onResize = () => setPetBaseSize(Math.round(Math.min(180, window.innerHeight*0.18)));
+    window.addEventListener("resize", onResize);
+    return ()=>window.removeEventListener("resize", onResize);
+  },[]);
+
   React.useEffect(()=>{
     if(!userId || !window.SB || checkedRef.current) return;
     checkedRef.current = true;
@@ -107,6 +117,11 @@ function FriendMessageNotif({ userId, onBoost }){
   if(!msg || phase === "idle") return null;
 
   const senderName = firstName(msg.sender.name)||msg.sender.username||"A friend";
+  const friendStage = msg.sender.pet_stage || "baby";
+  // Match dashboard's per-stage sizing: full base for adult/baby/egg, 0.75 for teen, 0.45 for child
+  const friendSize = friendStage === "child" ? Math.round(petBaseSize * 0.45)
+                   : friendStage === "teen"  ? Math.round(petBaseSize * 0.75)
+                   : petBaseSize;
   return (
     <div className={"friend-notif-wrap "+(phase==="walkout"?"notif-out":phase==="walkin"?"notif-in":"notif-show")}
          onClick={dismiss}>
@@ -114,7 +129,7 @@ function FriendMessageNotif({ userId, onBoost }){
         {phase === "showing" && (
           <div className="friend-notif-sender-name">{senderName}</div>
         )}
-        <FriendAvatar animal={msg.sender.animal} stage={msg.sender.pet_stage} size={56}/>
+        <FriendAvatar animal={msg.sender.animal} stage={friendStage} size={friendSize}/>
       </div>
       {phase === "showing" && (
         <div className="friend-notif-bubble">
