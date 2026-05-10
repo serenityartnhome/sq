@@ -1775,7 +1775,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {petStage==="egg"
               ? <img src={eggSrc(mood||"neutral")} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
               : petStage==="baby"
-              ? <BabyPet animal={animal} happy={celebrating} size={22}/>
+              ? <BabyPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} happy={celebrating} size={22}/>
               : <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
             }
           </div>
@@ -1930,7 +1930,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     return (
                       <div style={{position:"relative",display:"inline-block"}}>
                         {justHatched && <div className="hatch-flash"/>}
-                        <BabyPet animal={animal} happy={(celebrating||justWokeUp)&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
+                        <BabyPet animal={animal} mood={petMood} happy={(celebrating||justWokeUp)&&!isSleeping} neglected={isSleeping||(()=>{ try{ const yd=new Date(); yd.setDate(yd.getDate()-1); const hist=JSON.parse(localStorage.getItem("sq_history")||"{}"); const hasHistory=Object.keys(hist).some(k=>hist[k]?.done); return hatched && hasHistory && !hist[appDay(yd)]?.done; }catch{return false;} })()}
                           size={Math.round(sz*0.3)}
                           className={justHatched?"baby-pop":""}/>
                       </div>
@@ -3111,7 +3111,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                 {petStage==="egg"
                   ? <img src={eggSrc(mood||"neutral")} style={{width:64,height:64,imageRendering:"pixelated"}} alt="egg"/>
                   : petStage==="baby"
-                  ? <BabyPet animal={animal} happy={celebrating} size={22}/>
+                  ? <BabyPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} happy={celebrating} size={22}/>
                   : petStage==="child"
                   ? <ChildPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} size={42}/>
                   : petStage==="teen"

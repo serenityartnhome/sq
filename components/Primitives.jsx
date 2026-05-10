@@ -24,8 +24,19 @@ function HabitIcon({ kind, size=24 }){
 function Sparkle({ size=18 }){ return <Icon name="sparkle" size={size}/>; }
 function Flame(){ return <Icon name="flame" size={22}/>; }
 
-function BabyPet({ animal, happy, neglected, size=64, className="" }){
-  const animClass = neglected ? "baby-neglected" : happy ? "baby-happy" : "baby-idle";
+// Map the 8 mood categories onto baby's 3 available animation states
+const BABY_MOOD_MAP = {
+  happy:"happy", excited:"happy",
+  sad:"neglected", frustrated:"neglected", anxious:"neglected", tired:"neglected",
+  neutral:"idle", calm:"idle",
+};
+
+function BabyPet({ animal, mood, happy, neglected, size=64, className="" }){
+  // Explicit happy/neglected bools (celebration/sleep) override the mood-derived state
+  const state = neglected ? "neglected"
+              : happy     ? "happy"
+              : (mood && BABY_MOOD_MAP[mood]) || "idle";
+  const animClass = `baby-${state}`;
   return (
     <div className={`baby-sprite ${animClass} ${className}`}
       style={{
@@ -43,8 +54,9 @@ const SHEET_MOODS = ["happy","calm","neutral","sad","frustrated","anxious","tire
 
 function ChildPet({ animal, mood="neutral", size=64, className="" }){
   const col = Math.max(0, SHEET_MOODS.indexOf(mood));
+  // key={mood} forces remount on mood change so the CSS animation picks up the new --cx column
   return (
-    <div className={`child-sprite ${className}`}
+    <div key={mood} className={`child-sprite ${className}`}
       style={{
         width: size, height: size,
         "--cframe": `${size}px`,
@@ -61,7 +73,7 @@ function ChildPet({ animal, mood="neutral", size=64, className="" }){
 function TeenPet({ animal, mood="neutral", size=64, className="" }){
   const col = Math.max(0, SHEET_MOODS.indexOf(mood));
   return (
-    <div className={`teen-sprite ${className}`}
+    <div key={mood} className={`teen-sprite ${className}`}
       style={{
         width: size, height: size,
         "--tframe": `${size}px`,
