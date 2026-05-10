@@ -3410,9 +3410,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <h3 className="coming-soon-title">✦ Edit Profile ✦</h3>
             <div className="field" style={{marginBottom:10}}>
               <label style={{fontSize:11,fontFamily:"Silkscreen,monospace",color:"var(--plum)"}}>Name</label>
-              <div style={{display:"flex",gap:8}}>
-                <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={24} placeholder="First name…" style={{flex:1}}/>
-                <input value={editLastName} onChange={e=>setEditLastName(e.target.value)} maxLength={24} placeholder="Last name…" style={{flex:1}}/>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <input value={editName} onChange={e=>setEditName(e.target.value)} maxLength={24} placeholder="First name…" style={{width:"100%",boxSizing:"border-box"}}/>
+                <input value={editLastName} onChange={e=>setEditLastName(e.target.value)} maxLength={24} placeholder="Last name…" style={{width:"100%",boxSizing:"border-box"}}/>
               </div>
             </div>
             <div className="field" style={{marginBottom:10}}>
