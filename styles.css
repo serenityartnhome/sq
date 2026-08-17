@@ -313,10 +313,16 @@ body{
 .pu-pick-btn.on{background:var(--blush-soft);border-color:var(--rose);box-shadow:2px 2px 0 var(--rose);}
 .pu-pick-btn:hover{border-color:var(--plum);transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(92,42,53,.2);}
 .pu-remove{
-  margin-left:auto;font-size:10px;color:var(--plum-soft);
-  line-height:1;padding:0 2px;
+  position:absolute;top:-8px;right:-8px;
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Silkscreen",monospace;font-size:11px;line-height:1;
+  color:#fff;background:var(--rose);
+  border:2px solid var(--cream);border-radius:50%;
+  box-shadow:1px 1px 0 rgba(92,42,53,.25);
+  cursor:pointer;z-index:3;
 }
-.pu-remove:hover{color:var(--rose);}
+.pu-remove:hover,.pu-remove:active{background:#c0392b;transform:scale(1.1);}
 .pu-add-input{
   background:var(--cream);border:2px solid var(--gold);
   padding:5px 8px;font-family:"Pixelify Sans",monospace;font-size:12px;

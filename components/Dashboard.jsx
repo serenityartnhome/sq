@@ -1218,6 +1218,37 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
       setActiveHabitIds(profileFlags.activeHabitIds);
       localStorage.setItem("sq_active_habits", JSON.stringify(profileFlags.activeHabitIds));
     }
+
+    // Legacy migration: any account with prior progress gets every unlock,
+    // since the new XP-based gating shouldn't take things away from existing users.
+    let hasHistory = false;
+    try {
+      const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
+      hasHistory = Object.keys(hist).length > 0;
+    } catch{}
+    const isLegacy = !!profileFlags.hatched
+      || !!profileFlags.powerupsUnlocked
+      || !!profileFlags.diaryUnlocked
+      || !!profileFlags.photoUnlocked
+      || !!profileFlags.adultUnlocked
+      || (profileFlags.petStage && profileFlags.petStage !== "egg")
+      || (profileFlags.stageXP > 0)
+      || hasHistory;
+    if(isLegacy){
+      setHatched(true);             localStorage.setItem("sq_hatched","1");
+      setPowerupsUnlocked(true);    localStorage.setItem("sq_powerups_unlocked","1");
+      setDiaryUnlocked(true);       localStorage.setItem("sq_diary_unlocked","1");
+      setPhotoUnlocked(true);       localStorage.setItem("sq_photo_unlocked","1");
+      if(userId && window.SB){
+        window.SB.from("profiles").upsert({
+          id:userId,
+          hatched:true,
+          powerups_unlocked:true,
+          diary_unlocked:true,
+          photo_unlocked:true,
+        },{onConflict:"id"}).then(()=>{});
+      }
+    }
   }, [profileFlags]);
 
   // Admin always gets everything unlocked, even if cloud flags say otherwise
@@ -1459,24 +1490,25 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     run();
   }, []);
 
-  // Power-ups unlock when any previous day has been completed — check on mount
+  // (Power-up unlock now driven by stage XP — see effect below)
+
+  // Legacy migration for local-only users: anyone with prior history gets every unlock
   React.useEffect(()=>{
+    if(isAdmin) return;
+    let hasHistory = false;
     try {
       const hist = JSON.parse(localStorage.getItem("sq_history")||"{}");
-      const todayKey = appDay();
-      const anyPrevDone = Object.keys(hist).some(k => k < todayKey && hist[k]?.done);
-      if(!anyPrevDone) return;
-      if(!localStorage.getItem("sq_powerups_unlocked")){
-        localStorage.setItem("sq_powerups_unlocked","1");
-        setPowerupsUnlocked(true);
-        if(userId && window.SB) window.SB.from("profiles").upsert({ id:userId, powerups_unlocked:true },{onConflict:"id"}).then(()=>{});
-      }
-      if(!localStorage.getItem("sq_pu_announce_shown") && !profileFlags?.puAnnounced){
-        localStorage.setItem("sq_pu_announce_shown","1");
-        setTimeout(()=>setShowPowerupsAnnounce(true), 800);
-        if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,pu_announced:true},{onConflict:"id"}).then(()=>{});
-      }
+      hasHistory = Object.keys(hist).length > 0;
     } catch{}
+    const isLegacy = hasHistory
+      || !!localStorage.getItem("sq_hatched")
+      || !!localStorage.getItem("sq_pet_stage") && localStorage.getItem("sq_pet_stage") !== "egg"
+      || (parseInt(localStorage.getItem("sq_stage_xp")||"0",10) > 0);
+    if(!isLegacy) return;
+    if(!localStorage.getItem("sq_hatched"))           { localStorage.setItem("sq_hatched","1");           setHatched(true); }
+    if(!localStorage.getItem("sq_powerups_unlocked")) { localStorage.setItem("sq_powerups_unlocked","1"); setPowerupsUnlocked(true); }
+    if(!localStorage.getItem("sq_diary_unlocked"))    { localStorage.setItem("sq_diary_unlocked","1");    setDiaryUnlocked(true); }
+    if(!localStorage.getItem("sq_photo_unlocked"))    { localStorage.setItem("sq_photo_unlocked","1");    setPhotoUnlocked(true); }
   }, []);
 
   // Decay stage XP for missed days on app open
@@ -1496,27 +1528,66 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
     localStorage.setItem("sq_last_visit", todayStr);
   }, []);
 
-  // Diary + adult + photo unlocks driven by pet stage
+  // Unlocks driven by stage XP — sticky once unlocked
   React.useEffect(()=>{
     if(isAdmin) return;
     let changed = false;
-    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){ setTimeout(()=>{ setHatchPhase("shaking"); setShowHatchOverlay(true); }, 400); }
-    if(petStageState !== "egg" && !localStorage.getItem("sq_diary_unlocked")){ localStorage.setItem("sq_diary_unlocked","1"); setDiaryUnlocked(true); changed=true; }
-    if(changed && petStageState !== "egg" && !profileFlags?.diaryAnnounced){
-      setTimeout(()=>setShowDiaryAnnounce(true), 800);
-      if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,diary_announced:true},{onConflict:"id"}).then(()=>{});
+    const stageIdx = STAGE_ORDER.indexOf(petStageState);
+    const eggXP  = stageIdx > 0 ? Infinity : stageXP;
+    const babyXP = stageIdx > 1 ? Infinity : (stageIdx === 1 ? stageXP : -1);
+
+    // Power-ups: 150 XP into egg stage
+    if(eggXP >= 150 && !localStorage.getItem("sq_powerups_unlocked")){
+      localStorage.setItem("sq_powerups_unlocked","1");
+      setPowerupsUnlocked(true);
+      changed = true;
+      if(!localStorage.getItem("sq_pu_announce_shown") && !profileFlags?.puAnnounced){
+        localStorage.setItem("sq_pu_announce_shown","1");
+        setTimeout(()=>setShowPowerupsAnnounce(true), 800);
+        if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,pu_announced:true},{onConflict:"id"}).then(()=>{});
+      }
     }
-    if(petStageState === "adult" && !localStorage.getItem("sq_adult")){ localStorage.setItem("sq_adult","1"); setAdultUnlocked(true); changed=true; }
-    if(petStageState === "adult" && !localStorage.getItem("sq_photo_unlocked")){ localStorage.setItem("sq_photo_unlocked","1"); setPhotoUnlocked(true); changed=true; }
+
+    // Diary: 250 XP into egg stage
+    if(eggXP >= 250 && !localStorage.getItem("sq_diary_unlocked")){
+      localStorage.setItem("sq_diary_unlocked","1");
+      setDiaryUnlocked(true);
+      changed = true;
+      if(!profileFlags?.diaryAnnounced){
+        setTimeout(()=>setShowDiaryAnnounce(true), 800);
+        if(userId && window.SB) window.SB.from("profiles").upsert({id:userId,diary_announced:true},{onConflict:"id"}).then(()=>{});
+      }
+    }
+
+    // Hatch overlay (stage transition out of egg)
+    if(petStageState !== "egg" && !localStorage.getItem("sq_hatched") && !hatched){
+      setTimeout(()=>{ setHatchPhase("shaking"); setShowHatchOverlay(true); }, 400);
+    }
+
+    // Photo: 100 XP into baby stage
+    if(babyXP >= 100 && !localStorage.getItem("sq_photo_unlocked")){
+      localStorage.setItem("sq_photo_unlocked","1");
+      setPhotoUnlocked(true);
+      changed = true;
+    }
+
+    // Adult unlock at adult stage
+    if(petStageState === "adult" && !localStorage.getItem("sq_adult")){
+      localStorage.setItem("sq_adult","1");
+      setAdultUnlocked(true);
+      changed = true;
+    }
+
     if(changed && userId && window.SB){
       window.SB.from("profiles").upsert({
         id: userId,
-        diary_unlocked: petStageState !== "egg",
+        diary_unlocked: !!localStorage.getItem("sq_diary_unlocked"),
         adult_unlocked: petStageState === "adult",
-        photo_unlocked: petStageState === "adult",
+        photo_unlocked: !!localStorage.getItem("sq_photo_unlocked"),
+        powerups_unlocked: !!localStorage.getItem("sq_powerups_unlocked"),
       },{onConflict:"id"}).then(()=>{});
     }
-  }, [petStageState]);
+  }, [petStageState, stageXP]);
 
   React.useEffect(()=>{
     window.testHatch = ()=>{ setHatchPhase("shaking"); setShowHatchOverlay(true); };
@@ -1775,7 +1846,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             {petStage==="egg"
               ? <img src={eggSrc(mood||"neutral")} style={{width:36,height:36,imageRendering:"pixelated"}} alt="egg"/>
               : petStage==="baby"
-              ? <BabyPet animal={animal} mood={celebrating?"happy":(mood||"neutral")} happy={celebrating} size={22}/>
+              ? <BabyPet animal={animal} happy={celebrating} size={22}/>
               : <ZodiacPet animal={animal} mood={celebrating?"happy":mood} size={36}/>
             }
           </div>
@@ -2283,14 +2354,14 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                      textTransform:"uppercase",letterSpacing:".05em",
                      display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             <Icon name="sparkle" size={18}/>Power-Ups
-            {!powerupsUnlocked && daysInFlow < 2 && (
+            {!powerupsUnlocked && (
               <img src="assets/icon-lock.png?v=1" alt="locked"
                 style={{width:16,height:16,imageRendering:"pixelated",verticalAlign:"middle"}}/>
             )}
             <Icon name="sparkle" size={18}/>
           </h2>
 
-          {(!powerupsUnlocked && daysInFlow < 2) ? (
+          {!powerupsUnlocked ? (
             <>
               <button style={{width:"100%",padding:"14px 16px",
                               background:"transparent",color:"#f5c9cc",
@@ -2300,7 +2371,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                               display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
                 onClick={()=>setShowPowerupLockedMsg(true)}>
                 <img src="assets/icon-lock.png?v=1" style={{width:16,height:16,imageRendering:"pixelated"}} alt=""/>
-                Unlocks Tomorrow
+                Unlocks at 150 XP
               </button>
               {false && (
                 <div className="pu-picker-panel" style={{marginBottom:0}}>
@@ -2453,19 +2524,19 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                     <button className="diary-photo-remove" title="Remove photo" onClick={()=>setDiaryPhoto("")}>✕</button>
                   </div>
                 ) : (
-                  <button className="diary-photo-add" title={photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}
-                    onClick={()=>{ if(photoUnlocked||daysInFlow>=7){ diaryPhotoRef.current.click(); } else { setShowPhotoLocked(true); } }}
-                    style={!photoUnlocked&&daysInFlow<7?{opacity:.5,cursor:"default"}:{}}>
+                  <button className="diary-photo-add" title={photoUnlocked?"Add a memory":"Unlocks at Baby +100 XP"}
+                    onClick={()=>{ if(photoUnlocked){ diaryPhotoRef.current.click(); } else { setShowPhotoLocked(true); } }}
+                    style={!photoUnlocked?{opacity:.5,cursor:"default"}:{}}>
                     <div style={{position:"relative",display:"inline-block"}}>
                       <img src="assets/icon-camera.png" alt="camera"
                         style={{width:64,height:64,imageRendering:"pixelated",display:"block"}}
                         onError={e=>{e.currentTarget.replaceWith(Object.assign(document.createElement("span"),{textContent:"📷",style:"font-size:28px"}));}}/>
-                      {!photoUnlocked && daysInFlow < 7 && (
+                      {!photoUnlocked && (
                         <img src="assets/icon-lock.png?v=1" alt="locked"
                           style={{position:"absolute",bottom:0,right:0,width:18,height:18,imageRendering:"pixelated"}}/>
                       )}
                     </div>
-                    <span className="diary-photo-lbl">{photoUnlocked||daysInFlow>=7?"Add a memory":"Unlocks Day 7"}</span>
+                    <span className="diary-photo-lbl">{photoUnlocked?"Add a memory":"Unlocks at Baby +100 XP"}</span>
                   </button>
                 )}
               </div>
@@ -2537,18 +2608,18 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
                   </div>
                   <div className="diary-col">
                     <div style={{position:"relative",display:"inline-block"}}>
-                      <button className="diary-btn" onClick={()=>diaryUnlocked||daysInFlow>=3?setShowDiary(true):setShowDiaryLocked(true)}>
+                      <button className="diary-btn" onClick={()=>diaryUnlocked?setShowDiary(true):setShowDiaryLocked(true)}>
                         <img src="assets/icon-diary.png" onError={e=>{e.target.src="assets/icon-journal.png"}}
                              className="diary-icon" alt="diary"
-                             style={!diaryUnlocked&&daysInFlow<3?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
+                             style={!diaryUnlocked?{opacity:.6,filter:"grayscale(40%)"}:{}}/>
                       </button>
-                      {!diaryUnlocked && daysInFlow < 3 && (
+                      {!diaryUnlocked && (
                         <img src="assets/icon-lock.png?v=1" alt="locked"
                           style={{position:"absolute",top:0,right:0,width:18,height:18,
                                   imageRendering:"pixelated",pointerEvents:"none"}}/>
                       )}
                     </div>
-                    <span className="diary-label">{diaryUnlocked||daysInFlow>=3?"Write in my Journal":"Unlocks Day 3"}</span>
+                    <span className="diary-label">{diaryUnlocked?"Write in my Journal":"Unlocks at 250 XP"}</span>
                   </div>
                 </div>
               </div>
@@ -2772,9 +2843,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             </div>
             <h3 className="coming-soon-title">Memory Photos Locked</h3>
             <p className="coming-soon-body">
-              Complete 7 days in a row to add photos to your journal.<br/>
+              Once your companion hatches and grows a little, you'll be able to add photos to your journal.<br/>
               <span style={{fontSize:13,color:"var(--jade-deep)"}}>
-                You're on day {Math.max(daysInFlow,1)}… almost there! ✦
+                Unlocks at 100 XP into the Baby stage ✦
               </span>
             </p>
             <button className="coming-soon-btn" onClick={()=>setShowPhotoLocked(false)}>Got it ✦</button>
@@ -2789,7 +2860,7 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
               <img src="assets/icon-lock.png?v=1" style={{width:48,height:48,imageRendering:"pixelated"}} alt="locked"/>
             </div>
             <h3 className="coming-soon-title">✦ Journal Locked ✦</h3>
-            <p className="coming-soon-body">Unlocks after you complete your Day 3 quest ✦</p>
+            <p className="coming-soon-body">Unlocks at 250 XP ✦ keep going, you're nearly there!</p>
             <button className="coming-soon-btn" onClick={()=>setShowDiaryLocked(false)}>Got it ✦</button>
           </div>
         </div>
@@ -2800,8 +2871,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="coming-soon-overlay" onClick={()=>setShowPowerupLockedMsg(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>⚡</div>
-            <h3 className="coming-soon-title">Unlocks Tomorrow</h3>
-            <p className="coming-soon-body">Come back tomorrow and your power-ups will be waiting ✦</p>
+            <h3 className="coming-soon-title">Unlocks at 150 XP</h3>
+            <p className="coming-soon-body">Earn a little more XP and your power-ups will be waiting ✦</p>
             <button className="coming-soon-btn" onClick={()=>setShowPowerupLockedMsg(false)}>Got it ✦</button>
           </div>
         </div>
