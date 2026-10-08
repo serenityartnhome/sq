@@ -240,8 +240,10 @@ function ResetPassword({ accessToken, onDone }){
 }
 
 function EmailConfirmed({ onContinue }){
-  const [isIOS] = React.useState(()=> /iphone|ipad|ipod/i.test(navigator.userAgent));
-  const [isAndroid] = React.useState(()=> /android/i.test(navigator.userAgent));
+  // Inside the native app there is nothing to install — hide the home-screen guidance.
+  const isNative = !!window.Capacitor?.isNativePlatform?.();
+  const [isIOS] = React.useState(()=> !isNative && /iphone|ipad|ipod/i.test(navigator.userAgent));
+  const [isAndroid] = React.useState(()=> !isNative && /android/i.test(navigator.userAgent));
   const [showInstructions, setShowInstructions] = React.useState(false);
 
   return (
@@ -267,7 +269,7 @@ function EmailConfirmed({ onContinue }){
             Your email is confirmed. Welcome to your Serenity Quest — your 21-day journey starts now. ✦
           </p>
 
-          <div style={{background:"rgba(201,127,165,.12)",border:"1px solid var(--rose)",borderRadius:8,padding:"16px",marginBottom:20}}>
+          {!isNative && <div style={{background:"rgba(201,127,165,.12)",border:"1px solid var(--rose)",borderRadius:8,padding:"16px",marginBottom:20}}>
             <p style={{fontSize:13,fontFamily:"Silkscreen,monospace",color:"var(--plum)",marginBottom:10,lineHeight:1.5}}>
               ✦ Add to your Home Screen
             </p>
@@ -304,7 +306,7 @@ function EmailConfirmed({ onContinue }){
                 )}
               </div>
             )}
-          </div>
+          </div>}
 
           <button className="btn-primary" onClick={onContinue} style={{width:"100%"}}>
             <Icon name="sparkle" size={16}/>

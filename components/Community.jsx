@@ -5,6 +5,11 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const [liked, setLiked]         = React.useState(new Set());
   const [reported, setReported]   = React.useState(new Set());
   const [reportConfirm, setReportConfirm] = React.useState(null);
+  const [blockConfirm, setBlockConfirm] = React.useState(null);
+  const [blocked, setBlocked] = React.useState(()=>{
+    try { return new Set(JSON.parse(localStorage.getItem("sq_blocked_users")||"[]")); }
+    catch { return new Set(); }
+  });
   const [loading, setLoading]     = React.useState(true);
   const [err, setErr]             = React.useState(null);
   const [flagged, setFlagged]       = React.useState([]);
@@ -54,8 +59,11 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
       const reportCountMap = {};
       reports.forEach(r => { reportCountMap[r.post_id] = (reportCountMap[r.post_id] || 0) + 1; });
 
-      // Hide posts with 3+ reports (pending admin review) unless admin
-      const visiblePosts = postsData.filter(p => isAdmin || (reportCountMap[p.id] || 0) < 3);
+      // Hide posts with 3+ reports (pending admin review) unless admin,
+      // and hide anything from a user this player has blocked.
+      const visiblePosts = postsData.filter(p =>
+        (isAdmin || (reportCountMap[p.id] || 0) < 3) && !blocked.has(p.user_id)
+      );
 
       const mapped = visiblePosts.map(p => ({
         ...p,
@@ -165,6 +173,29 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
   const confirmReport = (postId) => {
     if (!userId || reported.has(postId)) return;
     setReportConfirm(postId);
+  };
+
+  const confirmBlock = (post) => {
+    if (!userId || !post || post.user_id === userId) return;
+    setBlockConfirm(post);
+  };
+
+  const doBlock = (post) => {
+    setBlockConfirm(null);
+    if (!post) return;
+    setBlocked(prev => {
+      const n = new Set(prev); n.add(post.user_id);
+      try { localStorage.setItem("sq_blocked_users", JSON.stringify([...n])); } catch {}
+      return n;
+    });
+    // Remove every post by that user immediately
+    setPosts(prev => prev.filter(p => p.user_id !== post.user_id));
+  };
+
+  const unblockAll = () => {
+    setBlocked(new Set());
+    try { localStorage.removeItem("sq_blocked_users"); } catch {}
+    loadPosts();
   };
 
   const doReport = async (postId) => {
@@ -459,6 +490,35 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
           </div>
         )}
 
+        {/* Block confirmation dialog */}
+        {blockConfirm && (
+          <div className="coming-soon-overlay" onClick={()=>setBlockConfirm(null)}>
+            <div className="coming-soon-box" onClick={e=>e.stopPropagation()} style={{maxWidth:300,width:"88%",textAlign:"center"}}>
+              <h3 className="coming-soon-title" style={{fontSize:13,marginBottom:12}}>
+                Block {blockConfirm.display_name || "this user"}?
+              </h3>
+              <p style={{fontFamily:"Pixelify Sans,monospace",fontSize:12,color:"var(--plum-soft)",
+                         marginBottom:18,lineHeight:1.5}}>
+                You won't see their posts any more. You can undo this from the bottom of the board.
+              </p>
+              <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+                <button onClick={()=>doBlock(blockConfirm)}
+                  style={{background:"rgba(192,57,43,.15)",color:"#8b1a1a",border:"2px solid #c0392b",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
+                          textTransform:"uppercase",boxShadow:"none"}}>
+                  Block
+                </button>
+                <button onClick={()=>setBlockConfirm(null)}
+                  style={{background:"rgba(255,255,255,.6)",color:"var(--plum)",border:"2px solid var(--plum-soft)",
+                          fontFamily:"Silkscreen,monospace",fontSize:11,padding:"8px 16px",cursor:"pointer",
+                          textTransform:"uppercase",boxShadow:"none"}}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Report confirmation dialog */}
         {reportConfirm && (
           <div className="coming-soon-overlay" onClick={()=>setReportConfirm(null)}>
@@ -534,6 +594,12 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
                           {isReported ? "⚑" : "⚑"}
                         </button>
                       )}
+                      {!isOwn && userId && (
+                        <button onClick={()=>confirmBlock(post)}
+                          className="grat-card-report" title="Block this user">
+                          ⊘
+                        </button>
+                      )}
                       <button onClick={()=>toggleLike(post.id)} className={"grat-card-like"+(isLiked?" liked":"")}>
                         ♥ {post.likeCount}
                       </button>
@@ -542,6 +608,21 @@ function CommunityBoard({ userId, pendingReports, onReportClear, isAdmin }) {
                 </div>
               );
             })}
+            {blocked.size > 0 && (
+              <div style={{textAlign:"center",marginTop:14,paddingTop:12,
+                           borderTop:"1px solid rgba(201,127,165,.3)"}}>
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,
+                             color:"var(--plum-soft)",marginBottom:6}}>
+                  {blocked.size} blocked {blocked.size===1?"user":"users"} hidden
+                </div>
+                <button onClick={unblockAll}
+                  style={{background:"rgba(255,255,255,.6)",color:"var(--plum)",
+                          border:"2px solid var(--plum-soft)",fontFamily:"Silkscreen,monospace",
+                          fontSize:10,padding:"6px 14px",cursor:"pointer",textTransform:"uppercase"}}>
+                  Unblock all
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -9,6 +9,19 @@
 
   function _notify(event, session){ _listeners.forEach(fn=>fn(event, session)); }
 
+  // --- PKCE helpers (native OAuth only) ---
+  function _b64url(bytes){
+    let s = ""; for(const b of bytes) s += String.fromCharCode(b);
+    return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+  function _makeVerifier(){
+    const a = new Uint8Array(64); crypto.getRandomValues(a); return _b64url(a);
+  }
+  async function _challenge(verifier){
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+    return _b64url(new Uint8Array(digest));
+  }
+
   function _hdrs(extra){
     const h = { "apikey": KEY, "Content-Type": "application/json" };
     if(_session) h["Authorization"] = "Bearer " + _session.access_token;
@@ -103,6 +116,16 @@
       return { data:{ subscription:{ unsubscribe(){ const i=_listeners.indexOf(cb); if(i>-1)_listeners.splice(i,1); }}}};
     },
 
+    async resendConfirmation(email){
+      const r = await fetch(URL+"/auth/v1/resend", {
+        method:"POST", headers:_hdrs(),
+        body: JSON.stringify({ type:"signup", email })
+      });
+      const d = await r.json().catch(()=>({}));
+      if(d.error) return { error:{ message: d.error_description||d.error||"Could not resend" }};
+      return { error:null };
+    },
+
     async resetPasswordForEmail(email){
       const r = await fetch(URL+"/auth/v1/recover", {
         method:"POST", headers:_hdrs(),
@@ -113,9 +136,22 @@
       return { error:null };
     },
 
-    signInWithGoogle(){
-      const redirectTo = "https://app.serenityartnhome.com";
-      window.location.href = URL+"/auth/v1/authorize?provider=google&prompt=select_account&redirect_to="+encodeURIComponent(redirectTo);
+    async signInWithGoogle(){
+      // Native app: Google forbids OAuth inside webviews, so open the system browser
+      // (SFSafariViewController) and come back via the app's custom URL scheme.
+      const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+      if(!isNative){
+        window.location.href = URL+"/auth/v1/authorize?provider=google&prompt=select_account&redirect_to="+encodeURIComponent("https://app.serenityartnhome.com");
+        return;
+      }
+      // PKCE: tokens come back as a ?code= query param, which survives the custom-scheme
+      // redirect (a #fragment does not).
+      const verifier = _makeVerifier();
+      try{ localStorage.setItem("sq_pkce_verifier", verifier); }catch{}
+      const authUrl = URL+"/auth/v1/authorize?provider=google&prompt=select_account"
+        + "&redirect_to="+encodeURIComponent("com.serenityartnhome.quest://auth-callback")
+        + "&flow_type=pkce&code_challenge_method=s256&code_challenge="+encodeURIComponent(await _challenge(verifier));
+      window.Capacitor.Plugins.Browser.open({ url: authUrl });
     },
 
     async updatePassword(newPassword, accessToken){
@@ -205,6 +241,47 @@
         }).catch(e=>resolve({ data:null, error:{ message:e.message }}));
       }
     };
+  }
+
+  // Native app: catch the OAuth redirect (com.serenityartnhome.quest://auth-callback#access_token=...)
+  if(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
+    window.Capacitor.Plugins.App.addListener("appUrlOpen", async ({ url })=>{
+      if(!url || !url.startsWith("com.serenityartnhome.quest://auth-callback")) return;
+      try{ window.Capacitor.Plugins.Browser.close(); }catch{}
+      try{
+        const q = new URLSearchParams((url.split("?")[1]||"").split("#")[0]);
+        const code = q.get("code");
+        let sess = null;
+
+        if(code){
+          // PKCE: exchange the code for a session using the stored verifier
+          let verifier = null;
+          try{ verifier = localStorage.getItem("sq_pkce_verifier"); }catch{}
+          const r = await fetch(URL+"/auth/v1/token?grant_type=pkce", {
+            method:"POST",
+            headers:{ "apikey":KEY, "Content-Type":"application/json" },
+            body: JSON.stringify({ auth_code: code, code_verifier: verifier })
+          });
+          const d = await r.json();
+          if(d.access_token) sess = d;
+          try{ localStorage.removeItem("sq_pkce_verifier"); }catch{}
+        } else {
+          // Fallback: implicit flow tokens in the fragment
+          const p = new URLSearchParams((url.split("#")[1])||"");
+          const access_token = p.get("access_token");
+          if(access_token){
+            const ur = await fetch(URL+"/auth/v1/user", { headers:{ "apikey":KEY, "Authorization":"Bearer "+access_token }});
+            sess = { access_token, refresh_token:p.get("refresh_token"), token_type:p.get("token_type")||"bearer",
+                     expires_in:parseInt(p.get("expires_in")||"3600",10), user: await ur.json() };
+          }
+        }
+
+        if(!sess || !sess.access_token) return;
+        _session = sess;
+        try{ localStorage.setItem(SESS, JSON.stringify(sess)); }catch{}
+        _notify("SIGNED_IN", sess);
+      }catch{}
+    });
   }
 
   window.SB = { auth, from, rpc };

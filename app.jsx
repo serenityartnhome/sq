@@ -51,12 +51,16 @@ function App(){
     return p.type === "signup" && !!p.access_token;
   });
   const [checkEmailMsg, setCheckEmailMsg] = React.useState(null);
+  const [resendMsg, setResendMsg] = React.useState(null);
+  const handleLoginRef = React.useRef(null);
   const [sessionLoading, setSessionLoading] = React.useState(()=>{
     const p = parseHashParams();
     return !!p.access_token || !!localStorage.getItem("sq_sb_session");
   });
   const [showPwaPrompt, setShowPwaPrompt] = React.useState(()=>{
     if(localStorage.getItem("sq_pwa_shown")) return false;
+    // Already the native app — never ask the user to "add to home screen"
+    if(window.Capacitor?.isNativePlatform?.()) return false;
     if(window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) return false;
     return /iphone|ipad|ipod|android/i.test(navigator.userAgent);
   });
@@ -87,7 +91,13 @@ function App(){
   // Listen for session being cleared by _fetch (expired token + failed refresh)
   React.useEffect(()=>{
     if(!window.SB) return;
-    const { data:{ subscription } } = window.SB.auth.onAuthStateChange((event)=>{
+    const { data:{ subscription } } = window.SB.auth.onAuthStateChange((event, session)=>{
+      if(event === "SIGNED_IN" && session?.user){
+        // Native Google sign-in completes here (the OAuth callback fires this event).
+        // Without it the onboarding/login screen would sit there after a successful login.
+        handleLoginRef.current?.(session.user);
+        return;
+      }
       if(event === "SIGNED_OUT"){
         // Only prompt re-login if this was NOT an intentional sign-out
         // (intentional sign-out clears sq_was_logged_in via clearAllLocalData first)
@@ -295,7 +305,14 @@ function App(){
       } else {
         // Email already registered — try signing in instead
         const { data:signInData, error:signInErr } = await window.SB.auth.signInWithPassword({ email:credentials.email, password:credentials.password });
-        if(!signInErr && signInData?.user) user = signInData.user;
+        if(!signInErr && signInData?.user){
+          user = signInData.user;
+        } else {
+          // Most common cause: the account exists but the email was never confirmed.
+          // Say so instead of silently returning to the form.
+          setCheckEmailMsg(credentials.email);
+          return;
+        }
       }
       if(user){
         localStorage.setItem("sq_was_logged_in","1");
@@ -338,6 +355,7 @@ function App(){
   };
 
   const handleLogin = async (user)=>{
+    if(authUser?.id === user.id) return; // already signed in as this user
     localStorage.setItem("sq_was_logged_in","1");
     setAuthUser(user);
     if(window.SB){
@@ -358,6 +376,10 @@ function App(){
       save(p); setSaved(p);
     }
   };
+
+  // Keep the ref current so the auth listener (registered once) always calls the
+  // latest handleLogin without needing to re-subscribe.
+  handleLoginRef.current = handleLogin;
 
   const handleUpdateProfile = (updates)=>{
     setSaved(prev=>{
@@ -435,6 +457,21 @@ function App(){
                       boxShadow:"3px 3px 0 rgba(0,0,0,.3)"}}>
               ✦ Got It ✦
             </button>
+            <div style={{marginTop:14}}>
+              <button onClick={async ()=>{
+                  await window.SB.auth.resendConfirmation(checkEmailMsg);
+                  setResendMsg("Sent! Check your inbox and spam folder.");
+                }}
+                style={{background:"none",border:"none",color:"rgba(255,255,255,.6)",
+                        fontFamily:"Silkscreen,monospace",fontSize:10,cursor:"pointer",
+                        textDecoration:"underline",padding:"4px 0"}}>
+                Didn't get it? Resend
+              </button>
+              {resendMsg && (
+                <div style={{fontFamily:"Pixelify Sans,monospace",fontSize:11,
+                             color:"#a8e6a3",marginTop:6}}>{resendMsg}</div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1743,6 +1743,23 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
   const powerDone     = powerups.size > 0;
   const mainHabits    = activeHabits.filter(h=>isMainQuest(h));
   const habitsDone    = mainHabits.filter(h=>completed.has(h.id)).length;
+
+  // Publish pet state to the home-screen widget (native app only).
+  // The widget draws exactly what the app shows — it derives nothing itself.
+  React.useEffect(()=>{
+    const WB = window.Capacitor?.Plugins?.WidgetBridge;
+    if(!WB) return;
+    WB.updatePetState({
+      animal: animal || "",
+      stage: petStage || "egg",
+      mood: mood || "neutral",
+      message: petBubble || "",
+      streak: daysInFlow || 0,
+      questsDone: habitsDone,
+      questsTotal: mainHabits.length,
+      quests: mainHabits.slice(0,5).map(h=>({ name: h.label || h.name || "", done: completed.has(h.id) }))
+    }).catch(()=>{});
+  },[animal, petStage, mood, petBubble, daysInFlow, habitsDone, mainHabits.length, completed]);
   const activeDuoDisplay = activeDuoQuests.filter(q => q.status === "active");
   const duoDoneDisplay   = activeDuoDisplay.filter(q => {
     const isReq = q.requester_id === userId;
@@ -2487,8 +2504,8 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
             <button className="btn-primary" onClick={goodnightFn}
               disabled={saveStatus==="saving"}
               style={{width:"100%",marginTop:8,fontSize:16,padding:"12px 16px",
-                      background:"rgba(40,15,80,.85)",borderColor:"rgba(140,80,210,.5)",
-                      color:"#c9a3e8",display:"flex",alignItems:"center",
+                      background:"transparent",borderColor:"rgba(140,80,210,.5)",
+                      color:"#7a4a9e",display:"flex",alignItems:"center",
                       justifyContent:"center",gap:8}}>
               🌙 End My Adventure Today
             </button>
@@ -2749,12 +2766,9 @@ function Dashboard({ profile, habits, onReset, userId, isGuest, onSignOut, onUpd
         <div className="coming-soon-overlay" onClick={()=>setShowShopPrompt(false)}>
           <div className="coming-soon-box" onClick={e=>e.stopPropagation()}>
             <div className="coming-soon-lock"><Icon name="shop" size={40}/></div>
-            <h3 className="coming-soon-title">Visit Our Shop</h3>
-            <p className="coming-soon-body">Discover feng shui treasures to elevate your space and energy.</p>
+            <h3 className="coming-soon-title">Shop Coming Soon</h3>
+            <p className="coming-soon-body">Feng shui treasures to elevate your space and energy — opening here soon.</p>
             <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="coming-soon-btn" onClick={()=>{ window.open("https://www.serenityartnhome.com/","_blank"); setShowShopPrompt(false); }}>
-                Visit Shop ✦
-              </button>
               <button className="coming-soon-btn"
                 style={{background:"var(--cream)",color:"var(--plum)",borderColor:"var(--rose)"}}
                 onClick={()=>{ setShowShopPrompt(false); setFeedbackMsg(""); setFeedbackStatus(null); setShowFeedback(true); }}>

@@ -119,11 +119,13 @@ body{
   border-style:solid;border-width:14px;
   border-image:url('assets/frame-button-pink.png') 20 / 14px / 0 stretch;
   background:transparent;
+  background-clip:padding-box;
   font-family:"Silkscreen",monospace;font-weight:700;
-  color:var(--plum);font-size:16px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--plum);font-size:13px;letter-spacing:.04em;text-transform:uppercase;
   cursor:pointer;
   image-rendering:pixelated;
   transition:transform .1s steps(2), filter .1s;
+  text-wrap:balance;
 }
 .btn-primary:hover:not(:disabled){transform:translate(-1px,-1px);filter:brightness(1.05)}
 .btn-primary:active:not(:disabled){transform:translate(1px,1px);filter:brightness(.95)}
@@ -563,8 +565,8 @@ body{
 .cursor-pick-btn{background:var(--cream);border:2px solid var(--gold-soft);padding:8px;cursor:pointer;transition:border-color .1s steps(2),background .1s steps(2);}
 .cursor-pick-btn.active{background:var(--blush-soft);border-color:var(--rose);}
 .cursor-pick-btn:hover{background:var(--blush-soft);}
-.btn-pink{background:#f5c9cc !important;border-color:#e39aa0 !important;color:#5c2a35 !important;}
-.btn-pink:hover:not(:disabled){background:#fbe0e2 !important;border-color:#e39aa0 !important;}
+.btn-pink{background:#fdf1ec !important;color:#5c2a35 !important;}
+.btn-pink:hover:not(:disabled){background:#fff8f4 !important;}
 .acct-btn{
   width:100%;background:transparent;color:var(--plum);
   border:2px solid #e39aa0;

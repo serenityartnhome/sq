@@ -175,7 +175,7 @@ function SaveProgressPopup({ profileData, onComplete, onClose }){
             <button type="button" onClick={()=>setShowPw(v=>!v)}
               style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",
                       background:"none",border:"none",cursor:"pointer",padding:"2px 4px"}}>
-              <img src={showPw?"assets/icon-eye-closed.png":"assets/icon-eye-open.png"}
+              <img src={showPw?"assets/icon-eye-open.png":"assets/icon-eye-closed.png"}
                 style={{width:20,height:20,imageRendering:"pixelated"}} alt={showPw?"hide":"show"}/>
             </button>
           </div>
